@@ -8,6 +8,10 @@ public abstract class Message {
 	
 	public abstract byte[] serialize();
 	
+	public Message(){
+		
+	}
+	
 	public Message(byte[] data) {
 		this.loadData(data);
 	}
