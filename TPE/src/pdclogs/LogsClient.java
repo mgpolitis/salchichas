@@ -11,13 +11,6 @@ import marshall.Message;
 
 public class LogsClient implements BaseClient {
 
-	private String host;
-	private int port;
-
-	public LogsClient(String host, int port) {
-		this.host = host;
-		this.port = port;
-	}
 
 	private static Pattern messagePattern = Pattern
 			.compile("(HEAD|GET)\\s*(/[a-zA-Z][a-zA-Z0-9_\\-]*.log(\\?(\\d+-\\d+))?)\\s*\\n");
@@ -35,7 +28,7 @@ public class LogsClient implements BaseClient {
 			}
 		}
 		String content = "";
-		PDCLogsMessage message = new PDCLogsMessage(host,port,messageHeader, null,
+		PDCLogsMessage message = new PDCLogsMessage(messageHeader, null,
 				content);
 		return message;
 	}
@@ -57,8 +50,8 @@ public class LogsClient implements BaseClient {
 				}
 			}
 			String content = "";
-			PDCLogsMessage messageToSend = new PDCLogsMessage(host, port,
-					messageHeader, null, content); //TODO hay que arreglar esto
+			PDCLogsMessage messageToSend = new PDCLogsMessage(messageHeader,
+					null, content);
 			list.add(messageToSend);
 		}
 		return list;

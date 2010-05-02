@@ -9,12 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import marshall.BaseServer;
-import marshall.EndPoint;
 import marshall.Message;
 
 public class LogsServer implements BaseServer {
-
-	private EndPoint origin = null;
 	
 	@Override
 	public List<Message> messageReceived(Message m) {
@@ -69,8 +66,8 @@ public class LogsServer implements BaseServer {
 		} else {
 			messageHeader += "406";
 		}
-		PDCLogsMessage responseMessage = new PDCLogsMessage(origin.host, origin.port, messageHeader,
-				headers, content);
+		PDCLogsMessage responseMessage = new PDCLogsMessage(message.dest,
+				message.origin, messageHeader, headers, content);
 		return responseMessage;
 	}
 
@@ -103,17 +100,19 @@ public class LogsServer implements BaseServer {
 										String aux;
 										while ((aux = file.readLine()) != null) {
 											lines++;
-											if(lines >= minRange && lines <= maxRange){
+											if (lines >= minRange
+													&& lines <= maxRange) {
 												readlines++;
 												builder.append(aux);
 												builder.append('\n');
 											}
 										}
-										if(maxRange <= lines){
-										headers.add("Lines:" + readlines);
-										headers.add("Content-Length:"
-												+ builder.toString().length());
-										content = builder.toString();
+										if (maxRange <= lines) {
+											headers.add("Lines:" + readlines);
+											headers.add("Content-Length:"
+													+ builder.toString()
+															.length());
+											content = builder.toString();
 										} else {
 											messageHeader += "406";
 										}
@@ -143,8 +142,8 @@ public class LogsServer implements BaseServer {
 		} else {
 			messageHeader += "406";
 		}
-		PDCLogsMessage responseMessage = new PDCLogsMessage(origin.host, origin.port , messageHeader,
-				headers, content);//TODO modificar que el mensaje envie bien el destino y eso
+		PDCLogsMessage responseMessage = new PDCLogsMessage(message.dest,
+				message.origin, messageHeader, headers, content);
 		return responseMessage;
 	}
 
