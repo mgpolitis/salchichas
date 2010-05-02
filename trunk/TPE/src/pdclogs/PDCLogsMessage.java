@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import marshall.EndPoint;
 import marshall.Message;
 
 public class PDCLogsMessage extends Message {
@@ -18,9 +19,9 @@ public class PDCLogsMessage extends Message {
 		super(data);
 	}
 
-	public PDCLogsMessage(String messageHeader, List<String> headers,
+	public PDCLogsMessage(String host, int port, String messageHeader, List<String> headers,
 			String content) {
-		super();
+		super(new EndPoint(host,port),new EndPoint(host,port));//TODO hay que arreglar esto porq es el mismo
 		this.messageHeader = messageHeader;
 		this.content = content;
 		addHeaders(headers);

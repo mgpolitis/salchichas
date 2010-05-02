@@ -86,7 +86,7 @@ public class ServerReactor {
 	}
 	
 	private void sendMessage(Message m) throws IOException {
-		Socket socket = clients.get(new EndPoint(m.host, m.port));
+		Socket socket = clients.get(new EndPoint(m.dest.host, m.dest.port));
 		final DataOutputStream w = new DataOutputStream(socket.getOutputStream());
 		
 		byte [] serializedMessage = m.serialize();
