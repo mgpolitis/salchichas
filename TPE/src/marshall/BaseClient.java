@@ -7,5 +7,7 @@ public interface BaseClient {
 	public List<Message> messageReceived(Message m);
 	
 	public Message greet();
+	
+	public Message createMessage(byte[] serialized);
 
 }
