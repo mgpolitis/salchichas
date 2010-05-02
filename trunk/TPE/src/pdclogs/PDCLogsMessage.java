@@ -19,13 +19,20 @@ public class PDCLogsMessage extends Message {
 		super(data);
 	}
 
-	public PDCLogsMessage(String host, int port, String messageHeader, List<String> headers,
+	public PDCLogsMessage(EndPoint origin, EndPoint dest, String messageHeader, List<String> headers,
 			String content) {
-		super(new EndPoint(host,port),new EndPoint(host,port));//TODO hay que arreglar esto porq es el mismo
+		super(origin,dest);
 		this.messageHeader = messageHeader;
 		this.content = content;
 		addHeaders(headers);
 	}
+	
+	
+	public PDCLogsMessage(String messageHeader, List<String> headers,
+			String content) {
+		this(null, null,messageHeader, headers,content);
+	}
+	
 
 	@Override
 	public void loadData(byte[] data) {
