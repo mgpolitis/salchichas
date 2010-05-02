@@ -3,13 +3,14 @@ package marshall;
 
 public abstract class Message {
 
-	public String host = null;
-	public Integer port = null;
+	public EndPoint origin;
+	public EndPoint dest;
 	
 	public abstract byte[] serialize();
 	
-	public Message(){
-		
+	public Message(EndPoint origin, EndPoint dest){
+		this.origin = origin;
+		this.dest = dest;
 	}
 	
 	public Message(byte[] data) {

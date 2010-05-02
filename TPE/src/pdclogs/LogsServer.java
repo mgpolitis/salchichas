@@ -9,10 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import marshall.BaseServer;
+import marshall.EndPoint;
 import marshall.Message;
 
 public class LogsServer implements BaseServer {
 
+	private EndPoint origin = null;
+	
 	@Override
 	public List<Message> messageReceived(Message m) {
 		List<Message> list = new LinkedList<Message>();
@@ -66,7 +69,7 @@ public class LogsServer implements BaseServer {
 		} else {
 			messageHeader += "406";
 		}
-		PDCLogsMessage responseMessage = new PDCLogsMessage(messageHeader,
+		PDCLogsMessage responseMessage = new PDCLogsMessage(origin.host, origin.port, messageHeader,
 				headers, content);
 		return responseMessage;
 	}
@@ -140,8 +143,8 @@ public class LogsServer implements BaseServer {
 		} else {
 			messageHeader += "406";
 		}
-		PDCLogsMessage responseMessage = new PDCLogsMessage(messageHeader,
-				headers, content);
+		PDCLogsMessage responseMessage = new PDCLogsMessage(origin.host, origin.port , messageHeader,
+				headers, content);//TODO modificar que el mensaje envie bien el destino y eso
 		return responseMessage;
 	}
 
