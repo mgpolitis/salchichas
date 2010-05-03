@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,8 @@ public class ClientReactor {
 	}
 
 	public void unsubscribeTCPClient() throws IOException{
-		for( Socket s: servers){
+		Collection<Socket> c = servers.values();
+		for( Socket s: c){
 			s.close();
 		}
 		tcpSenderClient = null;
@@ -68,7 +70,7 @@ public class ClientReactor {
 		
 		while (true) {
 			Message incomingMessage = this.readMessage(r);
-			List<Message> responses = tcpObserverServer.messageReceived(incomingMessage);
+			List<Message> responses = tcpSenderClient.messageReceived(incomingMessage);
 			if (responses == null) {
 				break;
 			}
