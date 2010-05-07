@@ -27,9 +27,7 @@ public class ClientReactor {
 		return instance;
 	}
 
-	private ClientReactor() {
-
-	}
+	private ClientReactor() {}
 
 	public void unsubscribeTCPClient() throws IOException{
 		Collection<Socket> c = servers.values();

@@ -1,5 +1,6 @@
 package test.marshall;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import marshall.interfaces.BaseServer;
@@ -11,14 +12,14 @@ public class EchoServer implements BaseServer {
 	
 	@Override
 	public Message createMessage(byte[] serialized) {
-		// TODO Auto-generated method stub
-		return null;
+		return new EchoMessage(null, null, serialized);
 	}
 
 	@Override
 	public List<Message> messageReceived(Message m) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Message> ret = new LinkedList<Message>();
+		ret.add(m);
+		return ret;
 	}
 
 }
