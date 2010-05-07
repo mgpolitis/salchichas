@@ -15,13 +15,11 @@ public class PDCLogsMessage extends Message {
 	private Map<String, String> headers = new HashMap<String, String>();
 	private String content = "";
 
-	public PDCLogsMessage(byte[] data) {
-		super(data);
-	}
 
 	public PDCLogsMessage(EndPoint origin, EndPoint dest, String messageHeader, List<String> headers,
 			String content) {
-		super(origin,dest);
+		//TODO: arreglar el tema del llamado a super con null
+		super(origin,dest, null);
 		this.messageHeader = messageHeader;
 		this.content = content;
 		addHeaders(headers);
@@ -33,6 +31,11 @@ public class PDCLogsMessage extends Message {
 		this(null, null,messageHeader, headers,content);
 	}
 	
+
+	public PDCLogsMessage(byte[] serialized) {
+		super(null, null, serialized);
+	}
+
 
 	@Override
 	public void loadData(byte[] data) {
