@@ -39,5 +39,5 @@ public class EchoMessage extends Message {
 	public String toString() {
 		return this.text;
 	}
-
+	
 }
