@@ -50,7 +50,8 @@ public class EchoClient implements BaseClient {
 		ClientReactor reactor = ClientReactor.getInstance();
 		EchoClient c = new EchoClient();
 		
-		reactor.subscribeTCPClient(c, 8085);
+		reactor.subscribeTCPClient(c, "localhost", 8085);
+		reactor.runClient();
 	}
 
 }
