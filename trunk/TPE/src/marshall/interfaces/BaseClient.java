@@ -1,6 +1,8 @@
-package marshall;
+package marshall.interfaces;
 
 import java.util.List;
+
+import marshall.model.Message;
 
 public interface BaseClient {
 

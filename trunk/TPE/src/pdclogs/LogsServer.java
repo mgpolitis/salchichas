@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import marshall.BaseServer;
-import marshall.Message;
+import marshall.interfaces.BaseServer;
+import marshall.model.Message;
 
 public class LogsServer implements BaseServer {
 	

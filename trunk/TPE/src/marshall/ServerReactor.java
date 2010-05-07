@@ -10,6 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import marshall.interfaces.BaseServer;
+import marshall.model.EndPoint;
+import marshall.model.Message;
+
 public class ServerReactor {
 
 	private static final ServerReactor instance = new ServerReactor();

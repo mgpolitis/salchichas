@@ -1,4 +1,5 @@
-package marshall;
+package marshall.model;
+
 
 
 public abstract class Message {

@@ -1,4 +1,4 @@
-package marshall;
+package marshall.model;
 
 public class EndPoint {
 
