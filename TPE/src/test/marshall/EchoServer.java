@@ -7,6 +7,8 @@ import marshall.model.Message;
 
 public class EchoServer implements BaseServer {
 
+	
+	
 	@Override
 	public Message createMessage(byte[] serialized) {
 		// TODO Auto-generated method stub
