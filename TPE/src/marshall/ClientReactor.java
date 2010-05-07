@@ -10,10 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import marshall.interfaces.BaseClient;
+import marshall.model.EndPoint;
+import marshall.model.Message;
+
 public class ClientReactor {
 
 	private static final ClientReactor instance = new ClientReactor();
-	private static final int backlog = 50;
+	//private static final int backlog = 50;
 	private Map<EndPoint,Socket> servers = new HashMap<EndPoint, Socket>();
 
 	BaseClient tcpSenderClient;

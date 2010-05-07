@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import marshall.EndPoint;
-import marshall.Message;
+import marshall.model.EndPoint;
+import marshall.model.Message;
 
 public class PDCLogsMessage extends Message {
 

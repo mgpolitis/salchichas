@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import marshall.BaseClient;
-import marshall.Message;
+import marshall.interfaces.BaseClient;
+import marshall.model.Message;
 
 public class LogsClient implements BaseClient {
 
