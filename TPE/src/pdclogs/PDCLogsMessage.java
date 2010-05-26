@@ -12,47 +12,54 @@ import marshall.model.Message;
 public class PDCLogsMessage extends Message {
 
 	private String messageHeader = "";
-	private Map<String, String> headers = new HashMap<String, String>();
+	private Map<String, String> headers =  new HashMap<String, String>();
 	private String content = "";
 
-
-	public PDCLogsMessage(EndPoint origin, EndPoint dest, String messageHeader, List<String> headers,
-			String content) {
-		//TODO: arreglar el tema del llamado a super con null
-		super(origin,dest, null);
+	public PDCLogsMessage(EndPoint origin, EndPoint dest, String messageHeader,
+			List<String> headers, String content) {
+		// TODO: arreglar el tema del llamado a super con null
+		super(origin, dest, new byte[0]);
 		this.messageHeader = messageHeader;
 		this.content = content;
 		addHeaders(headers);
 	}
-	
-	
+
 	public PDCLogsMessage(String messageHeader, List<String> headers,
 			String content) {
-		this(null, null,messageHeader, headers,content);
+		this(null, null, messageHeader, headers, content);
 	}
-	
 
 	public PDCLogsMessage(byte[] serialized) {
 		super(null, null, serialized);
+		loadData(serialized);
 	}
-
 
 	@Override
 	public void loadData(byte[] data) {
-		String dataString = new String(data);
-		int messageSeparator = dataString.indexOf('\n');
-		this.messageHeader = dataString.substring(0, messageSeparator - 1);
-		String[] tempArray = dataString.substring(messageSeparator).split(
-				"\\n\\s*\\n");
-		if (tempArray.length == 2) {
-			this.content = tempArray[1];
-			String[] splittedHeaders = tempArray[0].split("\\n");
-			for (String str : splittedHeaders) {
-				addHeader(str);
-			}
-		} else {
-			// TODO: aca se deberia mandar un error por data mal formada
+		if(this.headers == null){
+			this.headers = new HashMap<String,String>();
 		}
+		String dataString = new String(data);
+		if (!(dataString.isEmpty())) {
+			int messageSeparator = dataString.indexOf('\n');
+			if (messageSeparator != -1) {
+				this.messageHeader = dataString.substring(0, messageSeparator);
+				String[] tempArray = dataString.substring(messageSeparator)
+						.split("\\n\\s*\\n");
+				if (tempArray.length > 0) {
+					String[] splittedHeaders = tempArray[0].split("\\n");
+					for (String str : splittedHeaders) {
+						addHeader(str);
+					}
+					if (tempArray.length > 1) {
+						this.content = tempArray[1];
+					} else {
+						System.out.println("Warning: Message without content");
+					}
+				}
+			}
+		}
+
 	}
 
 	@Override
@@ -62,11 +69,15 @@ public class PDCLogsMessage extends Message {
 	}
 
 	public void addHeader(String str) {
-		String[] tempArray = str.split(":");
-		if (tempArray.length == 2) {
-			this.headers.put(tempArray[0], tempArray[1]);
+		if (str != null) {
+			String[] tempArray = str.split(":");
+			if (tempArray.length == 2) {
+				this.headers.put(tempArray[0], tempArray[1]);
+			} else {
+				System.out.println("invalid header: " + str);
+			}
 		} else {
-			// TODO: aca deberia mandar un error porq esta mal formado el header
+			System.out.println("invalid header, cannot be null ");
 		}
 	}
 
@@ -87,6 +98,10 @@ public class PDCLogsMessage extends Message {
 		this.messageHeader = messageHeader;
 	}
 
+	public String getMessageHeader() {
+		return this.messageHeader;
+	}
+
 	public String getHeader(String str) {
 		return this.headers.get(str);
 	}
@@ -94,7 +109,7 @@ public class PDCLogsMessage extends Message {
 	private String getHeaders() {
 		String headersString = "";
 		for (String str : this.headers.keySet()) {
-			headersString += str + ":" + this.headers.get(str) + "\\n";
+			headersString += str + ":" + this.headers.get(str) + '\n';
 		}
 		return headersString;
 	}
@@ -129,10 +144,10 @@ public class PDCLogsMessage extends Message {
 	@Override
 	public String toString() {
 		String data = "";
-		data += this.messageHeader + "\\n";
+		data += this.messageHeader + '\n';
 		data += getHeaders();
-		data += "\\n";
-		data += this.content + "\\n";
+		data += '\n';
+		data += this.content + '\n';
 		return data;
 	}
 }

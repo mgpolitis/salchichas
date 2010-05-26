@@ -8,16 +8,27 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import marshall.ServerReactor;
 import marshall.interfaces.BaseServer;
 import marshall.model.Message;
 
 public class LogsServer implements BaseServer {
+	
+
+	
+	private String baseDirectory = ".";
+	
+	public LogsServer(String baseDirectory){
+		super();
+		this.baseDirectory = baseDirectory;
+	}
 	
 	@Override
 	public List<Message> messageReceived(Message m) {
 		List<Message> list = new LinkedList<Message>();
 		Message messageToSend = null;
 		if (m instanceof PDCLogsMessage) {
+			System.out.println(m);
 			PDCLogsMessage message = (PDCLogsMessage) m;
 			System.out.println("Server: " + message);
 			if (message.getType().equals("HEAD")) {
@@ -41,9 +52,9 @@ public class LogsServer implements BaseServer {
 		String fileName = message.getFileName();
 		if (fileName != null) {
 			try {
-				File archive = new File("." + fileName);
+				File archive = new File(baseDirectory + fileName);
 				if (archive.exists()) {
-					BufferedReader file = new BufferedReader(new FileReader("."
+					BufferedReader file = new BufferedReader(new FileReader(baseDirectory
 							+ fileName));
 					int lines = 0;
 					try {
@@ -52,6 +63,7 @@ public class LogsServer implements BaseServer {
 						}
 						headers.add("Lines:" + lines);
 						headers.add("Content-Length:" + archive.length());
+						messageHeader += "200";
 					} catch (IOException e) {
 						e.printStackTrace();
 						messageHeader += "500";
@@ -113,6 +125,7 @@ public class LogsServer implements BaseServer {
 													+ builder.toString()
 															.length());
 											content = builder.toString();
+											messageHeader += "200";
 										} else {
 											messageHeader += "406";
 										}
@@ -151,5 +164,12 @@ public class LogsServer implements BaseServer {
 	public Message createMessage(byte[] serialized) {
 		PDCLogsMessage message = new PDCLogsMessage(serialized);
 		return message;
+	}
+	
+	public static void main(String[] args) throws IOException {
+		ServerReactor reactor = ServerReactor.getInstance();
+		LogsServer s = new 	LogsServer("/Users/matiaswilliams/Documents/ITBA/3er II/PROTOCOLOS DE COMUNICACION/workspace/TPE/logfiles");
+		reactor.subscribeTCPServer(s, 8085);
+		reactor.runServer();
 	}
 }
