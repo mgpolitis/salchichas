@@ -53,6 +53,7 @@ public class LogsServer implements BaseServer {
 		if (fileName != null) {
 			try {
 				File archive = new File(baseDirectory + fileName);
+				System.out.println(archive.getAbsolutePath());
 				if (archive.exists()) {
 					BufferedReader file = new BufferedReader(new FileReader(baseDirectory
 							+ fileName));
@@ -168,7 +169,7 @@ public class LogsServer implements BaseServer {
 	
 	public static void main(String[] args) throws IOException {
 		ServerReactor reactor = ServerReactor.getInstance();
-		LogsServer s = new 	LogsServer("/Users/matiaswilliams/Documents/ITBA/3er II/PROTOCOLOS DE COMUNICACION/workspace/TPE/logfiles");
+		LogsServer s = new 	LogsServer("./logfiles");
 		reactor.subscribeTCPServer(s, 8085);
 		reactor.runServer();
 	}
