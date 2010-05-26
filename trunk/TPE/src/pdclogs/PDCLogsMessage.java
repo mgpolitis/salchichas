@@ -17,7 +17,6 @@ public class PDCLogsMessage extends Message {
 
 	public PDCLogsMessage(EndPoint origin, EndPoint dest, String messageHeader,
 			List<String> headers, String content) {
-		// TODO: arreglar el tema del llamado a super con null
 		super(origin, dest, new byte[0]);
 		this.messageHeader = messageHeader;
 		this.content = content;
