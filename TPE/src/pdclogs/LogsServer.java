@@ -99,12 +99,12 @@ public class LogsServer implements BaseServer {
 						int minRange = Integer.valueOf(ranges[0]);
 						int maxRange = Integer.valueOf(ranges[1]);
 						if (minRange <= maxRange) {
-							File archive = new File("." + fileName);
+							File archive = new File(baseDirectory + fileName);
 							if (archive.exists()) {
 								BufferedReader file;
 								try {
 									file = new BufferedReader(new FileReader(
-											"." + fileName));
+											baseDirectory + fileName));
 									int lines = 0;
 									int readlines = 0;
 									try {
