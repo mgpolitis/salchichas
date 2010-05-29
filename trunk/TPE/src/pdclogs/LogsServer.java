@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import marshall.ServerReactor;
+import marshall.Reactor;
 import marshall.interfaces.BaseServer;
 import marshall.model.Message;
 
@@ -168,9 +168,9 @@ public class LogsServer implements BaseServer {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		ServerReactor reactor = ServerReactor.getInstance();
+		Reactor reactor = Reactor.getInstance();
 		LogsServer s = new 	LogsServer("./logfiles");
 		reactor.subscribeTCPServer(s, 8085);
-		reactor.runServer();
+		reactor.run();
 	}
 }

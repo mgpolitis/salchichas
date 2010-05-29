@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import marshall.ClientReactor;
+import marshall.Reactor;
 import marshall.interfaces.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
@@ -95,11 +95,11 @@ public class LogsClient implements BaseClient {
 
 
 	public static void main(String[] args) throws IOException {
-		ClientReactor reactor = ClientReactor.getInstance();
+		Reactor reactor = Reactor.getInstance();
 		LogsClient c = new LogsClient();
 		
 		reactor.subscribeTCPClient(c, serverHost, serverPort);
-		reactor.runClient();
+		reactor.run();
 	}
 
 }
