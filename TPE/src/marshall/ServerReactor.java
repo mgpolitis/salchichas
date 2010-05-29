@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import marshall.interfaces.BaseServer;
 import marshall.model.EndPoint;
@@ -17,7 +19,8 @@ import marshall.model.Message;
 public class ServerReactor {
 
 	private static final ServerReactor instance = new ServerReactor();
-	private static final int backlog = 50;
+	private static final int BACKLOG = 50;
+	private static final int THREADS_IN_POOL = 10;
 	private Map<EndPoint, Socket> clients = new HashMap<EndPoint, Socket>();
 
 	BaseServer tcpObserverServer;
@@ -28,7 +31,6 @@ public class ServerReactor {
 	}
 
 	private ServerReactor() {
-
 	}
 
 	public void subscribeTCPServer(BaseServer server, int port)
@@ -37,7 +39,7 @@ public class ServerReactor {
 			throw new RuntimeException(
 					"Can't subscribe more than one TCP server in reactor");
 
-		serverSocket = new ServerSocket(port, ServerReactor.backlog,
+		serverSocket = new ServerSocket(port, ServerReactor.BACKLOG,
 				InetAddress.getByName("localhost"));
 		tcpObserverServer = server;
 	}
@@ -48,33 +50,38 @@ public class ServerReactor {
 				+ this.tcpObserverServer.getClass().getName() + " on "
 				+ this.serverSocket.getLocalSocketAddress().toString() + ".");
 		System.out.println("Now accepting clients...");
+		ExecutorService es = Executors.newFixedThreadPool(THREADS_IN_POOL);
+
 		while (true) {
 			final Socket socket = serverSocket.accept();
-
-			EndPoint newClientEndPoint = this.getEndPointFromSocket(socket);
+			final EndPoint newClientEndPoint = this
+					.getEndPointFromSocket(socket);
 			clients.put(newClientEndPoint, socket);
 
-			new Thread(new Runnable() {
+			Runnable runner = new Runnable() {
 				public void run() {
 					try {
-						String s = socket.getRemoteSocketAddress().toString();
-						System.out.printf("Client has connected: %s\n", s);
-						thiz.handle(socket);
+						System.out.printf("Client has connected: %s\n", socket
+								.getRemoteSocketAddress().toString());
+						thiz.handle(newClientEndPoint);
 						if (!socket.isClosed()) {
 							socket.close();
 						}
 					} catch (IOException e) {
 						e.printStackTrace();
+					} finally {
+						clients.remove(newClientEndPoint);
 					}
 
 				}
-			}).start();
+			};
+			es.execute(runner);
 
 		}
 	}
 
-	protected void handle(Socket socket) throws IOException {
-
+	protected void handle(EndPoint clientEndPoint) throws IOException {
+		Socket socket = clients.get(clientEndPoint);
 		while (true) {
 			Message incomingMessage = this.readMessage(socket);
 			List<Message> responses = tcpObserverServer
@@ -90,13 +97,14 @@ public class ServerReactor {
 				this.sendMessage(m);
 			}
 		}
-
-		return;
-
 	}
 
 	private void sendMessage(Message m) throws IOException {
 		Socket socket = clients.get(new EndPoint(m.dest.host, m.dest.port));
+		if (socket == null) {
+			throw new IOException(
+					"ERROR sending message: Endpoint not connected");
+		}
 		final DataOutputStream w = new DataOutputStream(socket
 				.getOutputStream());
 
