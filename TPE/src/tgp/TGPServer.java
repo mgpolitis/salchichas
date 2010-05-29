@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import marshall.ServerReactor;
+import marshall.TCPServerReactor;
 import marshall.interfaces.BaseServer;
 import marshall.model.Message;
 import marshall.model.EndPoint;
@@ -114,7 +114,7 @@ public class TGPServer implements BaseServer{
 	}
 
 	public static void main(String[] args) throws IOException {
-		ServerReactor reactor = ServerReactor.getInstance();
+		TCPServerReactor reactor = TCPServerReactor.getInstance();
 		TGPServer s = new TGPServer("3","localhost","8092");
 		reactor.subscribeTCPServer(s, 8092);
 		reactor.runServer();

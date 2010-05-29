@@ -10,7 +10,7 @@ public class Reactor implements ClientContainer, ServerContainer {
 	private static final Reactor instance = new Reactor();
 
 	private ClientReactor clientReactor = ClientReactor.getInstance();
-	private ServerReactor serverReactor = ServerReactor.getInstance();
+	private TCPServerReactor serverReactor = TCPServerReactor.getInstance();
 
 	private Reactor() {
 	}
