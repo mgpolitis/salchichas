@@ -12,14 +12,24 @@ import marshall.Reactor;
 import marshall.interfaces.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
+import domain.data.WorkerDAO;
 
 public class LogsClient implements BaseClient {
 
-	private static final String serverHost = "localhost";
-	private static final int serverPort = 8085;
-	private static Pattern messagePattern = Pattern
+	private final String serverHost;
+	private final int serverPort;
+	private final WorkerDAO workerDao;
+	private Pattern messagePattern = Pattern
 			.compile("(HEAD|GET)\\s+(/[a-zA-Z][a-zA-Z0-9_\\-]*.log(\\?(\\d+-\\d+))?)\\s*\\n");
 
+	public LogsClient(String serverHost, int serverPort, WorkerDAO workerDao){
+		super();
+		this.serverHost = serverHost;
+		this.serverPort = serverPort;
+		this.workerDao = workerDao;
+	}
+	
+	
 	@Override
 	public Message greet() {
 		boolean messageOK = false;
@@ -91,15 +101,6 @@ public class LogsClient implements BaseClient {
 			e.printStackTrace();
 		}
 		return aux.toString();
-	}
-
-
-	public static void main(String[] args) throws IOException {
-		Reactor reactor = Reactor.getInstance();
-		LogsClient c = new LogsClient();
-		
-		reactor.subscribeTCPClient(c, serverHost, serverPort);
-		reactor.run();
 	}
 
 }
