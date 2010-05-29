@@ -3,19 +3,16 @@ package tgp;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import marshall.ClientReactor;
 import marshall.interfaces.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
+import domain.data.WorkerDAO;
 
 public class TGPClient implements BaseClient{
 	
@@ -25,6 +22,8 @@ public class TGPClient implements BaseClient{
 	private String tgpCliHost;
 	private String tgpCliPort;
 	
+	private WorkerDAO workerDao;
+	
 	private State state;
 	private String xid;
 	
@@ -32,12 +31,13 @@ public class TGPClient implements BaseClient{
 	private static Pattern groupPattern = Pattern.compile("[0-9]+\\n");
 	private enum State { WAITING_OFFER, WAITING_ACK, SUBSCRIBED };
 	
-	public TGPClient(String workerHost, String workerPort, String tgpCliHost, String tgpCliPort){
+	public TGPClient(String workerHost, String workerPort, String tgpCliHost, String tgpCliPort, WorkerDAO workerDao){
 		super();
 		this.workerHost = workerHost;
 		this.workerPort = workerHost;
 		this.tgpCliHost = tgpCliHost;
 		this.tgpCliPort = tgpCliPort;
+		this.workerDao = workerDao;
 	}
 	
 	@Override
@@ -147,13 +147,13 @@ public class TGPClient implements BaseClient{
 		return messageToSend;
 	}
 
-	public static void main(String[] args) throws IOException {
-		ClientReactor reactor = ClientReactor.getInstance();
-		// worker host port + tgp host port
-		// lo utiliza para indicarle al servidor a donde va a tener que conectarse el director
-		TGPClient c = new TGPClient("localhost","8091","localhost","8092");
-		reactor.subscribeTCPClient(c, "localhost", 8092);
-		reactor.runClient();
-	}
-	
+//	public static void main(String[] args) throws IOException {
+//		ClientReactor reactor = ClientReactor.getInstance();
+//		// worker host port + tgp host port
+//		// lo utiliza para indicarle al servidor a donde va a tener que conectarse el director
+//		TGPClient c = new TGPClient("localhost","8091","localhost","8092");
+//		reactor.subscribeTCPClient(c, "localhost", 8092);
+//		reactor.runClient();
+//	}
+//	
 }
