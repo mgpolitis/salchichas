@@ -4,10 +4,15 @@ public class EndPoint {
 
 	public String host;
 	public Integer port;
-	
+
 	public EndPoint(String host, Integer port) {
 		this.host = host;
 		this.port = port;
+	}
+
+	@Override
+	public String toString() {
+		return "(" + this.host.toString() + ", " + this.port.toString() + ")";
 	}
 
 	@Override
@@ -40,5 +45,5 @@ public class EndPoint {
 			return false;
 		return true;
 	}
-	
+
 }
