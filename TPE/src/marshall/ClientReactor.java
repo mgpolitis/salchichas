@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +16,7 @@ import marshall.interfaces.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
-public class ClientReactor {
+public class ClientReactor implements ClientContainer {
 
 	private static final ClientReactor instance = new ClientReactor();
 	private static final int THREADS_IN_POOL = 10;
@@ -37,10 +39,21 @@ public class ClientReactor {
 
 	}
 
-	public void runClient() throws IOException {
+	public void subscribeUDPClient(BaseClient client, String serverHost,
+			int serverPort) {
+		throw new IllegalArgumentException("Method not yet implemented");
+	}
+
+	public void runClient() {
 		final ClientReactor thiz = this;
 		final ExecutorService es = Executors
 				.newFixedThreadPool(THREADS_IN_POOL);
+
+		if (this.tcpSenderClients.size() == 0) {
+			System.out.println("No clients to start. (none subscribed)");
+			return;
+		}
+
 		for (final EndPoint serverEndPoint : this.tcpSenderClients.keySet()) {
 			final BaseClient tcpSenderClient = this.tcpSenderClients
 					.get(serverEndPoint);
@@ -48,8 +61,21 @@ public class ClientReactor {
 					+ tcpSenderClient.getClass().getName()
 					+ " connecting to port " + serverEndPoint.port + ".");
 
-			final Socket clientSocket = new Socket(serverEndPoint.host,
-					serverEndPoint.port);
+			final Socket clientSocket;
+			try {
+				clientSocket = new Socket(serverEndPoint.host,
+						serverEndPoint.port);
+			} catch (UnknownHostException e1) {
+				e1.printStackTrace();
+				System.out.println("Could not resolve ip for address: "
+						+ serverEndPoint);
+				continue;
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				System.out.println("No server response for address: "
+						+ serverEndPoint);
+				continue;
+			}
 			clientSockets.put(serverEndPoint, clientSocket);
 
 			Runnable r = new Runnable() {
@@ -85,18 +111,24 @@ public class ClientReactor {
 		}
 		this.sendMessage(greeting);
 
-		while (true) {
+		boolean continueReading = true;
+		while (continueReading) {
 			Message incomingMessage = this.readMessage(serverEndPoint);
 			List<Message> responses = actualClient
 					.messageReceived(incomingMessage);
 			if (responses == null) {
-				break;
+				continueReading = false;
 			}
 			for (Message m : responses) {
 				if (m.dest == null) {
 					m.dest = serverEndPoint;
 				}
-				this.sendMessage(m);
+				try {
+					this.sendMessage(m);
+				} catch (SocketException e) {
+					System.out.println("Server closed connection");
+					continueReading = false;
+				}
 			}
 		}
 

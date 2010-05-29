@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import marshall.ServerReactor;
+import marshall.Reactor;
 import marshall.interfaces.BaseServer;
 import marshall.model.Message;
 
@@ -24,10 +24,10 @@ public class EchoServer implements BaseServer {
 	}
 
 	public static void main(String[] args) throws IOException {
-		ServerReactor reactor = ServerReactor.getInstance();
+		Reactor r = Reactor.getInstance();
 		EchoServer s = new EchoServer();
-		reactor.subscribeTCPServer(s, 8085);
-		reactor.runServer();
+		r.subscribeTCPServer(s, 8085);
+		r.run();
 	}
 
 }

@@ -16,7 +16,7 @@ import marshall.interfaces.BaseServer;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
-public class ServerReactor {
+public class ServerReactor implements ServerContainer {
 
 	private static final ServerReactor instance = new ServerReactor();
 	private static final int BACKLOG = 50;
@@ -33,51 +33,79 @@ public class ServerReactor {
 	private ServerReactor() {
 	}
 
-	public void subscribeTCPServer(BaseServer server, int port)
+	private boolean initialized() {
+		return (serverSocket != null || tcpObserverServer != null);
+	}
+
+	public void subscribeTCPServer(BaseServer server, int listenPort)
 			throws IOException {
-		if (serverSocket != null || tcpObserverServer != null)
+		if (this.initialized())
 			throw new RuntimeException(
 					"Can't subscribe more than one TCP server in reactor");
 
-		serverSocket = new ServerSocket(port, ServerReactor.BACKLOG,
+		serverSocket = new ServerSocket(listenPort, ServerReactor.BACKLOG,
 				InetAddress.getByName("localhost"));
 		tcpObserverServer = server;
 	}
 
-	public void runServer() throws IOException {
+	public void subscribeUDPServer(BaseServer server, int listenPort)
+			throws IOException {
+		throw new IllegalArgumentException("Method not yet implemented");
+	}
+
+	public void runServer() {
 		final ServerReactor thiz = this;
+
+		if (!this.initialized()) {
+			System.out.println("Starting no servers. (none subscribed)");
+			return;
+		}
+
 		System.out.println("Starting server "
 				+ this.tcpObserverServer.getClass().getName() + " on "
 				+ this.serverSocket.getLocalSocketAddress().toString() + ".");
 		System.out.println("Now accepting clients...");
-		ExecutorService es = Executors.newFixedThreadPool(THREADS_IN_POOL);
-
-		while (true) {
-			final Socket socket = serverSocket.accept();
-			final EndPoint newClientEndPoint = this
-					.getEndPointFromSocket(socket);
-			clients.put(newClientEndPoint, socket);
-
-			Runnable runner = new Runnable() {
-				public void run() {
+		final ExecutorService es = Executors
+				.newFixedThreadPool(THREADS_IN_POOL);
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					final Socket socket;
 					try {
-						System.out.printf("Client has connected: %s\n", socket
-								.getRemoteSocketAddress().toString());
-						thiz.handle(newClientEndPoint);
-						if (!socket.isClosed()) {
-							socket.close();
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					} finally {
-						clients.remove(newClientEndPoint);
+						socket = serverSocket.accept();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						return;
 					}
+					final EndPoint newClientEndPoint = thiz
+							.getEndPointFromSocket(socket);
+					clients.put(newClientEndPoint, socket);
+
+					Runnable runner = new Runnable() {
+						public void run() {
+							try {
+								System.out.printf("Client has connected: %s\n",
+										socket.getRemoteSocketAddress()
+												.toString());
+								thiz.handle(newClientEndPoint);
+								if (!socket.isClosed()) {
+									socket.close();
+								}
+							} catch (IOException e) {
+								e.printStackTrace();
+							} finally {
+								clients.remove(newClientEndPoint);
+							}
+
+						}
+					};
+					es.execute(runner);
 
 				}
-			};
-			es.execute(runner);
+			}
+		}).start();
 
-		}
 	}
 
 	protected void handle(EndPoint clientEndPoint) throws IOException {

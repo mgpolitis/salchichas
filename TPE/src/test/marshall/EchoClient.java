@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
-import marshall.ClientReactor;
+import marshall.Reactor;
 import marshall.interfaces.BaseClient;
 import marshall.model.Message;
 
@@ -25,7 +25,7 @@ public class EchoClient implements BaseClient {
 	private Message getLine() {
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(
 				System.in));
-		
+
 		String line = "";
 		try {
 			line = stdin.readLine();
@@ -43,15 +43,13 @@ public class EchoClient implements BaseClient {
 		ret.add(this.getLine());
 		return ret;
 	}
-	
-	
-	
+
 	public static void main(String[] args) throws IOException {
-		ClientReactor reactor = ClientReactor.getInstance();
+		Reactor r = Reactor.getInstance();
 		EchoClient c = new EchoClient();
-		
-		reactor.subscribeTCPClient(c, "localhost", 8085);
-		reactor.runClient();
+
+		r.subscribeTCPClient(c, "localhost", 8085);
+		r.run();
 	}
 
 }
