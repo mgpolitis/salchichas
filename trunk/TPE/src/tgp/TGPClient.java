@@ -15,26 +15,18 @@ import marshall.model.Message;
 import domain.data.WorkerDAO;
 
 public class TGPClient implements BaseClient{
-	
-	private int group;
-	private String workerHost;
-	private String workerPort;
 	private String tgpCliHost;
-	private String tgpCliPort;
-	
+	private int tgpCliPort;
 	private WorkerDAO workerDao;
-	
 	private State state;
 	private String xid;
+	private int group;
 	
-	private static final int serverPort = 8092;
 	private static Pattern groupPattern = Pattern.compile("[0-9]+\\n");
 	private enum State { WAITING_OFFER, WAITING_ACK, SUBSCRIBED };
 	
-	public TGPClient(String workerHost, String workerPort, String tgpCliHost, String tgpCliPort, WorkerDAO workerDao){
+	public TGPClient(String tgpCliHost, int tgpCliPort, WorkerDAO workerDao){
 		super();
-		this.workerHost = workerHost;
-		this.workerPort = workerHost;
 		this.tgpCliHost = tgpCliHost;
 		this.tgpCliPort = tgpCliPort;
 		this.workerDao = workerDao;
@@ -64,14 +56,13 @@ public class TGPClient implements BaseClient{
 		} else {
 			System.out.println("No group specified");
 		}
-		
 				
 		TGPMessage message = new TGPMessage("TGPDISCOVER",c);
 		
 		state = State.WAITING_OFFER;
 		
 		message.broadcastMe=true;
-		message.origin = new EndPoint(this.tgpCliHost, Integer.valueOf(this.tgpCliPort));
+		message.origin = new EndPoint(this.tgpCliHost, this.tgpCliPort);
 		
 		System.out.println("Message Sent to Server: "+message);
 		return message;
@@ -98,7 +89,7 @@ public class TGPClient implements BaseClient{
 	
 	@Override
 	public List<Message> messageReceived(Message m) {
-		List<Message> list = new LinkedList<Message>();
+		List<Message> list = null;
 		Message messageToSend = null;
 		if (m instanceof TGPMessage) {
 			TGPMessage message = (TGPMessage) m;
@@ -110,6 +101,7 @@ public class TGPClient implements BaseClient{
 			else if(message.getType().equals("TGPACK")){
 				if(state==State.WAITING_ACK){
 					state=State.SUBSCRIBED;
+					this.workerDao.setGroup(this.group);
 				} //No hay respuesta al ACK
 			}
 			else {
@@ -117,6 +109,7 @@ public class TGPClient implements BaseClient{
 			}
 			
 			if(messageToSend !=null){
+				list = new LinkedList<Message>();
 				list.add(messageToSend);				
 			}
 			
@@ -135,15 +128,15 @@ public class TGPClient implements BaseClient{
 			return null; //Mensaje mal formado.
 		}
 		content.add("group: " + respGroup);
-		content.add("host: " + workerHost);
-		content.add("port: "+ workerPort);
+		content.add("host: " + this.workerDao.getWorkerHost() );
+		content.add("port: "+ this.workerDao.getWorkerPort() );
 		content.add("xid: " + xid);
 		this.group=Integer.valueOf(respGroup);
 		
 		TGPMessage messageToSend = new TGPMessage("TGPREQUEST", content);
 		
 		messageToSend.broadcastMe=true;
-		messageToSend.origin = new EndPoint(this.tgpCliHost, Integer.valueOf(this.tgpCliPort));
+		messageToSend.origin = new EndPoint(this.tgpCliHost, this.tgpCliPort);
 		return messageToSend;
 	}
 
