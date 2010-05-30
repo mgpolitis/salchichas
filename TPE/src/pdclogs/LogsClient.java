@@ -8,25 +8,24 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import marshall.Reactor;
 import marshall.interfaces.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
-import domain.data.WorkerDAO;
+import domain.services.WorkerService;
 
 public class LogsClient implements BaseClient {
 
 	private final String serverHost;
 	private final int serverPort;
-	private final WorkerDAO workerDao;
+	private final WorkerService workerService;
 	private Pattern messagePattern = Pattern
 			.compile("(HEAD|GET)\\s+(/[a-zA-Z][a-zA-Z0-9_\\-]*.log(\\?(\\d+-\\d+))?)\\s*\\n");
 
-	public LogsClient(String serverHost, int serverPort, WorkerDAO workerDao){
+	public LogsClient(String serverHost, int serverPort, WorkerService workerService){
 		super();
 		this.serverHost = serverHost;
 		this.serverPort = serverPort;
-		this.workerDao = workerDao;
+		this.workerService = workerService;
 	}
 	
 	
@@ -58,22 +57,41 @@ public class LogsClient implements BaseClient {
 		if (m instanceof PDCLogsMessage) {
 			PDCLogsMessage message = (PDCLogsMessage) m;
 			System.out.println("CLIENT: " + message);
-			boolean messageOK = false;
-			String messageHeader = null;
-			while (!messageOK) {
-				String input = readMessage();
-				System.out.println(input);
-				Matcher matcher = messagePattern.matcher(input);
-				if (matcher.find()) {
-					messageOK = true;
-					messageHeader = matcher.group(1) + " " + matcher.group(2);
+			switch (message.getStatusCode()) {
+			case 200:
+				if(message.getType().equals("GETRESP")){
+					workerService.saveLogs(message.getContent());
 				}
+				boolean messageOK = false;
+				String messageHeader = null;
+				while (!messageOK) {
+					String input = readMessage();
+					System.out.println(input);
+					Matcher matcher = messagePattern.matcher(input);
+					if (matcher.find()) {
+						messageOK = true;
+						messageHeader = matcher.group(1) + " " + matcher.group(2);
+					}
+				}
+				String content = "";
+				PDCLogsMessage messageToSend = new PDCLogsMessage(messageHeader,
+						null, content);
+				messageToSend.dest = new EndPoint(serverHost, serverPort);
+				list.add(messageToSend);
+				break;
+//			case 404:
+//				workerDao.getWdpServer().sendLogNotFound();
+//				break;
+//			case 405:
+//				workerDao.getWdpServer().sendInvalidRange();
+//				break;
+//			case 406:
+//				workerDao.getWdpServer().sendBadRequest();
+//				break;	
+//			default:
+//				workerDao.getWdpServer().sendUnknownError();
+//				break;
 			}
-			String content = "";
-			PDCLogsMessage messageToSend = new PDCLogsMessage(messageHeader,
-					null, content);
-			messageToSend.dest = new EndPoint(serverHost, serverPort);
-			list.add(messageToSend);
 		}
 		return list;
 	}

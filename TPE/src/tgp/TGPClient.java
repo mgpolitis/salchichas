@@ -12,12 +12,12 @@ import java.util.regex.Pattern;
 import marshall.interfaces.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
-import domain.data.WorkerDAO;
+import domain.services.WorkerService;
 
 public class TGPClient implements BaseClient{
 	private String tgpCliHost;
 	private int tgpCliPort;
-	private WorkerDAO workerDao;
+	private WorkerService workerService;
 	private State state;
 	private String xid;
 	private int group;
@@ -25,11 +25,11 @@ public class TGPClient implements BaseClient{
 	private static Pattern groupPattern = Pattern.compile("[0-9]+\\n");
 	private enum State { WAITING_OFFER, WAITING_ACK, SUBSCRIBED };
 	
-	public TGPClient(String tgpCliHost, int tgpCliPort, WorkerDAO workerDao){
+	public TGPClient(String tgpCliHost, int tgpCliPort, WorkerService workerService){
 		super();
 		this.tgpCliHost = tgpCliHost;
 		this.tgpCliPort = tgpCliPort;
-		this.workerDao = workerDao;
+		this.workerService = workerService;
 	}
 	
 	@Override
@@ -101,7 +101,7 @@ public class TGPClient implements BaseClient{
 			else if(message.getType().equals("TGPACK")){
 				if(state==State.WAITING_ACK){
 					state=State.SUBSCRIBED;
-					this.workerDao.setGroup(this.group);
+					this.workerService.setGroup(this.group);
 				} //No hay respuesta al ACK
 			}
 			else {
@@ -128,8 +128,8 @@ public class TGPClient implements BaseClient{
 			return null; //Mensaje mal formado.
 		}
 		content.add("group: " + respGroup);
-		content.add("host: " + this.workerDao.getWorkerHost() );
-		content.add("port: "+ this.workerDao.getWorkerPort() );
+		content.add("host: " + this.workerService.getWorkerHost() );
+		content.add("port: "+ this.workerService.getWorkerPort() );
 		content.add("xid: " + xid);
 		this.group=Integer.valueOf(respGroup);
 		

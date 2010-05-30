@@ -6,8 +6,6 @@ import tgp.TGPClient;
 
 public class WorkerDAO {
 	private String directorIP = null;
-	private TGPClient tgpClient = null;
-	private LogsClient logsClient = null;
 	private StringBuffer logs =  null;
 	private String host;
 	private int port;
@@ -15,32 +13,15 @@ public class WorkerDAO {
 	
 	public WorkerDAO(){
 		logs = new StringBuffer();
-		tgpClient = new TGPClient("localhost",8092,this);
-		logsClient = new LogsClient("localhost",8085,this);
 	}
 
-	public StringBuffer getLogs() {
-		return logs;
+	public String getLogs() {
+		return logs.toString();
 	}
 
-	public void setLogs(StringBuffer logs) {
-		this.logs = logs;
-	}
-
-	public TGPClient getTgpClient() {
-		return tgpClient;
-	}
-
-	public void setTgpClient(TGPClient tgpClient) {
-		this.tgpClient = tgpClient;
-	}
-
-	public LogsClient getLogsClient() {
-		return logsClient;
-	}
-
-	public void setLogsClient(LogsClient logsClient) {
-		this.logsClient = logsClient;
+	public void setLogs(String logs) {
+		this.logs.delete(0, this.logs.length());
+		this.logs.append(logs);
 	}
 	
 	public String getWorkerHost(){

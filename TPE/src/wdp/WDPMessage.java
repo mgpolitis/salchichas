@@ -1,4 +1,4 @@
-package pdclogs;
+package wdp;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,26 +9,24 @@ import java.util.Map;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
-public class PDCLogsMessage extends Message {
+public class WDPMessage extends Message {
 
 	private String messageHeader = "";
 	private Map<String, String> headers =  new HashMap<String, String>();
-	private String content = "";
 
-	public PDCLogsMessage(EndPoint origin, EndPoint dest, String messageHeader,
+	public WDPMessage(EndPoint origin, EndPoint dest, String messageHeader,
 			List<String> headers, String content) {
 		super(origin, dest, new byte[0]);
 		this.messageHeader = messageHeader;
-		this.content = content;
 		addHeaders(headers);
 	}
 
-	public PDCLogsMessage(String messageHeader, List<String> headers,
+	public WDPMessage(String messageHeader, List<String> headers,
 			String content) {
 		this(null, null, messageHeader, headers, content);
 	}
 
-	public PDCLogsMessage(byte[] serialized) {
+	public WDPMessage(byte[] serialized) {
 		super(null, null, serialized);
 		loadData(serialized);
 	}
@@ -43,18 +41,10 @@ public class PDCLogsMessage extends Message {
 			int messageSeparator = dataString.indexOf('\n');
 			if (messageSeparator != -1) {
 				this.messageHeader = dataString.substring(0, messageSeparator);
-				String[] tempArray = dataString.substring(messageSeparator)
-						.split("\\n\\s*\\n");
-				if (tempArray.length > 0) {
-					String[] splittedHeaders = tempArray[0].split("\\n");
-					for (String str : splittedHeaders) {
-						addHeader(str);
-					}
-					if (tempArray.length > 1) {
-						this.content = tempArray[1];
-					} else {
-						System.out.println("Warning: Message without content");
-					}
+				String tempString = dataString.substring(messageSeparator);
+				String[] splittedHeaders = tempString.split("\\n");
+				for (String str : splittedHeaders) {
+					addHeader(str);
 				}
 			}
 		}
@@ -89,10 +79,6 @@ public class PDCLogsMessage extends Message {
 		}
 	}
 
-	public void setContent(String content) {
-		this.content = content;
-	}
-
 	public void setMessageHeader(String messageHeader) {
 		this.messageHeader = messageHeader;
 	}
@@ -111,11 +97,6 @@ public class PDCLogsMessage extends Message {
 			headersString += str + ":" + this.headers.get(str) + '\n';
 		}
 		return headersString;
-	}
-
-	
-	public String getContent() {
-		return content;
 	}
 
 	public String getType() {
@@ -150,8 +131,6 @@ public class PDCLogsMessage extends Message {
 		String data = "";
 		data += this.messageHeader + '\n';
 		data += getHeaders();
-		data += '\n';
-		data += this.content + '\n';
 		return data;
 	}
 }
