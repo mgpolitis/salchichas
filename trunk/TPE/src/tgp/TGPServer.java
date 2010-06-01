@@ -79,8 +79,11 @@ public class TGPServer implements BaseServer{
 			List<String> content = new LinkedList<String>();
 			resp = new TGPMessage(new EndPoint(tgpSrvHost , Integer.valueOf(tgpSrvPort) ),
 					message.origin,"TGPACK",content);
-			
+			//TODO: Establecer en la capa de arriba la conexión
 			registry.remove(Integer.valueOf(xid));
+		}
+		else{
+			//TODO: Liberar recursos reservados. El usuario eligió otro director
 		}
 		
 		return resp;
@@ -108,6 +111,7 @@ public class TGPServer implements BaseServer{
 			
 			resp = new TGPMessage(new EndPoint(tgpSrvHost , Integer.valueOf(tgpSrvPort) ),
 					message.origin,"TGPOFFER",content);
+			// TODO: Reservar recursos para establer conexión (??)
 		}
 		
 		return resp;

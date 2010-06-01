@@ -68,10 +68,10 @@ public class TGPMessage extends Message{
 			if (tempArray.length == 2) {
 				this.content.put(tempArray[0], tempArray[1]);
 			} else {
-				System.out.println("invalid header: " + str);
+				System.out.println("invalid key-value: " + str);
 			}
 		} else {
-			System.out.println("invalid header, cannot be null ");
+			System.out.println("invalid key-value, cannot be null ");
 		}
 		return content;
 	}
