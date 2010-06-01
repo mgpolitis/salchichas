@@ -103,6 +103,7 @@ public class TGPClient implements BaseClient{
 					state=State.SUBSCRIBED;
 					this.workerService.setGroup(this.group);
 				} //No hay respuesta al ACK
+					
 			}
 			else {
 				//unknown message format
@@ -134,6 +135,8 @@ public class TGPClient implements BaseClient{
 		this.group=Integer.valueOf(respGroup);
 		
 		TGPMessage messageToSend = new TGPMessage("TGPREQUEST", content);
+		
+		// TODO: Lanzar un timer. Si no llega el ACK dentro del tiempo, RECOMENZAR
 		
 		messageToSend.broadcastMe=true;
 		messageToSend.origin = new EndPoint(this.tgpCliHost, this.tgpCliPort);
