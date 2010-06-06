@@ -29,6 +29,7 @@ public class WDPServer extends BaseServer {
 		WDPMessage messageToSend = null;
 		if (m instanceof WDPMessage) {
 			WDPMessage message = (WDPMessage) m;
+			System.out.println("Message Received in WDPServer: "+message);
 			if (message.getType().equals("PROCESS")) {
 				client = message.origin;
 				EndPoint endPoint = message.getEndPoint();

@@ -63,9 +63,11 @@ public class WDPMessage extends Message {
 			if (tempArray.length == 2) {
 				this.headers.put(tempArray[0].toUpperCase(), tempArray[1]);
 			} else {
+				if(!str.isEmpty())
 				System.out.println("invalid header: " + str);
 			}
 		} else {
+			//TODO: show error
 			System.out.println("invalid header, cannot be null ");
 		}
 	}

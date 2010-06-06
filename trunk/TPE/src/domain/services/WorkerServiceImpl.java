@@ -146,7 +146,8 @@ public class WorkerServiceImpl implements WorkerService {
 		for (String log : logs) {
 			if (hasUserAgents) {
 				for (String userAgent : userAgents) {
-					if (log.contains(userAgent)) {
+					if (log.toLowerCase().contains(userAgent.toLowerCase().trim())) {
+						System.out.println("log: "+log);
 						userAgentAccepted = true;
 					}
 				}
@@ -161,6 +162,7 @@ public class WorkerServiceImpl implements WorkerService {
 						Locale locale = InetAddressLocator.getLocale(ipAddress);
 						String countryFromIp = locale.getDisplayCountry();
 						for (String paramCountry : countries) {
+							System.out.println("request from: "+locale);
 							if (countryFromIp.equalsIgnoreCase(paramCountry)) {
 								countryAccepted = true;
 							}
