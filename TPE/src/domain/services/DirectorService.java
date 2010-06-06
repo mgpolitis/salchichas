@@ -5,7 +5,7 @@ import tgp.TGPServer;
 import tmp.TMPServer;
 import marshall.model.EndPoint;
 
-public interface DirectorService extends WDPServerMessageHandler {
+public interface DirectorService extends ProtocolsMessageHandler {
 
 	public TMPServer getTMPServer();
 	

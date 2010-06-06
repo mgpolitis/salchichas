@@ -5,14 +5,12 @@ import tgp.TGPClient;
 import tmp.TMPServer;
 import wdp.WDPServer;
 
-public interface WorkerService extends WDPServerMessageHandler{
+public interface WorkerService extends ProtocolsMessageHandler{
 
 	
 	public void badRequest();
 	
 	public void logError(String error);
-	
-	public void saveLogs(String logs);
 	
 	public void setGroup(int group);
 	
@@ -29,9 +27,5 @@ public interface WorkerService extends WDPServerMessageHandler{
 	public WDPServer getWdpServer();
 	
 	public void setResource(String resource);
-	
-	public String getResource();
-	
-	public void processLogs();
 	
 }

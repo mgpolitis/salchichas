@@ -3,6 +3,7 @@ package wdp;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +21,9 @@ public class WDPClient extends BaseClient {
 	private final String serverHost;
 	private final int serverPort;
 	private Pattern messagePattern = Pattern
-			.compile("(PROCESS)\\s+(pdclogs://[a-zA-Z0-9\\.]+(?::\\d{1,5})?/[a-zA-Z][a-zA-Z0-9_\\\\-]*.log(?:\\?\\d+-\\d+)?)\\s*\n(.*)",Pattern.DOTALL);
+			.compile(
+					"(PROCESS)\\s+(pdclogs://[a-zA-Z0-9\\.]+(?::\\d{1,5})?/[a-zA-Z][a-zA-Z0-9_\\\\-]*.log(?:\\?\\d+-\\d+)?)\\s*\n(.*)",
+					Pattern.DOTALL);
 	private String logFile = null;
 	private List<String> countries = null;
 	private List<String> userAgents = null;
@@ -60,7 +63,7 @@ public class WDPClient extends BaseClient {
 				System.out.println("Wrong Format Message");
 			}
 		}
-		if(headersToConvert != null){
+		if (headersToConvert != null) {
 			headers = Arrays.asList(headersToConvert.split("\\n"));
 		}
 		String content = "";
@@ -137,22 +140,20 @@ public class WDPClient extends BaseClient {
 		StringBuffer aux = new StringBuffer();
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(
 				System.in));
-		
+
 		String line;
 		try {
 			do {
 				line = stdin.readLine();
 				aux.append(line);
 				aux.append('\n');
-			}
-			while(line != null && !line.isEmpty());
+			} while (line != null && !line.isEmpty());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return aux.toString();
 	}
-	
-	
+
 	public static void main(String[] args) throws IOException {
 		Reactor reactor = Reactor.getInstance();
 		// worker host port + tgp host port
@@ -163,4 +164,30 @@ public class WDPClient extends BaseClient {
 		reactor.run();
 	}
 
+	public void getJobDone(EndPoint server, String resource, List<String> userAgents, List<String> countries, String dateParams) throws IOException{
+		List<String> headers = new ArrayList<String>();
+		if(countries != null){
+			String countriesString = "";
+			for(String str: countries){
+				countriesString += str + ";";
+			}
+			countriesString = countriesString.substring(0,countriesString.length()-1);
+			headers.add("COUNTRIES: "+countriesString);
+		}
+		if(countries != null){
+			String userAgentsStrings = "";
+			for(String str: userAgents){
+				userAgentsStrings += str + ";";
+			}
+			userAgentsStrings = userAgentsStrings.substring(0,userAgentsStrings.length()-1);
+			headers.add("USER-AGENTS: "+userAgentsStrings);
+		}
+		if(dateParams != null){
+			headers.add("DATES: "+dateParams);
+		}
+		String content = "";
+		WDPMessage messageToSend = new WDPMessage("PROCESS "+resource, headers, content);
+		messageToSend.setDest(server);
+		this.sendMessage(messageToSend);
+	}
 }

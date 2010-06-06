@@ -11,22 +11,23 @@ import java.util.regex.Pattern;
 import marshall.base.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
+import domain.services.ProtocolsMessageHandler;
 import domain.services.WorkerService;
 
 public class LogsClient extends BaseClient {
 
 	private final String serverHost;
 	private final int serverPort;
-	private final WorkerService workerService;
+	private final ProtocolsMessageHandler messageHandler;
 	private String request;
 	private Pattern messagePattern = Pattern
 			.compile("(HEAD|GET)\\s+(/[a-zA-Z][a-zA-Z0-9_\\-]*.log(\\?(\\d+-\\d+))?)\\s*\\n");
 
-	public LogsClient(String serverHost, int serverPort, WorkerService workerService){
+	public LogsClient(String serverHost, int serverPort, ProtocolsMessageHandler messageHandler){
 		super();
 		this.serverHost = serverHost;
 		this.serverPort = serverPort;
-		this.workerService = workerService;
+		this.messageHandler = messageHandler;
 	}
 	
 	public void setRequest(String request){
@@ -66,7 +67,12 @@ public class LogsClient extends BaseClient {
 			switch (message.getStatusCode()) {
 			case 200:
 				if(message.getType().equals("GETRESP")){
-					workerService.saveLogs(message.getContent());
+					messageHandler.saveLogs(message.getContent());
+				}
+				if(message.getType().equals("HEADRESP")){
+					String lines = message.getHeader("Lines");
+					String contentLength = message.getHeader("Content-length");
+					messageHandler.saveResourceInfo(lines,contentLength);
 				}
 				boolean messageOK = false;
 				String messageHeader = null;
@@ -107,16 +113,6 @@ public class LogsClient extends BaseClient {
 		PDCLogsMessage message = new PDCLogsMessage(serialized);
 		return message;
 	}
-	
-	private String readGreetMessage() {
-		StringBuffer aux = new StringBuffer();
-		if(request != null && workerService != null){
-			aux.append(request+" "+workerService.getResource()+'\n'+'\n');
-		} else{
-			//TODO: error
-		}
-		return aux.toString();
-	}
 
 	private String readMessage() {
 		StringBuffer aux = new StringBuffer();
@@ -140,6 +136,12 @@ public class LogsClient extends BaseClient {
 	
 	public void fetchResource(String resource, String hostname, int port) throws IOException{
 		PDCLogsMessage messageToSend = new PDCLogsMessage("GET "+resource,null,null);
+		messageToSend.setDest(new EndPoint(hostname,port));
+		this.sendMessage(messageToSend);
+	}
+	
+	public void fetchResourceInfo(String resource, String hostname, int port) throws IOException{
+		PDCLogsMessage messageToSend = new PDCLogsMessage("HEAD "+resource,null,null);
 		messageToSend.setDest(new EndPoint(hostname,port));
 		this.sendMessage(messageToSend);
 	}
