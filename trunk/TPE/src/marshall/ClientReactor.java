@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import marshall.base.BaseClient;
+import marshall.interfaces.ClientContainer;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
@@ -136,7 +137,7 @@ public class ClientReactor implements ClientContainer {
 
 	}
 
-	private void sendMessage(Message m) throws IOException {
+	public void sendMessage(Message m) throws IOException {
 		EndPoint dest = m.dest;
 		Socket clientSocket = clientSockets.get(dest);
 		final DataOutputStream w = new DataOutputStream(clientSocket

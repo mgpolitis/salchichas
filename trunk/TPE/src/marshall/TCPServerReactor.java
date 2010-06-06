@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -15,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import marshall.base.BaseServer;
+import marshall.interfaces.ServerContainer;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
@@ -139,7 +139,7 @@ public class TCPServerReactor implements ServerContainer {
 		}
 	}
 
-	void sendMessage(Message m) throws IOException {
+	public void sendMessage(Message m) throws IOException {
 		Socket socket = tcpClients.get(new EndPoint(m.dest.host, m.dest.port));
 		if (socket == null) {
 			throw new IOException(
