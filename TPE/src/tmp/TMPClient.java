@@ -16,7 +16,7 @@ import marshall.interfaces.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
-public class TMPClient implements BaseClient{
+public class TMPClient extends BaseClient{
 	
 	private String tmpCliHost;
 	private int tmpCliPort;

@@ -139,7 +139,7 @@ public class TCPServerReactor implements ServerContainer {
 		}
 	}
 
-	private void sendMessage(Message m) throws IOException {
+	void sendMessage(Message m) throws IOException {
 		Socket socket = tcpClients.get(new EndPoint(m.dest.host, m.dest.port));
 		if (socket == null) {
 			throw new IOException(

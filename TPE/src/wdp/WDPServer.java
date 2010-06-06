@@ -7,7 +7,7 @@ import marshall.interfaces.BaseServer;
 import marshall.model.Message;
 import domain.services.WorkerService;
 
-public class WDPServer implements BaseServer {
+public class WDPServer extends BaseServer {
 	
 
 	private final WorkerService workerService;

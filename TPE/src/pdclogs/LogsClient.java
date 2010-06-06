@@ -13,7 +13,7 @@ import marshall.model.EndPoint;
 import marshall.model.Message;
 import domain.services.WorkerService;
 
-public class LogsClient implements BaseClient {
+public class LogsClient extends BaseClient {
 
 	private final String serverHost;
 	private final int serverPort;

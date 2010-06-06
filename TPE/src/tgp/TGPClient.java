@@ -14,7 +14,7 @@ import marshall.model.EndPoint;
 import marshall.model.Message;
 import domain.services.WorkerService;
 
-public class TGPClient implements BaseClient{
+public class TGPClient extends BaseClient{
 	private String tgpCliHost;
 	private int tgpCliPort;
 	private WorkerService workerService;

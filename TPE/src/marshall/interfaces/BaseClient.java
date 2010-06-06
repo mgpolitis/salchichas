@@ -4,12 +4,12 @@ import java.util.List;
 
 import marshall.model.Message;
 
-public interface BaseClient {
+public abstract class BaseClient {
 
-	public List<Message> messageReceived(Message m);
+	public abstract List<Message> messageReceived(Message m);
 	
-	public Message greet();
+	public abstract Message greet();
 	
-	public Message createMessage(byte[] serialized);
+	public abstract Message createMessage(byte[] serialized);
 
 }

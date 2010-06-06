@@ -10,7 +10,7 @@ import marshall.Reactor;
 import marshall.interfaces.BaseClient;
 import marshall.model.Message;
 
-public class EchoClient implements BaseClient {
+public class EchoClient extends BaseClient {
 
 	@Override
 	public Message createMessage(byte[] serialized) {
