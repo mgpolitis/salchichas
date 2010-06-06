@@ -53,7 +53,7 @@ public class UDPServerReactor implements ServerContainer {
 		final UDPServerReactor thiz = this;
 
 		if (!this.udpInitialized()) {
-			System.out.println("Starting no servers. (none subscribed)");
+			System.out.println("Starting no UDP servers. (none subscribed)");
 			return;
 		}
 

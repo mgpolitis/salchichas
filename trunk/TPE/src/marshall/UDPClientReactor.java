@@ -17,19 +17,19 @@ import marshall.interfaces.ClientContainer;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
-public class ClientReactor implements ClientContainer {
+public class UDPClientReactor implements ClientContainer {
 
-	private static final ClientReactor instance = new ClientReactor();
+	private static final UDPClientReactor instance = new UDPClientReactor();
 	private static final int THREADS_IN_POOL = 10;
 
 	Map<EndPoint, Socket> clientSockets = new HashMap<EndPoint, Socket>();
 	Map<EndPoint, BaseClient> tcpSenderClients = new HashMap<EndPoint, BaseClient>();
 
-	public static ClientReactor getInstance() {
+	public static UDPClientReactor getInstance() {
 		return instance;
 	}
 
-	private ClientReactor() {
+	private UDPClientReactor() {
 	}
 
 	public void subscribeTCPClient(BaseClient client, String serverHost,
@@ -47,19 +47,19 @@ public class ClientReactor implements ClientContainer {
 	}
 
 	public void runClient() {
-		final ClientReactor thiz = this;
+		final UDPClientReactor thiz = this;
 		final ExecutorService es = Executors
 				.newFixedThreadPool(THREADS_IN_POOL);
 
 		if (this.tcpSenderClients.size() == 0) {
-			System.out.println("No clients to start. (none subscribed)");
+			System.out.println("No UDP clients to start. (none subscribed)");
 			return;
 		}
 
 		for (final EndPoint serverEndPoint : this.tcpSenderClients.keySet()) {
 			final BaseClient tcpSenderClient = this.tcpSenderClients
 					.get(serverEndPoint);
-			System.out.println("Starting client "
+			System.out.println("Starting UDP client "
 					+ tcpSenderClient.getClass().getName()
 					+ " connecting to port " + serverEndPoint.port + ".");
 

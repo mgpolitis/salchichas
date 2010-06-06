@@ -60,7 +60,7 @@ public class TCPServerReactor implements ServerContainer {
 		final TCPServerReactor thiz = this;
 
 		if (!this.tcpInitialized()) {
-			System.out.println("Starting no servers. (none subscribed)");
+			System.out.println("Starting no TCP servers. (none subscribed)");
 			return;
 		}
 

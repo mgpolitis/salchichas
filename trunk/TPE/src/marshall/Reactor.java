@@ -1,6 +1,7 @@
 package marshall;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import marshall.base.BaseClient;
 import marshall.base.BaseServer;
@@ -12,8 +13,10 @@ public class Reactor implements ClientContainer, ServerContainer {
 
 	private static final Reactor instance = new Reactor();
 
-	private ClientReactor clientReactor = ClientReactor.getInstance();
-	private TCPServerReactor serverReactor = TCPServerReactor.getInstance();
+	private TCPClientReactor tcpClientReactor = TCPClientReactor.getInstance();
+	private TCPServerReactor tcpServerReactor = TCPServerReactor.getInstance();
+	private UDPClientReactor udpClientReactor = UDPClientReactor.getInstance();
+	private UDPServerReactor udpServerReactor = UDPServerReactor.getInstance();
 
 	private Reactor() {
 	}
@@ -24,27 +27,31 @@ public class Reactor implements ClientContainer, ServerContainer {
 
 	public void subscribeTCPClient(BaseClient client, String serverHost,
 			int serverPort) throws IOException {
-		this.clientReactor.subscribeTCPClient(client, serverHost, serverPort);
+		this.tcpClientReactor
+				.subscribeTCPClient(client, serverHost, serverPort);
 	}
 
 	public void subscribeUDPClient(BaseClient client, String serverHost,
 			int serverPort) {
-		this.clientReactor.subscribeUDPClient(client, serverHost, serverPort);
+		this.udpClientReactor
+				.subscribeUDPClient(client, serverHost, serverPort);
 	}
 
 	public void subscribeTCPServer(BaseServer server, int listenPort)
 			throws IOException {
-		this.serverReactor.subscribeTCPServer(server, listenPort);
+		this.tcpServerReactor.subscribeTCPServer(server, listenPort);
 	}
 
 	public void subscribeUDPServer(BaseServer server, int listenPort)
 			throws IOException {
-		this.serverReactor.subscribeUDPServer(server, listenPort);
+		this.udpServerReactor.subscribeUDPServer(server, listenPort);
 	}
 
 	public void run() throws IOException {
-		this.serverReactor.runServer();
-		this.clientReactor.runClient();
+		this.tcpClientReactor.runClient();
+		this.tcpServerReactor.runServer();
+		this.udpClientReactor.runClient();
+		this.udpServerReactor.runServer();
 	}
 
 	@Override
