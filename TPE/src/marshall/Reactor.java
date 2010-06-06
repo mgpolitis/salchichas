@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import marshall.base.BaseClient;
 import marshall.base.BaseServer;
+import marshall.interfaces.ClientContainer;
+import marshall.interfaces.ServerContainer;
+import marshall.model.Message;
 
 public class Reactor implements ClientContainer, ServerContainer {
 
@@ -42,6 +45,12 @@ public class Reactor implements ClientContainer, ServerContainer {
 	public void run() throws IOException {
 		this.serverReactor.runServer();
 		this.clientReactor.runClient();
+	}
+
+	@Override
+	public void sendMessage(Message m) throws IOException {
+		throw new IllegalStateException(
+				"Can't invoke method on general reactor");
 	}
 
 }

@@ -12,13 +12,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import marshall.base.BaseServer;
+import marshall.interfaces.ServerContainer;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
 public class UDPServerReactor implements ServerContainer {
 
 	private static final UDPServerReactor instance = new UDPServerReactor();
-	private static final int BACKLOG = 50;
 	private static final int THREADS_IN_POOL = 10;
 	private static final int DATAGRAM_BUF_SIZE = 1000;
 
@@ -118,7 +118,7 @@ public class UDPServerReactor implements ServerContainer {
 		}
 	}
 
-	private void sendMessage(Message m) throws IOException {
+	public void sendMessage(Message m) throws IOException {
 		
 		//TODO: HACER BIEN ESTA MAL!!!!!!
 		//TODO: HACER BIEN ESTA MAL!!!!!!
