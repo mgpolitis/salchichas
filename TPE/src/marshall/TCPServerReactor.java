@@ -159,7 +159,9 @@ public class TCPServerReactor implements ServerContainer {
 		final DataInputStream r = new DataInputStream(socket.getInputStream());
 		int length = r.readInt();
 		byte[] serializedMessage = new byte[length];
-		r.readFully(serializedMessage);
+		synchronized (socket) {
+			r.readFully(serializedMessage);
+		}
 		Message m = tcpObserverServer.createMessage(serializedMessage);
 		m.origin = this.getEndPointFromSocket(socket);
 		return m;

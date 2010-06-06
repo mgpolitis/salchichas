@@ -144,8 +144,10 @@ public class ClientReactor implements ClientContainer {
 				.getOutputStream());
 
 		final byte[] serializedMessage = m.serialize();
-		w.writeInt(serializedMessage.length);
-		w.write(serializedMessage);
+		synchronized (clientSocket) {
+			w.writeInt(serializedMessage.length);
+			w.write(serializedMessage);
+		}
 	}
 
 	protected Message readMessage(EndPoint serverEndPoint) throws IOException {
