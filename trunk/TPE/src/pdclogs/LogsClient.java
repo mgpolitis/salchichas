@@ -18,6 +18,7 @@ public class LogsClient extends BaseClient {
 	private final String serverHost;
 	private final int serverPort;
 	private final WorkerService workerService;
+	private String request;
 	private Pattern messagePattern = Pattern
 			.compile("(HEAD|GET)\\s+(/[a-zA-Z][a-zA-Z0-9_\\-]*.log(\\?(\\d+-\\d+))?)\\s*\\n");
 
@@ -28,13 +29,18 @@ public class LogsClient extends BaseClient {
 		this.workerService = workerService;
 	}
 	
+	public void setRequest(String request){
+		if(request.trim().equalsIgnoreCase("HEAD") || request.trim().equalsIgnoreCase("GET")){
+			this.request = request.trim();
+		}
+	}
 	
 	@Override
 	public Message greet() {
 		boolean messageOK = false;
 		String messageHeader = null;
 		while (!messageOK) {
-			String input = readMessage();
+			String input = readGreetMessage();
 			Matcher m = messagePattern.matcher(input);
 			if (m.find()) {
 				messageOK = true;
@@ -100,6 +106,16 @@ public class LogsClient extends BaseClient {
 	public Message createMessage(byte[] serialized) {
 		PDCLogsMessage message = new PDCLogsMessage(serialized);
 		return message;
+	}
+	
+	private String readGreetMessage() {
+		StringBuffer aux = new StringBuffer();
+		if(request != null && workerService != null){
+			aux.append(request+" "+workerService.getResource()+'\n'+'\n');
+		} else{
+			//TODO: error
+		}
+		return aux.toString();
 	}
 
 	private String readMessage() {

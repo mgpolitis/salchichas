@@ -8,6 +8,7 @@ public class WorkerDAO {
 	private String directorIP = null;
 	private StringBuffer logs =  null;
 	private String host;
+	private String resource;
 	private int port;
 	private int group;
 	
@@ -39,5 +40,14 @@ public class WorkerDAO {
 	public int getGroup(){
 		return group;
 	}
+
+	public String getResource() {
+		return resource;
+	}
+
+	public void setResource(String resource) {
+		this.resource = resource;
+	}
+	
 	
 }

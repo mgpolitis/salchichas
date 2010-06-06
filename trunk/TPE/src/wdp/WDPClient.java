@@ -1,13 +1,18 @@
 package wdp;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import marshall.Reactor;
 import marshall.base.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
+import tgp.TGPClient;
 import domain.DateRange;
 
 public class WDPClient extends BaseClient {
@@ -21,28 +26,29 @@ public class WDPClient extends BaseClient {
 	private List<String> userAgents = null;
 	private DateRange dates = null;
 
-	public WDPClient(String serverHost, int serverPort){
+	public WDPClient(String serverHost, int serverPort) {
 		super();
 		this.serverHost = serverHost;
 		this.serverPort = serverPort;
 	}
-	
-	public void setLogFile(String logFile){
+
+	public void setLogFile(String logFile) {
 		this.logFile = logFile;
 	}
-	
-	public void setParameters(List<String> countries, List<String> userAgents, DateRange dates){
+
+	public void setParameters(List<String> countries, List<String> userAgents,
+			DateRange dates) {
 		this.countries = countries;
 		this.userAgents = userAgents;
 		this.dates = dates;
 	}
-	
+
 	@Override
 	public Message greet() {
 		boolean messageOK = false;
 		String messageHeader = null;
 		while (!messageOK) {
-			String input = readGreetMessage();
+			String input = readMessage();
 			Matcher m = messagePattern.matcher(input);
 			if (m.find()) {
 				messageOK = true;
@@ -52,10 +58,9 @@ public class WDPClient extends BaseClient {
 			}
 		}
 		String content = "";
-		WDPMessage message = new WDPMessage(messageHeader, null,
-				content);
+		WDPMessage message = new WDPMessage(messageHeader, null, content);
 		message.dest = new EndPoint(serverHost, serverPort);
-		System.out.println("Message Sent to Server: "+message);
+		System.out.println("Message Sent to Server: " + message);
 		return message;
 	}
 
@@ -65,18 +70,20 @@ public class WDPClient extends BaseClient {
 		if (m instanceof WDPMessage) {
 			WDPMessage message = (WDPMessage) m;
 			System.out.println("CLIENT: " + message);
-			if(message.getType().equals("STATUS")){
-				Integer percentaje = Integer.valueOf(message.getHeader("PERCENTAJE"));
-				if(percentaje < 0 ){
-					//TODO: enviar error a quien me solicito el pedido
+			if (message.getType().equals("STATUS")) {
+				Integer percentaje = Integer.valueOf(message
+						.getHeader("PERCENTAJE"));
+				if (percentaje < 0) {
+					// TODO: enviar error a quien me solicito el pedido
 				} else {
-					//TODO: enviar estado del proceso a quien me solicito el pedido
+					// TODO: enviar estado del proceso a quien me solicito el
+					// pedido
 				}
-			} else if(message.getType().equals("WORKDONE")){
-				//TODO: obtener los resultados del trabajo procesado
-				//TODO: agregar el trabajador a la lista de disponibles
+			} else if (message.getType().equals("WORKDONE")) {
+				// TODO: obtener los resultados del trabajo procesado
+				// TODO: agregar el trabajador a la lista de disponibles
 			} else {
-				//TODO: enviar un bad request a quien solicito el pedido
+				// TODO: enviar un bad request a quien solicito el pedido
 			}
 		}
 		return list;
@@ -90,32 +97,64 @@ public class WDPClient extends BaseClient {
 
 	private String readGreetMessage() {
 		StringBuffer aux = new StringBuffer();
-		
-		if(logFile == null){
-			//TODO: send bad request back to client
+
+		if (logFile == null) {
+			// TODO: send bad request back to client
 		}
-		aux.append("PROCESS "+logFile+'\n');
-		if(dates != null){
-			aux.append("DATES: "+dates.startDate+"-"+dates.endDate+'\n');
+		aux.append("PROCESS " + logFile + '\n');
+		if (dates != null) {
+			aux
+					.append("DATES: " + dates.startDate + "-" + dates.endDate
+							+ '\n');
 		}
-		if(countries != null && !countries.isEmpty()){
+		if (countries != null && !countries.isEmpty()) {
 			aux.append("COUNTRIES: ");
-			for(String str: countries){
+			for (String str : countries) {
 				aux.append(str.trim() + ";");
 			}
-			aux.deleteCharAt(aux.length()-1);
+			aux.deleteCharAt(aux.length() - 1);
 			aux.append('\n');
 		}
-		if(userAgents != null && !userAgents.isEmpty()){
+		if (userAgents != null && !userAgents.isEmpty()) {
 			aux.append("USER-AGENTS: ");
-			for(String str: userAgents){
+			for (String str : userAgents) {
 				aux.append(str.trim() + ";");
 			}
-			aux.deleteCharAt(aux.length()-1);
+			aux.deleteCharAt(aux.length() - 1);
 			aux.append('\n');
 		}
 		aux.append('\n');
 		return aux.toString();
+	}
+
+	private String readMessage() {
+		StringBuffer aux = new StringBuffer();
+		BufferedReader stdin = new BufferedReader(new InputStreamReader(
+				System.in));
+		
+		String line;
+		try {
+			do {
+				line = stdin.readLine();
+				aux.append(line);
+				aux.append('\n');
+			}
+			while(line != null && !line.isEmpty());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return aux.toString();
+	}
+	
+	
+	public static void main(String[] args) throws IOException {
+		Reactor reactor = Reactor.getInstance();
+		// worker host port + tgp host port
+		// lo utiliza para indicarle al servidor a donde va a tener que
+		// conectarse el director
+		WDPClient c = new WDPClient("localhost", 8086);
+		reactor.subscribeTCPClient(c, "localhost", 8092);
+		reactor.run();
 	}
 
 }
