@@ -50,7 +50,7 @@ public class TCPServerReactor implements ServerContainer {
 	}
 
 	private boolean tcpInitialized() {
-		return !tcpClients.isEmpty();
+		return !tcpServerSockets.isEmpty();
 	}
 
 	public void runServer() {
