@@ -48,6 +48,7 @@ public class TCPServerReactor implements ServerContainer {
 		tcpServerSocket = new ServerSocket(listenPort, TCPServerReactor.BACKLOG,
 				InetAddress.getByName("localhost"));
 		tcpObserverServer = server;
+		server.setContainer(this);
 	}
 
 	public void subscribeUDPServer(BaseServer server, int listenPort)

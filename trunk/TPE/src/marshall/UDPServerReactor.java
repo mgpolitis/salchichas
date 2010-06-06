@@ -45,6 +45,7 @@ public class UDPServerReactor implements ServerContainer {
 
 		udpSocket = new DatagramSocket(listenPort);
 		udpObserverServer = server;
+		server.setContainer(this);
 	}
 
 	public void runServer() {
