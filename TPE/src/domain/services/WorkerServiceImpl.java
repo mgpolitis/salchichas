@@ -1,5 +1,6 @@
 package domain.services;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Calendar;
@@ -26,6 +27,9 @@ public class WorkerServiceImpl implements WorkerService {
 	private TGPClient tgpClient = null;
 	private LogsClient logsClient = null;
 	private WDPServer wdpServer = null;
+	private List<String> countries;
+	private List<String> userAgents;
+	private String datesParam;
 
 
 	
@@ -81,6 +85,7 @@ public class WorkerServiceImpl implements WorkerService {
 	@Override
 	public void saveLogs(String logs) {
 		workerDao.setLogs(logs);
+		processLogs();
 	}
 
 	@Override
@@ -115,14 +120,22 @@ public class WorkerServiceImpl implements WorkerService {
 	public void setResource(String resource) {
 		workerDao.setResource(resource);
 	}
+	
+	@Override
+	public void setParamsToProcess(List<String> countries,
+			List<String> userAgents, String datesParam){
+		this.countries = countries;
+		this.userAgents = userAgents;
+		this.datesParam = datesParam;
+	}
 
 	@Override
-	public Map<String, Integer> processLogs(List<String> countries,
-			List<String> userAgents, String datesParam) {
+	public void processLogs() {
 
 		boolean hasUserAgents = (userAgents != null && !userAgents.isEmpty());
 		boolean hasCountries = (countries != null && !countries.isEmpty());
 		boolean hasDateRange = (datesParam != null);
+			
 		String logs[] = workerDao.getLogs().split("\n");
 
 		Map<String, Integer> response = new HashMap<String, Integer>();
@@ -195,7 +208,12 @@ public class WorkerServiceImpl implements WorkerService {
 
 		}
 
-		return response;
+		try {
+			wdpServer.sendWorkDone(response);
+		} catch (IOException e) {
+			// TODO work could not be completed, inform.
+			e.printStackTrace();
+		}
 	}
 
 	private Calendar getDate(String date) {
@@ -219,4 +237,15 @@ public class WorkerServiceImpl implements WorkerService {
 	public TMPServer getTmpServer() {
 		return tmpServer;
 	}
+
+	@Override
+	public void fetchResource(String resource, String hostname, int port) {
+		try {
+			logsClient.fetchResource(resource, hostname, port);
+		} catch (IOException e) {
+			//TODO: enviar mensaje de error a quien corresponda
+			e.printStackTrace();
+		}
+	}
+	
 }

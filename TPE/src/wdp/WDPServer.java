@@ -1,5 +1,6 @@
 package wdp;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import marshall.base.BaseServer;
+import marshall.model.EndPoint;
 import marshall.model.Message;
 import domain.services.WorkerService;
 
@@ -14,6 +16,7 @@ public class WDPServer extends BaseServer {
 	
 
 	private final WorkerService workerService;
+	private EndPoint client = null;
 	
 	public WDPServer(WorkerService workerService){
 		super();
@@ -27,6 +30,8 @@ public class WDPServer extends BaseServer {
 		if (m instanceof WDPMessage) {
 			WDPMessage message = (WDPMessage) m;
 			if (message.getType().equals("PROCESS")) {
+				client = message.origin;
+				EndPoint endPoint = message.getEndPoint();
 				String userAgentsString = message.getHeader("user-agents");
 				String countriesString = message.getHeader("countries");
 				String dates = message.getHeader("dates");
@@ -38,16 +43,11 @@ public class WDPServer extends BaseServer {
 				if(countriesString != null){
 					countries = Arrays.asList(countriesString.split(";"));
 				}
-				Map<String,Integer> result = workerService.processLogs(countries, userAgents, dates);
-				List<String> headers = new ArrayList<String>();
-				headers.add("HITS: "+result.get("hits"));
-				headers.add("BYTES: "+result.get("bytes"));
-				messageToSend = new WDPMessage("WORKDONE", headers, null); 
+				workerService.setParamsToProcess(countries, userAgents, dates); 
+				workerService.fetchResource(message.getURI(),endPoint.host,endPoint.port);
 			} else {
 				// TODO: unknown message
 			}
-			messageToSend.setDest(m.origin);
-			messageToSend.setOrigin(m.dest);
 		}
 		if (messageToSend != null) {
 			list.add(messageToSend);
@@ -60,6 +60,15 @@ public class WDPServer extends BaseServer {
 	public Message createMessage(byte[] serialized) {
 		WDPMessage message = new WDPMessage(serialized);
 		return message;
+	}
+	
+	public void sendWorkDone(Map<String,Integer> result) throws IOException{
+		List<String> headers = new ArrayList<String>();
+		headers.add("HITS: "+result.get("hits"));
+		headers.add("BYTES: "+result.get("bytes"));
+		WDPMessage messageToSend  = new WDPMessage("WORKDONE", headers, null);
+		messageToSend.setDest(client);
+		this.sendMessage(messageToSend);
 	}
 //	
 //	public static void main(String[] args) throws IOException {

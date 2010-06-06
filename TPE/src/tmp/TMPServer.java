@@ -4,12 +4,9 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import domain.services.WorkerService;
-
-import tmp.TMPMessage;
 import marshall.base.BaseServer;
-import marshall.model.EndPoint;
 import marshall.model.Message;
+import domain.services.WorkerService;
 
 
 public class TMPServer extends BaseServer{

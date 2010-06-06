@@ -16,7 +16,7 @@ public class Worker extends Node{
 		reactor.subscribeTCPClient(workerService.getLogsClient(), "localhost", 8085);
 		//reactor.subscribeTCPClient(workerService.getTgpClient(), "localhost", 8092);
 		reactor.subscribeTCPServer(workerService.getWdpServer(), 8086);
-		reactor.subscribeTCPServer(workerService.getTmpServer(), 8099);
+		//reactor.subscribeTCPServer(workerService.getTmpServer(), 8099);
 		reactor.run();
 	}
 	

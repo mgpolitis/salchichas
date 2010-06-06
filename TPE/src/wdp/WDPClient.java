@@ -12,7 +12,6 @@ import marshall.Reactor;
 import marshall.base.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
-import tgp.TGPClient;
 import domain.DateRange;
 
 public class WDPClient extends BaseClient {

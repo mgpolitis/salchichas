@@ -1,7 +1,6 @@
 package domain.services;
 
 import java.util.List;
-import java.util.Map;
 
 import pdclogs.LogsClient;
 import tgp.TGPClient;
@@ -35,6 +34,9 @@ public interface WorkerService {
 	
 	public String getResource();
 	
-	public Map<String,Integer> processLogs(List<String> countries,List<String> userAgents, String datesParam);
+	public void processLogs();
 	
+	public void fetchResource(String resource, String hostname, int port);
+	
+	void setParamsToProcess(List<String> countries,	List<String> userAgents, String datesParam);
 }
