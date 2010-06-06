@@ -1,13 +1,11 @@
 package domain.services;
 
-import java.util.List;
-
 import pdclogs.LogsClient;
 import tgp.TGPClient;
 import tmp.TMPServer;
 import wdp.WDPServer;
 
-public interface WorkerService {
+public interface WorkerService extends WDPServerMessageHandler{
 
 	
 	public void badRequest();
@@ -36,7 +34,4 @@ public interface WorkerService {
 	
 	public void processLogs();
 	
-	public void fetchResource(String resource, String hostname, int port);
-	
-	void setParamsToProcess(List<String> countries,	List<String> userAgents, String datesParam);
 }
