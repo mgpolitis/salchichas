@@ -1,7 +1,6 @@
 package marshall;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import marshall.base.BaseClient;
 import marshall.base.BaseServer;
