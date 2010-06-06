@@ -24,6 +24,8 @@ public class TCPServerReactor implements ServerContainer {
 	private static final int BACKLOG = 50;
 	private static final int THREADS_IN_POOL = 10;
 
+	private final ExecutorService excecutorService = Executors
+			.newFixedThreadPool(THREADS_IN_POOL);
 	private final Map<EndPoint, Socket> tcpClients = new HashMap<EndPoint, Socket>();
 	private final Map<Integer, BaseServer> tcpObserverServers = new HashMap<Integer, BaseServer>();
 	private final Map<Integer, ServerSocket> tcpServerSockets = new HashMap<Integer, ServerSocket>();
@@ -54,75 +56,73 @@ public class TCPServerReactor implements ServerContainer {
 	}
 
 	public void runServer() {
-		final TCPServerReactor thiz = this;
 
 		if (!this.tcpInitialized()) {
 			System.out.println("Starting no TCP servers. (none subscribed)");
 			return;
 		}
-		final ExecutorService es = Executors
-				.newFixedThreadPool(THREADS_IN_POOL);
 
 		for (int serverPort : tcpObserverServers.keySet()) {
-			final BaseServer tcpObserverServer = tcpObserverServers
-					.get(serverPort);
-			final ServerSocket tcpServerSocket = tcpServerSockets
-					.get(serverPort);
-
-			System.out.println("Starting TCP server "
-					+ tcpObserverServer.getClass().getName() + " on "
-					+ tcpServerSocket.getLocalSocketAddress().toString() + ".");
-			System.out.println("Now accepting clients...");
-			Runnable listenerRunner = new Runnable() {
-				@Override
-				public void run() {
-					while (true) {
-						final Socket socket;
-						try {
-							socket = tcpServerSocket.accept();
-						} catch (IOException e1) {
-							e1.printStackTrace();
-							return;
-						}
-						final EndPoint newClientEndPoint = thiz
-								.getEndPointFromSocket(socket);
-						tcpClients.put(newClientEndPoint, socket);
-
-						Runnable handleRunner = new Runnable() {
-							public void run() {
-								try {
-									System.out.printf(
-											"Client has connected: %s\n",
-											socket.getRemoteSocketAddress()
-													.toString());
-									try {
-										thiz.handle(tcpObserverServer,
-												newClientEndPoint);
-									} catch (EOFException e) {
-										System.out
-												.println("Client closed connection: "
-														+ newClientEndPoint);
-									}
-
-									if (!socket.isClosed()) {
-										socket.close();
-									}
-								} catch (IOException e) {
-									e.printStackTrace();
-								} finally {
-									tcpClients.remove(newClientEndPoint);
-								}
-
-							}
-						};
-						es.execute(handleRunner);
-
-					}
-				}
-			};
-			es.execute(listenerRunner);
+			this.injectServer(serverPort);
 		}
 
+	}
+
+	void injectServer(int serverPort) {
+		final TCPServerReactor thiz = this;
+		final BaseServer tcpObserverServer = tcpObserverServers.get(serverPort);
+		final ServerSocket tcpServerSocket = tcpServerSockets.get(serverPort);
+
+		System.out.println("Starting TCP server "
+				+ tcpObserverServer.getClass().getName() + " on "
+				+ tcpServerSocket.getLocalSocketAddress().toString() + ".");
+		System.out.println("Now accepting clients...");
+		Runnable listenerRunner = new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					final Socket socket;
+					try {
+						socket = tcpServerSocket.accept();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						return;
+					}
+					final EndPoint newClientEndPoint = thiz
+							.getEndPointFromSocket(socket);
+					tcpClients.put(newClientEndPoint, socket);
+
+					Runnable handleRunner = new Runnable() {
+						public void run() {
+							try {
+								System.out.printf("Client has connected: %s\n",
+										socket.getRemoteSocketAddress()
+												.toString());
+								try {
+									thiz.handle(tcpObserverServer,
+											newClientEndPoint);
+								} catch (EOFException e) {
+									System.out
+											.println("Client closed connection: "
+													+ newClientEndPoint);
+								}
+
+								if (!socket.isClosed()) {
+									socket.close();
+								}
+							} catch (IOException e) {
+								e.printStackTrace();
+							} finally {
+								tcpClients.remove(newClientEndPoint);
+							}
+
+						}
+					};
+					excecutorService.execute(handleRunner);
+				}
+			}
+		};
+		excecutorService.execute(listenerRunner);
 	}
 
 	protected void handle(BaseServer tcpObserverServer, EndPoint clientEndPoint)

@@ -22,6 +22,9 @@ public class TCPClientReactor implements ClientContainer {
 	private static final TCPClientReactor instance = new TCPClientReactor();
 	private static final int THREADS_IN_POOL = 10;
 
+	private final ExecutorService executorService = Executors
+			.newFixedThreadPool(THREADS_IN_POOL);
+
 	Map<EndPoint, Socket> clientSockets = new HashMap<EndPoint, Socket>();
 	Map<EndPoint, BaseClient> tcpSenderClients = new HashMap<EndPoint, BaseClient>();
 
@@ -38,7 +41,6 @@ public class TCPClientReactor implements ClientContainer {
 		EndPoint serverEndPoint = new EndPoint(serverHost, serverPort);
 		tcpSenderClients.put(serverEndPoint, client);
 		client.setContainer(this);
-
 	}
 
 	public void subscribeUDPClient(BaseClient client, String serverHost,
@@ -47,61 +49,62 @@ public class TCPClientReactor implements ClientContainer {
 	}
 
 	public void runClient() {
-		final TCPClientReactor thiz = this;
-		final ExecutorService es = Executors
-				.newFixedThreadPool(THREADS_IN_POOL);
 
 		if (this.tcpSenderClients.size() == 0) {
 			System.out.println("No TCP clients to start. (none subscribed)");
 			return;
 		}
 
-		for (final EndPoint serverEndPoint : this.tcpSenderClients.keySet()) {
-			final BaseClient tcpSenderClient = this.tcpSenderClients
-					.get(serverEndPoint);
-			System.out.println("Starting TCP client "
-					+ tcpSenderClient.getClass().getName()
-					+ " connecting to port " + serverEndPoint.port + ".");
-
-			final Socket clientSocket;
-			try {
-				clientSocket = new Socket(serverEndPoint.host,
-						serverEndPoint.port);
-			} catch (UnknownHostException e1) {
-				e1.printStackTrace();
-				System.out.println("Could not resolve ip for address: "
-						+ serverEndPoint);
-				continue;
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				System.out.println("No server response for address: "
-						+ serverEndPoint);
-				continue;
-			}
-			clientSockets.put(serverEndPoint, clientSocket);
-
-			Runnable r = new Runnable() {
-				public void run() {
-					try {
-						String serverAddress = clientSocket
-								.getRemoteSocketAddress().toString();
-						System.out.printf("Connected to server %s\n",
-								serverAddress);
-						thiz.handle(serverEndPoint);
-						if (!clientSocket.isClosed()) {
-							clientSocket.close();
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					} finally {
-						clientSockets.remove(serverEndPoint);
-						tcpSenderClients.remove(serverEndPoint);
-					}
-				}
-			};
-			es.execute(r);
+		for (EndPoint serverEndPoint : this.tcpSenderClients.keySet()) {
+			this.injectClient(serverEndPoint);
 		}
 
+	}
+
+	void injectClient(final EndPoint serverEndPoint) {
+		final TCPClientReactor thiz = this;
+		final BaseClient tcpSenderClient = this.tcpSenderClients
+				.get(serverEndPoint);
+		System.out.println("Starting TCP client "
+				+ tcpSenderClient.getClass().getName() + " connecting to port "
+				+ serverEndPoint.port + ".");
+
+		final Socket clientSocket;
+		try {
+			clientSocket = new Socket(serverEndPoint.host, serverEndPoint.port);
+		} catch (UnknownHostException e1) {
+			e1.printStackTrace();
+			System.out.println("Could not resolve ip for address: "
+					+ serverEndPoint);
+			return;
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			System.out.println("No server response for address: "
+					+ serverEndPoint);
+			return;
+		}
+		clientSockets.put(serverEndPoint, clientSocket);
+
+		Runnable r = new Runnable() {
+			public void run() {
+				try {
+					String serverAddress = clientSocket
+							.getRemoteSocketAddress().toString();
+					System.out
+							.printf("Connected to server %s\n", serverAddress);
+					thiz.handle(serverEndPoint);
+					if (!clientSocket.isClosed()) {
+						clientSocket.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					clientSockets.remove(serverEndPoint);
+					tcpSenderClients.remove(serverEndPoint);
+				}
+			}
+		};
+		executorService.execute(r);
 	}
 
 	protected void handle(EndPoint serverEndPoint) throws IOException {

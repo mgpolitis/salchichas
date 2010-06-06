@@ -5,7 +5,7 @@ import marshall.model.EndPoint;
 import domain.data.DirectorDAO;
 
 
-public class DirectorServiceImpl implements DirectorService{
+public class DirectorServiceImpl implements DirectorService {
 
 	private DirectorDAO directorDao;
 		
