@@ -2,41 +2,41 @@ package tgp;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
-public class TGPMessage extends Message{
+public class TGPMessage extends Message {
 
 	private String type = "";
-	private Map<String, String> content =  new HashMap<String, String>();
-	
-	public TGPMessage(EndPoint origin, EndPoint dest, String type, List<String> content) {
+	private Map<String, String> content = new HashMap<String, String>();
+
+	public TGPMessage(EndPoint origin, EndPoint dest, String type,
+			List<String> content) {
 		super(origin, dest, new byte[0]);
 		this.type = type;
 		addContents(content);
 	}
-	
-	public TGPMessage(String type, List<String> content){
+
+	public TGPMessage(String type, List<String> content) {
 		this(null, null, type, content);
 	}
-	
+
 	public TGPMessage(byte[] serialized) {
 		super(null, null, serialized);
 		loadData(serialized);
 	}
-	
-	public String getGroup(){
+
+	public String getGroup() {
 		return content.get("group");
 	}
-	
+
 	public String getXid() {
 		return content.get("xid");
 	}
-	
+
 	@Override
 	public void loadData(byte[] data) {
 		String dataString = new String(data);
@@ -75,32 +75,31 @@ public class TGPMessage extends Message{
 		}
 		return content;
 	}
-	
+
 	public void addContents(Collection<String> contents) {
 		if (contents != null) {
-			Iterator<String> it = contents.iterator();
-			while (it.hasNext()) {
-				addContent(it.next());
+			for (String content : contents) {
+				addContent(content);
 			}
 		}
 	}
-	
-	public String getContent(){
+
+	public String getContent() {
 		String contentString = "";
 		for (String str : this.content.keySet()) {
 			contentString += str + ":" + this.content.get(str) + '\n';
 		}
 		return contentString;
 	}
-	
-	public String getType(){
+
+	public String getType() {
 		return type;
 	}
-	
-	public void setType(String type){
+
+	public void setType(String type) {
 		this.type = type;
 	}
-	
+
 	@Override
 	public String toString() {
 		String data = "";
