@@ -185,4 +185,9 @@ public class UDPClientReactor implements ClientContainer {
 		return new EndPoint(host, port);
 	}
 
+	public void injectClient(EndPoint endPoint) {
+		throw new IllegalStateException(
+				"Reactor does not support dynamic UDP client injection.");
+	}
+
 }
