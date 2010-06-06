@@ -119,11 +119,11 @@ public class UDPServerReactor implements ServerContainer {
 	}
 
 	public void sendMessage(Message m) throws IOException {
-		
-		//TODO: HACER BIEN ESTA MAL!!!!!!
-		//TODO: HACER BIEN ESTA MAL!!!!!!
-		//TODO: HACER BIEN ESTA MAL!!!!!!
-		
+
+		// TODO: HACER BIEN ESTA MAL!!!!!!
+		// TODO: HACER BIEN ESTA MAL!!!!!!
+		// TODO: HACER BIEN ESTA MAL!!!!!!
+
 		final DatagramSocket socket = this.udpSocket;
 
 		final DataOutputStream w = new DataOutputStream(
@@ -134,13 +134,14 @@ public class UDPServerReactor implements ServerContainer {
 		byte[] serializedMessage = m.serialize();
 		DatagramPacket datagram = new DatagramPacket(serializedMessage,
 				serializedMessage.length);
-		w.writeInt(serializedMessage.length);
-		w.write(serializedMessage);
-		//TODO: HACER BIEN ESTA MAL!!!!!!
-		//TODO: HACER BIEN ESTA MAL!!!!!!
-		//TODO: HACER BIEN ESTA MAL!!!!!!
-		
-	
+		synchronized (socket) {
+			w.writeInt(serializedMessage.length);
+			w.write(serializedMessage);
+		}
+		// TODO: HACER BIEN ESTA MAL!!!!!!
+		// TODO: HACER BIEN ESTA MAL!!!!!!
+		// TODO: HACER BIEN ESTA MAL!!!!!!
+
 	}
 
 	protected Message readMessage(DatagramPacket datagram) throws IOException {
