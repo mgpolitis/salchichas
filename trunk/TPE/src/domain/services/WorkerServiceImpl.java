@@ -30,6 +30,8 @@ public class WorkerServiceImpl implements WorkerService {
 	private List<String> countries;
 	private List<String> userAgents;
 	private String datesParam;
+	private int lines;
+	private int contentLength;
 
 	public WorkerServiceImpl(WorkerDAO workerDao) {
 		this.workerDao = workerDao;
@@ -109,10 +111,6 @@ public class WorkerServiceImpl implements WorkerService {
 		return logsClient;
 	}
 
-	@Override
-	public String getResource() {
-		return workerDao.getResource();
-	}
 
 	@Override
 	public void setResource(String resource) {
@@ -127,8 +125,7 @@ public class WorkerServiceImpl implements WorkerService {
 		this.datesParam = datesParam;
 	}
 
-	@Override
-	public void processLogs() {
+	private void processLogs() {
 
 		boolean hasUserAgents = (userAgents != null && !userAgents.isEmpty());
 		boolean hasCountries = (countries != null && !countries.isEmpty());
@@ -246,6 +243,12 @@ public class WorkerServiceImpl implements WorkerService {
 			// TODO: enviar mensaje de error a quien corresponda
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void saveResourceInfo(String lines, String contentLength) {
+		this.lines = Integer.valueOf(lines);
+		this.contentLength = Integer.valueOf(contentLength);
 	}
 
 }

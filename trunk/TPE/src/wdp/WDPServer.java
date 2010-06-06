@@ -10,16 +10,16 @@ import java.util.Map;
 import marshall.base.BaseServer;
 import marshall.model.EndPoint;
 import marshall.model.Message;
-import domain.services.WDPServerMessageHandler;
+import domain.services.ProtocolsMessageHandler;
 import domain.services.WorkerService;
 
 public class WDPServer extends BaseServer {
 	
 
-	private final WDPServerMessageHandler messageHandler;
+	private final ProtocolsMessageHandler messageHandler;
 	private EndPoint client = null;
 	
-	public WDPServer(WDPServerMessageHandler messageHandler){
+	public WDPServer(ProtocolsMessageHandler messageHandler){
 		super();
 		this.messageHandler = messageHandler;
 	}
