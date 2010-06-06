@@ -13,8 +13,6 @@ public interface DirectorService extends WDPServerMessageHandler {
 	
 	public LogsClient getLogsClient();
 	
-	public void addWorker(EndPoint workerEndPoint);
-
 	public void startWorkingSession(EndPoint myEndPoint);
 	
 }
