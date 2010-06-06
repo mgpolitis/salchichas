@@ -117,11 +117,11 @@ public class WDPMessage extends Message {
 		return null;
 	}
 
-	public String getFileName() {
+	public String getURI() {
 		String[] tempArray = this.messageHeader.split(" ");
 		if (tempArray.length > 1) {
-			String fileName = tempArray[1];
-			return fileName;
+			String uri = tempArray[1];
+			return uri;
 		}
 		return null;
 	}
@@ -132,5 +132,23 @@ public class WDPMessage extends Message {
 		data += this.messageHeader + '\n';
 		data += getHeaders();
 		return data;
+	}
+	
+	public EndPoint getEndPoint(){
+		String uri = getURI();
+		String aux[] = uri.split("/");
+		if(aux.length >= 3){
+			String endpoint[] = aux[2].split(":");
+			EndPoint rta = null;
+			if(endpoint.length == 2){
+				rta = new EndPoint(endpoint[0],Integer.valueOf(endpoint[1]));
+			} else if (endpoint.length == 1) {
+				rta = new EndPoint(endpoint[0],8085);
+			} else {
+				//TODO: error porq esta mal formada la URI
+			}
+			return rta;
+		}
+		return null;
 	}
 }

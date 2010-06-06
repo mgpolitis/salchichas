@@ -37,24 +37,24 @@ public class LogsClient extends BaseClient {
 	
 	@Override
 	public Message greet() {
-		boolean messageOK = false;
-		String messageHeader = null;
-		while (!messageOK) {
-			String input = readGreetMessage();
-			Matcher m = messagePattern.matcher(input);
-			if (m.find()) {
-				messageOK = true;
-				messageHeader = m.group(1) + " " + m.group(2);
-			} else {
-				System.out.println("Wrong Format Message");
-			}
-		}
-		String content = "";
-		PDCLogsMessage message = new PDCLogsMessage(messageHeader, null,
-				content);
-		message.dest = new EndPoint(serverHost, serverPort);
-		System.out.println("Message Sent to Server: "+message);
-		return message;
+//		boolean messageOK = false;
+//		String messageHeader = null;
+//		while (!messageOK) {
+//			String input = readGreetMessage();
+//			Matcher m = messagePattern.matcher(input);
+//			if (m.find()) {
+//				messageOK = true;
+//				messageHeader = m.group(1) + " " + m.group(2);
+//			} else {
+//				System.out.println("Wrong Format Message");
+//			}
+//		}
+//		String content = "";
+//		PDCLogsMessage message = new PDCLogsMessage(messageHeader, null,
+//				content);
+//		message.dest = new EndPoint(serverHost, serverPort);
+//		System.out.println("Message Sent to Server: "+message);
+		return null;
 	}
 
 	@Override
@@ -137,4 +137,10 @@ public class LogsClient extends BaseClient {
 		return aux.toString();
 	}
 
+	
+	public void fetchResource(String resource, String hostname, int port) throws IOException{
+		PDCLogsMessage messageToSend = new PDCLogsMessage("GET "+resource,null,null);
+		messageToSend.setDest(new EndPoint(hostname,port));
+		this.sendMessage(messageToSend);
+	}
 }
