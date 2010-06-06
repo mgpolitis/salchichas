@@ -2,8 +2,8 @@ package marshall;
 
 import java.io.IOException;
 
-import marshall.interfaces.BaseClient;
-import marshall.interfaces.BaseServer;
+import marshall.base.BaseClient;
+import marshall.base.BaseServer;
 
 public class Reactor implements ClientContainer, ServerContainer {
 

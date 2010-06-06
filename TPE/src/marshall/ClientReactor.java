@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import marshall.interfaces.BaseClient;
+import marshall.base.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 

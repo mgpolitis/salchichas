@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import marshall.interfaces.BaseClient;
+import marshall.base.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 import domain.services.WorkerService;

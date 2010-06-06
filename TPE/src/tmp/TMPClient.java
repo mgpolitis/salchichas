@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import domain.data.WorkerDAO;
 
-import marshall.interfaces.BaseClient;
+import marshall.base.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 

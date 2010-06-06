@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import marshall.Reactor;
-import marshall.interfaces.BaseServer;
+import marshall.base.BaseServer;
 import marshall.model.Message;
 
 public class LogsServer extends BaseServer {

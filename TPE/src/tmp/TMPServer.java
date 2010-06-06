@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import tmp.TMPMessage;
-import marshall.interfaces.BaseServer;
+import marshall.base.BaseServer;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 

@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import marshall.interfaces.BaseServer;
+import marshall.base.BaseServer;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
@@ -149,8 +149,10 @@ public class TCPServerReactor implements ServerContainer {
 				.getOutputStream());
 
 		byte[] serializedMessage = m.serialize();
-		w.writeInt(serializedMessage.length);
-		w.write(serializedMessage);
+		synchronized (socket) {
+			w.writeInt(serializedMessage.length);
+			w.write(serializedMessage);
+		}
 	}
 
 	protected Message readMessage(Socket socket) throws IOException {
