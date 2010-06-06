@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,7 +21,7 @@ public class UDPServerReactor implements ServerContainer {
 
 	private static final UDPServerReactor instance = new UDPServerReactor();
 	private static final int THREADS_IN_POOL = 10;
-	private static final int DATAGRAM_BUF_SIZE = 1000;
+	private static final int DATAGRAM_BUF_SIZE = 1024;
 
 	private byte[] buf = new byte[DATAGRAM_BUF_SIZE];
 	private BaseServer udpObserverServer;
@@ -121,28 +122,24 @@ public class UDPServerReactor implements ServerContainer {
 
 	public void sendMessage(Message m) throws IOException {
 
-		// TODO: HACER BIEN ESTA MAL!!!!!!
-		// TODO: HACER BIEN ESTA MAL!!!!!!
-		// TODO: HACER BIEN ESTA MAL!!!!!!
-
 		final DatagramSocket socket = this.udpSocket;
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final DataOutputStream w = new DataOutputStream(baos);
 
-		final DataOutputStream w = new DataOutputStream(
-				new ByteArrayOutputStream() {
+		final InetAddress addr = InetAddress.getByName(m.dest.host);
+		final int port = m.dest.port;
 
-				});
-
-		byte[] serializedMessage = m.serialize();
-		DatagramPacket datagram = new DatagramPacket(serializedMessage,
-				serializedMessage.length);
+		final byte[] serializedMessage = m.serialize();
+		w.writeInt(serializedMessage.length);
+		w.write(serializedMessage);
+		w.flush();
+		final byte[] result = baos.toByteArray();
+		final DatagramPacket datagram = new DatagramPacket(result,
+				result.length, addr, port);
 		synchronized (socket) {
-			w.writeInt(serializedMessage.length);
-			w.write(serializedMessage);
+			socket.setBroadcast(m.broadcastMe);
+			socket.send(datagram);
 		}
-		// TODO: HACER BIEN ESTA MAL!!!!!!
-		// TODO: HACER BIEN ESTA MAL!!!!!!
-		// TODO: HACER BIEN ESTA MAL!!!!!!
-
 	}
 
 	protected Message readMessage(DatagramPacket datagram) throws IOException {
