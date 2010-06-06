@@ -3,6 +3,7 @@ package wdp;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -19,7 +20,7 @@ public class WDPClient extends BaseClient {
 	private final String serverHost;
 	private final int serverPort;
 	private Pattern messagePattern = Pattern
-			.compile("(HEAD|GET)\\s+(/[a-zA-Z][a-zA-Z0-9_\\-]*.log(\\?(\\d+-\\d+))?)\\s*\\n");
+			.compile("(PROCESS)\\s+(pdclogs://[a-zA-Z0-9\\.]+(?::\\d{1,5})?/[a-zA-Z][a-zA-Z0-9_\\\\-]*.log(?:\\?\\d+-\\d+)?)\\s*\n(.*)",Pattern.DOTALL);
 	private String logFile = null;
 	private List<String> countries = null;
 	private List<String> userAgents = null;
@@ -46,18 +47,24 @@ public class WDPClient extends BaseClient {
 	public Message greet() {
 		boolean messageOK = false;
 		String messageHeader = null;
+		List<String> headers = null;
+		String headersToConvert = null;
 		while (!messageOK) {
 			String input = readMessage();
 			Matcher m = messagePattern.matcher(input);
 			if (m.find()) {
 				messageOK = true;
 				messageHeader = m.group(1) + " " + m.group(2);
+				headersToConvert = m.group(3);
 			} else {
 				System.out.println("Wrong Format Message");
 			}
 		}
+		if(headersToConvert != null){
+			headers = Arrays.asList(headersToConvert.split("\\n"));
+		}
 		String content = "";
-		WDPMessage message = new WDPMessage(messageHeader, null, content);
+		WDPMessage message = new WDPMessage(messageHeader, headers, content);
 		message.dest = new EndPoint(serverHost, serverPort);
 		System.out.println("Message Sent to Server: " + message);
 		return message;
@@ -152,7 +159,7 @@ public class WDPClient extends BaseClient {
 		// lo utiliza para indicarle al servidor a donde va a tener que
 		// conectarse el director
 		WDPClient c = new WDPClient("localhost", 8086);
-		reactor.subscribeTCPClient(c, "localhost", 8092);
+		reactor.subscribeTCPClient(c, "localhost", 8086);
 		reactor.run();
 	}
 
