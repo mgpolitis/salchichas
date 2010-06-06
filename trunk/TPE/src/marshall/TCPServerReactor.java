@@ -25,8 +25,8 @@ public class TCPServerReactor implements ServerContainer {
 	private static final int THREADS_IN_POOL = 10;
 
 	private final Map<EndPoint, Socket> tcpClients = new HashMap<EndPoint, Socket>();
-	private BaseServer tcpObserverServer;
-	private ServerSocket tcpServerSocket;
+	private final Map<Integer, BaseServer> tcpObserverServers = new HashMap<Integer, BaseServer>();
+	private final Map<Integer, ServerSocket> tcpServerSockets = new HashMap<Integer, ServerSocket>();
 
 	public static TCPServerReactor getInstance() {
 		return instance;
@@ -35,25 +35,22 @@ public class TCPServerReactor implements ServerContainer {
 	private TCPServerReactor() {
 	}
 
-	private boolean tcpInitialized() {
-		return (tcpServerSocket != null || tcpObserverServer != null);
-	}
-
 	public void subscribeTCPServer(BaseServer server, int listenPort)
 			throws IOException {
-		if (this.tcpInitialized())
-			throw new RuntimeException(
-					"Can't subscribe more than one TCP server in reactor");
 
-		tcpServerSocket = new ServerSocket(listenPort, TCPServerReactor.BACKLOG,
-				InetAddress.getByName("localhost"));
-		tcpObserverServer = server;
+		tcpServerSockets.put(listenPort, new ServerSocket(listenPort,
+				TCPServerReactor.BACKLOG, InetAddress.getByName("localhost")));
+		tcpObserverServers.put(listenPort, server);
 		server.setContainer(this);
 	}
 
 	public void subscribeUDPServer(BaseServer server, int listenPort)
 			throws IOException {
 		throw new IllegalArgumentException("Method not yet implemented");
+	}
+
+	private boolean tcpInitialized() {
+		return !tcpClients.isEmpty();
 	}
 
 	public void runServer() {
@@ -63,68 +60,77 @@ public class TCPServerReactor implements ServerContainer {
 			System.out.println("Starting no TCP servers. (none subscribed)");
 			return;
 		}
-
-		System.out
-				.println("Starting server "
-						+ this.tcpObserverServer.getClass().getName()
-						+ " on "
-						+ this.tcpServerSocket.getLocalSocketAddress()
-								.toString() + ".");
-		System.out.println("Now accepting clients...");
 		final ExecutorService es = Executors
 				.newFixedThreadPool(THREADS_IN_POOL);
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					final Socket socket;
-					try {
-						socket = tcpServerSocket.accept();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-						return;
-					}
-					final EndPoint newClientEndPoint = thiz
-							.getEndPointFromSocket(socket);
-					tcpClients.put(newClientEndPoint, socket);
 
-					Runnable runner = new Runnable() {
-						public void run() {
-							try {
-								System.out.printf("Client has connected: %s\n",
-										socket.getRemoteSocketAddress()
-												.toString());
-								try {
-									thiz.handle(newClientEndPoint);
-								} catch (EOFException e) {
-									System.out
-											.println("Client closed connection: "
-													+ newClientEndPoint);
-								}
+		for (int serverPort : tcpObserverServers.keySet()) {
+			final BaseServer tcpObserverServer = tcpObserverServers
+					.get(serverPort);
+			final ServerSocket tcpServerSocket = tcpServerSockets
+					.get(serverPort);
 
-								if (!socket.isClosed()) {
-									socket.close();
-								}
-							} catch (IOException e) {
-								e.printStackTrace();
-							} finally {
-								tcpClients.remove(newClientEndPoint);
-							}
-
+			System.out.println("Starting TCP server "
+					+ tcpObserverServer.getClass().getName() + " on "
+					+ tcpServerSocket.getLocalSocketAddress().toString() + ".");
+			System.out.println("Now accepting clients...");
+			Runnable listenerRunner = new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
+						final Socket socket;
+						try {
+							socket = tcpServerSocket.accept();
+						} catch (IOException e1) {
+							e1.printStackTrace();
+							return;
 						}
-					};
-					es.execute(runner);
+						final EndPoint newClientEndPoint = thiz
+								.getEndPointFromSocket(socket);
+						tcpClients.put(newClientEndPoint, socket);
 
+						Runnable handleRunner = new Runnable() {
+							public void run() {
+								try {
+									System.out.printf(
+											"Client has connected: %s\n",
+											socket.getRemoteSocketAddress()
+													.toString());
+									try {
+										thiz.handle(tcpObserverServer,
+												newClientEndPoint);
+									} catch (EOFException e) {
+										System.out
+												.println("Client closed connection: "
+														+ newClientEndPoint);
+									}
+
+									if (!socket.isClosed()) {
+										socket.close();
+									}
+								} catch (IOException e) {
+									e.printStackTrace();
+								} finally {
+									tcpClients.remove(newClientEndPoint);
+								}
+
+							}
+						};
+						es.execute(handleRunner);
+
+					}
 				}
-			}
-		}).start();
+			};
+			es.execute(listenerRunner);
+		}
 
 	}
 
-	protected void handle(EndPoint clientEndPoint) throws IOException {
-		Socket socket = tcpClients.get(clientEndPoint);
+	protected void handle(BaseServer tcpObserverServer, EndPoint clientEndPoint)
+			throws IOException {
+		final Socket socket = tcpClients.get(clientEndPoint);
 		while (true) {
-			Message incomingMessage = this.readMessage(socket);
+			Message incomingMessage = this.readMessage(tcpObserverServer,
+					socket);
 			List<Message> responses = tcpObserverServer
 					.messageReceived(incomingMessage);
 			if (responses == null) {
@@ -140,7 +146,7 @@ public class TCPServerReactor implements ServerContainer {
 		}
 	}
 
-	public void sendMessage(Message m) throws IOException {
+	public void sendMessage(final Message m) throws IOException {
 		Socket socket = tcpClients.get(new EndPoint(m.dest.host, m.dest.port));
 		if (socket == null) {
 			throw new IOException(
@@ -156,13 +162,15 @@ public class TCPServerReactor implements ServerContainer {
 		}
 	}
 
-	protected Message readMessage(Socket socket) throws IOException {
+	protected Message readMessage(BaseServer tcpObserverServer,
+			final Socket socket) throws IOException {
 		final DataInputStream r = new DataInputStream(socket.getInputStream());
 		int length = r.readInt();
 		byte[] serializedMessage = new byte[length];
 		synchronized (socket) {
 			r.readFully(serializedMessage);
 		}
+
 		Message m = tcpObserverServer.createMessage(serializedMessage);
 		m.origin = this.getEndPointFromSocket(socket);
 		return m;
