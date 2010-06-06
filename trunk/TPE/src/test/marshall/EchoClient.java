@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import marshall.Reactor;
-import marshall.interfaces.BaseClient;
+import marshall.base.BaseClient;
 import marshall.model.Message;
 
 public class EchoClient extends BaseClient {

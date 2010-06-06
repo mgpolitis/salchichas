@@ -1,4 +1,4 @@
-package marshall.interfaces;
+package marshall.base;
 
 import java.util.List;
 

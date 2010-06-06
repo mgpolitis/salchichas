@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import marshall.TCPServerReactor;
-import marshall.interfaces.BaseServer;
+import marshall.base.BaseServer;
 import marshall.model.Message;
 import marshall.model.EndPoint;
 

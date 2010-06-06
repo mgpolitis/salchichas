@@ -2,7 +2,7 @@ package marshall;
 
 import java.io.IOException;
 
-import marshall.interfaces.BaseClient;
+import marshall.base.BaseClient;
 
 public interface ClientContainer {
 
