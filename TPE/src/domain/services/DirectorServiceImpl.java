@@ -35,11 +35,6 @@ public class DirectorServiceImpl implements DirectorService {
 		
 	}
 
-	@Override
-	public void addWorker(EndPoint workerEndPoint) {
-		this.directorDao.addWorker(workerEndPoint);
-		
-	}
 
 	@Override
 	public void startWorkingSession(EndPoint myEndPoint) {

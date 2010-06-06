@@ -1,9 +1,5 @@
 package domain.data;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import marshall.model.EndPoint;
 
 public class DirectorDAO {
 	private String directorIP = null;
@@ -14,7 +10,6 @@ public class DirectorDAO {
 
 	private int group;
 
-	private final Set<EndPoint> workers = new HashSet<EndPoint>();
 
 	public DirectorDAO() {
 		logs = new StringBuffer();
@@ -36,9 +31,5 @@ public class DirectorDAO {
 		return group;
 	}
 
-	public void addWorker(EndPoint workerEndPoint) {
-		this.workers.add(workerEndPoint);
-
-	}
 
 }

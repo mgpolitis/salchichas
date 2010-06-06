@@ -6,5 +6,7 @@ public class Configuration {
 	public final static int TGP_SERVER_PORT = 8888;
 	public final static int WDP_SERVER_PORT = 7777;
 	public final static int TMP_SERVER_PORT = 9999;
+	
+	public final static long TGP_TIMEOUT = 5;
 
 }

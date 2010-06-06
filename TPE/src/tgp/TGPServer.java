@@ -27,7 +27,6 @@ public class TGPServer extends BaseServer {
 		this.tgpSrvHost = tgpSrvHost;
 		this.tgpSrvPort = tgpSrvPort;
 		this.directorService = directorService;
-		registry = new HashMap<Integer, EndPoint>();
 	}
 
 	@Override
@@ -66,28 +65,30 @@ public class TGPServer extends BaseServer {
 		String groupRequest = message.getGroup();
 		String xid = message.getXid();
 
-		Message resp = null;
 
 		if (xid.isEmpty()) {
-			return resp;
+			//TODO: report error: no XID
+			return null;
 		}
 
 		EndPoint ep = registry.get(Integer.valueOf(xid));
 		if (ep.host.equals(message.origin.host) != true) {
-			return resp;
+			//TODO: report error? fake XID (XID existed but bond to other endpoint)
+			return null;
 		}
 
+		Message resp = null;
 		if (groupRequest.equals(group)) {
 
 			List<String> content = new LinkedList<String>();
 			EndPoint myEndPoint = new EndPoint(tgpSrvHost, tgpSrvPort);
 			resp = new TGPMessage(myEndPoint,
 					message.origin, "TGPACK", content);
-			directorService.startWorkingSession(myEndPoint);
-			// TODO: Establecer en la capa de arriba la conexión
-			// directorService.getWdpServer().connect();
+			directorService.startWorkingSession(ep);
+			
 
 		} else {
+			// the worker is requesting to join other group, so forget him (snif...)
 			registry.remove(Integer.valueOf(xid));
 		}
 
