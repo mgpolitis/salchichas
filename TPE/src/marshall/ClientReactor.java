@@ -37,12 +37,13 @@ public class ClientReactor implements ClientContainer {
 
 		EndPoint serverEndPoint = new EndPoint(serverHost, serverPort);
 		tcpSenderClients.put(serverEndPoint, client);
+		client.setContainer(this);
 
 	}
 
 	public void subscribeUDPClient(BaseClient client, String serverHost,
 			int serverPort) {
-		throw new IllegalArgumentException("Method not yet implemented");
+		throw new IllegalArgumentException("Protocol not yet supported");
 	}
 
 	public void runClient() {
