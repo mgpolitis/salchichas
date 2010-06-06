@@ -2,6 +2,7 @@ package domain.services;
 
 import pdclogs.LogsClient;
 import tgp.TGPClient;
+import tmp.TMPServer;
 import domain.data.WorkerDAO;
 
 public class WorkerServiceImpl implements WorkerService{
@@ -9,11 +10,13 @@ public class WorkerServiceImpl implements WorkerService{
 	private WorkerDAO workerDao;
 	private TGPClient tgpClient = null;
 	private LogsClient logsClient = null;
+	private TMPServer tmpServer = null;
 	
 	public WorkerServiceImpl (WorkerDAO workerDao){
 		this.workerDao = workerDao;
 		tgpClient = new TGPClient("localhost",8092,this);
 		logsClient = new LogsClient("localhost",8085,this);
+		tmpServer = new TMPServer(this);
 	}
 
 	@Override
@@ -56,9 +59,10 @@ public class WorkerServiceImpl implements WorkerService{
 	public LogsClient getLogsClient() {
 		return logsClient;
 	}
-	
-	
-	
-	
+
+	@Override
+	public TMPServer getTmpServer() {
+		return tmpServer;
+	}
 	
 }

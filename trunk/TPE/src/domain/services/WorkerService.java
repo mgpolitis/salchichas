@@ -1,7 +1,9 @@
 package domain.services;
 
+import marshall.base.BaseServer;
 import pdclogs.LogsClient;
 import tgp.TGPClient;
+import tmp.TMPServer;
 
 public interface WorkerService {
 
@@ -21,5 +23,7 @@ public interface WorkerService {
 	public TGPClient getTgpClient();
 	
 	public LogsClient getLogsClient();
+
+	public TMPServer getTmpServer();
 	
 }

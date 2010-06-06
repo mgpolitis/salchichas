@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import domain.services.WorkerService;
+
 import tmp.TMPMessage;
 import marshall.base.BaseServer;
 import marshall.model.EndPoint;
@@ -12,9 +14,15 @@ import marshall.model.Message;
 
 public class TMPServer extends BaseServer{
 
+	WorkerService workerService;
 	
 	public static void main(String[] args) throws IOException {
 	
+	}
+	
+	public TMPServer(WorkerService workerService){
+		super();
+		this.workerService = workerService;
 	}
 
 	@Override
@@ -38,6 +46,7 @@ public class TMPServer extends BaseServer{
 			} else {
 				// TODO: unknown message
 			}
+			
 		}
 		if (messageToSend != null) {
 			list.add(messageToSend);
@@ -55,19 +64,55 @@ public class TMPServer extends BaseServer{
 		
 			switch(service){
 				case 1: //TODO: cantidad de lineas
+					resp = lines();
 					break;
 				case 2: //TODO: cantidad de trabajos procesados
+					resp = jobs();
 					break;
 				case 3: //TODO: listado de trabajadores suscriptos
+					resp = workers();
 					break;
 				case 4: //TODO: nodo director
+					resp = director();
 					break;
 			}
 		}
 		else{
-			//TODO: Se pide todo. 
+			//TODO: Se pide todo.
+			resp = all();
 		}
 		
 		return resp;
 	}
+	
+	private Message lines(){
+		TMPMessage message = null;
+		
+		return message;
+	}
+	
+	private Message jobs(){
+		TMPMessage message = null;
+		
+		return message;
+	}
+	
+	private Message workers(){
+		TMPMessage message = null;
+		
+		return message;
+	}
+	
+	private Message director(){
+		TMPMessage message = null;
+		
+		return message;
+	}
+	
+	private Message all(){
+		TMPMessage message = null;
+		
+		return message;	
+	}
+	
 }

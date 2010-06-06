@@ -72,7 +72,7 @@ public class TGPClient extends BaseClient{
 		StringBuffer aux = new StringBuffer();
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(
 				System.in));
-		
+		System.out.println("Ingresar numero de grupo o dejar vacio:");
 		String line;
 		try {
 			do {
@@ -143,13 +143,5 @@ public class TGPClient extends BaseClient{
 		return messageToSend;
 	}
 
-//	public static void main(String[] args) throws IOException {
-//		ClientReactor reactor = ClientReactor.getInstance();
-//		// worker host port + tgp host port
-//		// lo utiliza para indicarle al servidor a donde va a tener que conectarse el director
-//		TGPClient c = new TGPClient("localhost","8091","localhost","8092");
-//		reactor.subscribeTCPClient(c, "localhost", 8092);
-//		reactor.runClient();
-//	}
-//	
+
 }

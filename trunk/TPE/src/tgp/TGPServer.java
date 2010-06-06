@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import domain.services.DirectorService;
+
 import marshall.TCPServerReactor;
 import marshall.base.BaseServer;
 import marshall.model.Message;
@@ -17,14 +19,16 @@ public class TGPServer extends BaseServer{
 	private final Integer MAX_RANDOM = 39591394;
 	
 	private Map<Integer,EndPoint> registry;
-	private String tgpSrvPort;
+	private int tgpSrvPort;
 	private String tgpSrvHost;
+	private DirectorService directorService;
 	
-	public TGPServer(String group, String tgpSrvPort, String tgpSrvHost){
+	public TGPServer(String group, String tgpSrvHost,  int tgpSrvPort, DirectorService directorService ){
 		super();
 		this.group = group;
 		this.tgpSrvHost = tgpSrvHost;
 		this.tgpSrvPort = tgpSrvPort;
+		this.directorService = directorService;
 		registry = new HashMap<Integer,EndPoint>();
 	}
 	
@@ -77,9 +81,11 @@ public class TGPServer extends BaseServer{
 		if(groupRequest.equals(group)){
 			
 			List<String> content = new LinkedList<String>();
-			resp = new TGPMessage(new EndPoint(tgpSrvHost , Integer.valueOf(tgpSrvPort) ),
+			resp = new TGPMessage(new EndPoint(tgpSrvHost , tgpSrvPort ),
 					message.origin,"TGPACK",content);
 			//TODO: Establecer en la capa de arriba la conexión
+			//directorService.getWdpServer().connect();
+			
 			registry.remove(Integer.valueOf(xid));
 		}
 		else{
@@ -109,7 +115,7 @@ public class TGPServer extends BaseServer{
 			content.add("group: " + groupRequest);
 			content.add("xid: " + key);
 			
-			resp = new TGPMessage(new EndPoint(tgpSrvHost , Integer.valueOf(tgpSrvPort) ),
+			resp = new TGPMessage(new EndPoint(tgpSrvHost , tgpSrvPort ),
 					message.origin,"TGPOFFER",content);
 			// TODO: Reservar recursos para establer conexión (??)
 		}
@@ -117,10 +123,10 @@ public class TGPServer extends BaseServer{
 		return resp;
 	}
 
-	public static void main(String[] args) throws IOException {
+	/*public static void main(String[] args) throws IOException {
 		TCPServerReactor reactor = TCPServerReactor.getInstance();
-		TGPServer s = new TGPServer("3","localhost","8092");
-		reactor.subscribeTCPServer(s, 8092);
+		TGPServer s = new TGPServer("3","localhost",8092);
+		reactor.subscribeUDPServer(s, 8092);
 		reactor.runServer();
-	}
+	}*/
 }
