@@ -31,9 +31,7 @@ public class WorkerServiceImpl implements WorkerService {
 	private List<String> userAgents;
 	private String datesParam;
 
-
-	
-	public WorkerServiceImpl (WorkerDAO workerDao){
+	public WorkerServiceImpl(WorkerDAO workerDao) {
 		this.workerDao = workerDao;
 		tgpClient = new TGPClient("localhost", 8092, this);
 		logsClient = new LogsClient("localhost", 8085, this);
@@ -120,10 +118,10 @@ public class WorkerServiceImpl implements WorkerService {
 	public void setResource(String resource) {
 		workerDao.setResource(resource);
 	}
-	
+
 	@Override
 	public void setParamsToProcess(List<String> countries,
-			List<String> userAgents, String datesParam){
+			List<String> userAgents, String datesParam) {
 		this.countries = countries;
 		this.userAgents = userAgents;
 		this.datesParam = datesParam;
@@ -135,7 +133,7 @@ public class WorkerServiceImpl implements WorkerService {
 		boolean hasUserAgents = (userAgents != null && !userAgents.isEmpty());
 		boolean hasCountries = (countries != null && !countries.isEmpty());
 		boolean hasDateRange = (datesParam != null);
-			
+
 		String logs[] = workerDao.getLogs().split("\n");
 
 		Map<String, Integer> response = new HashMap<String, Integer>();
@@ -243,9 +241,9 @@ public class WorkerServiceImpl implements WorkerService {
 		try {
 			logsClient.fetchResource(resource, hostname, port);
 		} catch (IOException e) {
-			//TODO: enviar mensaje de error a quien corresponda
+			// TODO: enviar mensaje de error a quien corresponda
 			e.printStackTrace();
 		}
 	}
-	
+
 }
