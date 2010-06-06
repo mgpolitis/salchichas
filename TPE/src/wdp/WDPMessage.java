@@ -61,7 +61,7 @@ public class WDPMessage extends Message {
 		if (str != null) {
 			String[] tempArray = str.split(":");
 			if (tempArray.length == 2) {
-				this.headers.put(tempArray[0], tempArray[1]);
+				this.headers.put(tempArray[0].toUpperCase(), tempArray[1]);
 			} else {
 				System.out.println("invalid header: " + str);
 			}
@@ -88,7 +88,7 @@ public class WDPMessage extends Message {
 	}
 
 	public String getHeader(String str) {
-		return this.headers.get(str);
+		return this.headers.get(str.toUpperCase());
 	}
 
 	private String getHeaders() {
@@ -122,6 +122,15 @@ public class WDPMessage extends Message {
 		if (tempArray.length > 1) {
 			String uri = tempArray[1];
 			return uri;
+		}
+		return null;
+	}
+	
+	public String getFilename() {
+		String uri = getURI();
+		String aux[] = uri.split("/");
+		if(aux.length >= 4){
+			return "/"+aux[3];
 		}
 		return null;
 	}

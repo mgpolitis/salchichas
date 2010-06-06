@@ -44,7 +44,7 @@ public class WDPServer extends BaseServer {
 					countries = Arrays.asList(countriesString.split(";"));
 				}
 				workerService.setParamsToProcess(countries, userAgents, dates); 
-				workerService.fetchResource(message.getURI(),endPoint.host,endPoint.port);
+				workerService.fetchResource(message.getFilename(),endPoint.host,endPoint.port);
 			} else {
 				// TODO: unknown message
 			}
