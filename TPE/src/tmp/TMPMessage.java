@@ -68,9 +68,9 @@ public class TMPMessage extends Message{
 		return content;
 	}
 	
-	public void addContents(Collection<String> contents) {
-		if (contents != null) {
-			Iterator<String> it = contents.iterator();
+	public void addContents(Collection<String> content) {
+		if (content != null) {
+			Iterator<String> it = content.iterator();
 			while (it.hasNext()) {
 				addContent(it.next());
 			}
@@ -83,6 +83,10 @@ public class TMPMessage extends Message{
 			contentString += str + ":" + this.content.get(str) + '\n';
 		}
 		return contentString;
+	}
+	
+	public String getWorkers(){
+		return content.get("workers");
 	}
 	
 	public String getType(){

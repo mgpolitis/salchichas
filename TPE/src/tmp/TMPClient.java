@@ -10,19 +10,19 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import tgp.TGPMessage;
+import domain.Configuration;
+import domain.services.DirectorServiceImpl;
 
-import domain.data.WorkerDAO;
-
+import marshall.Reactor;
 import marshall.base.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 
 public class TMPClient extends BaseClient{
 	
-	private String tmpCliHost;
-	private int tmpCliPort;
-	private WorkerDAO workerDao;
+	//private String tmpCliHost;
+	//private int tmpCliPort;
+	
 	
 	private static Pattern servicePattern = Pattern.compile("[0-9]+\\n");
 	
@@ -30,17 +30,17 @@ public class TMPClient extends BaseClient{
 		
 	//}
 	
-	public TMPClient(String tmpCliHost, int tmpCliPort, WorkerDAO workerDao){
+	public TMPClient(){
 		super();
-		this.tmpCliHost = tmpCliHost;
-		this.tmpCliPort = tmpCliPort;
-		this.workerDao = workerDao;
+		//this.tmpCliHost = tmpCliHost;
+		//this.tmpCliPort = tmpCliPort;
+		
 	}
 
 	@Override
 	public Message createMessage(byte[] serialized) {
-		// TODO Auto-generated method stub
-		return null;
+		TMPMessage message = new TMPMessage(serialized);
+		return message;
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class TMPClient extends BaseClient{
 				
 		TMPMessage message = new TMPMessage("TMPREQUEST",c);
 		
-		message.origin = new EndPoint(this.tmpCliHost, this.tmpCliPort);
+		//message.origin = new EndPoint(this.tmpCliHost, this.tmpCliPort);
 		
 		System.out.println("Message Sent to Server: "+message);
 		return message;
@@ -91,12 +91,34 @@ public class TMPClient extends BaseClient{
 	public List<Message> messageReceived(Message m) {
 		//TODO: recibe el mensaje con la respuesta.
 		List<Message> list = null;
-		Message messageToSend = null;
+		//Message messageToSend = null;
+		EndPoint endPoint = null;
 		
-		if (m instanceof TGPMessage) {
-			TGPMessage message = (TGPMessage) m;
-			System.out.println("CLIENT: " + message);
-		}	
+		if (m instanceof TMPMessage) {
+			TMPMessage message = (TMPMessage) m;
+			
+			
+			// pedidos recursivos a los workers
+			String workers = message.getWorkers();
+			if(!workers.isEmpty()){
+				System.out.println("=>");
+				String[] tempIPHArray = workers.split("|");
+				for(String str: tempIPHArray){
+					String[] tempArray = str.split("-");
+					// hago una conexión hacia cada uno de los ip:puerto
+					if( tempArray.length == 2 ){
+						int port = Integer.valueOf(tempArray[1]);
+						try{
+							Reactor.getInstance().subscribeTCPClient(new TMPClient(), tempArray[0], Configuration.TMP_SERVER_PORT);
+						}catch(IOException e){
+							//TODO: manejo
+						}
+					}
+				}
+			}
+			
+		}
+		System.out.println("CLIENT: " + m);
 		
 		return list;
 	}
