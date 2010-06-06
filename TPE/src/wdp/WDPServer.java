@@ -30,6 +30,8 @@ public class WDPServer extends BaseServer {
 			} else {
 				// TODO: unknown message
 			}
+			messageToSend.setDest(m.origin);
+			messageToSend.setOrigin(m.dest);
 		}
 		if (messageToSend != null) {
 			list.add(messageToSend);

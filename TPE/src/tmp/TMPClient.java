@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import tgp.TGPMessage;
+
 import domain.data.WorkerDAO;
 
 import marshall.base.BaseClient;
@@ -87,9 +89,14 @@ public class TMPClient extends BaseClient{
 
 	@Override
 	public List<Message> messageReceived(Message m) {
-		List<Message> list = new LinkedList<Message>();
-		
 		//TODO: recibe el mensaje con la respuesta.
+		List<Message> list = null;
+		Message messageToSend = null;
+		
+		if (m instanceof TGPMessage) {
+			TGPMessage message = (TGPMessage) m;
+			System.out.println("CLIENT: " + message);
+		}	
 		
 		return list;
 	}
