@@ -72,7 +72,7 @@ public class LogsClient extends BaseClient {
 				String messageHeader = null;
 				while (!messageOK) {
 					String input = readMessage();
-					System.out.println(input);
+					System.out.println("input vale en LogsClient="+input);
 					Matcher matcher = messagePattern.matcher(input);
 					if (matcher.find()) {
 						messageOK = true;
