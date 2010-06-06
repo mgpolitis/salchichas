@@ -1,11 +1,14 @@
 package marshall;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +24,12 @@ public class UDPClientReactor implements ClientContainer {
 
 	private static final UDPClientReactor instance = new UDPClientReactor();
 	private static final int THREADS_IN_POOL = 10;
+	private static final int DATAGRAM_BUF_SIZE = 1024;
 
-	Map<EndPoint, Socket> clientSockets = new HashMap<EndPoint, Socket>();
-	Map<EndPoint, BaseClient> tcpSenderClients = new HashMap<EndPoint, BaseClient>();
+	Map<EndPoint, DatagramSocket> clientSockets = new HashMap<EndPoint, DatagramSocket>();
+	Map<EndPoint, BaseClient> udpSenderClients = new HashMap<EndPoint, BaseClient>();
+
+	private byte[] buf = new byte[DATAGRAM_BUF_SIZE];
 
 	public static UDPClientReactor getInstance() {
 		return instance;
@@ -34,16 +40,14 @@ public class UDPClientReactor implements ClientContainer {
 
 	public void subscribeTCPClient(BaseClient client, String serverHost,
 			int serverPort) throws IOException {
-
-		EndPoint serverEndPoint = new EndPoint(serverHost, serverPort);
-		tcpSenderClients.put(serverEndPoint, client);
-		client.setContainer(this);
-
+		throw new IllegalArgumentException("Protocol not yet supported");
 	}
 
 	public void subscribeUDPClient(BaseClient client, String serverHost,
 			int serverPort) {
-		throw new IllegalArgumentException("Protocol not yet supported");
+		EndPoint serverEndPoint = new EndPoint(serverHost, serverPort);
+		udpSenderClients.put(serverEndPoint, client);
+		client.setContainer(this);
 	}
 
 	public void runClient() {
@@ -51,31 +55,24 @@ public class UDPClientReactor implements ClientContainer {
 		final ExecutorService es = Executors
 				.newFixedThreadPool(THREADS_IN_POOL);
 
-		if (this.tcpSenderClients.size() == 0) {
+		if (this.udpSenderClients.size() == 0) {
 			System.out.println("No UDP clients to start. (none subscribed)");
 			return;
 		}
 
-		for (final EndPoint serverEndPoint : this.tcpSenderClients.keySet()) {
-			final BaseClient tcpSenderClient = this.tcpSenderClients
+		for (final EndPoint serverEndPoint : this.udpSenderClients.keySet()) {
+			final BaseClient tcpSenderClient = this.udpSenderClients
 					.get(serverEndPoint);
 			System.out.println("Starting UDP client "
-					+ tcpSenderClient.getClass().getName()
-					+ " connecting to port " + serverEndPoint.port + ".");
+					+ tcpSenderClient.getClass().getName() + ".");
 
-			final Socket clientSocket;
+			final DatagramSocket clientSocket;
 			try {
-				clientSocket = new Socket(serverEndPoint.host,
-						serverEndPoint.port);
-			} catch (UnknownHostException e1) {
-				e1.printStackTrace();
-				System.out.println("Could not resolve ip for address: "
-						+ serverEndPoint);
-				continue;
+				clientSocket = new DatagramSocket();
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				System.out.println("No server response for address: "
-						+ serverEndPoint);
+				System.out.println("Couldn't open UDP socket for "
+						+ serverEndPoint.host);
 				continue;
 			}
 			clientSockets.put(serverEndPoint, clientSocket);
@@ -85,7 +82,8 @@ public class UDPClientReactor implements ClientContainer {
 					try {
 						String serverAddress = clientSocket
 								.getRemoteSocketAddress().toString();
-						System.out.printf("Connected to server %s\n",
+						System.out.printf(
+								"Ready to communicate with server %s\n",
 								serverAddress);
 						thiz.handle(serverEndPoint);
 						if (!clientSocket.isClosed()) {
@@ -95,7 +93,7 @@ public class UDPClientReactor implements ClientContainer {
 						e.printStackTrace();
 					} finally {
 						clientSockets.remove(serverEndPoint);
-						tcpSenderClients.remove(serverEndPoint);
+						udpSenderClients.remove(serverEndPoint);
 					}
 				}
 			};
@@ -105,7 +103,7 @@ public class UDPClientReactor implements ClientContainer {
 	}
 
 	protected void handle(EndPoint serverEndPoint) throws IOException {
-		BaseClient actualClient = tcpSenderClients.get(serverEndPoint);
+		BaseClient actualClient = udpSenderClients.get(serverEndPoint);
 
 		Message greeting = actualClient.greet();
 		if (greeting.dest == null) {
@@ -139,30 +137,52 @@ public class UDPClientReactor implements ClientContainer {
 	}
 
 	public void sendMessage(Message m) throws IOException {
-		EndPoint dest = m.dest;
-		Socket clientSocket = clientSockets.get(dest);
-		final DataOutputStream w = new DataOutputStream(clientSocket
-				.getOutputStream());
+
+		final DatagramSocket socket = clientSockets.get(m.dest);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final DataOutputStream w = new DataOutputStream(baos);
+
+		final InetAddress addr = InetAddress.getByName(m.dest.host);
+		final int port = m.dest.port;
 
 		final byte[] serializedMessage = m.serialize();
-		synchronized (clientSocket) {
-			w.writeInt(serializedMessage.length);
-			w.write(serializedMessage);
+		w.writeInt(serializedMessage.length);
+		w.write(serializedMessage);
+		w.flush();
+		final byte[] result = baos.toByteArray();
+		final DatagramPacket datagram = new DatagramPacket(result,
+				result.length, addr, port);
+		synchronized (socket) {
+			socket.setBroadcast(m.broadcastMe);
+			socket.send(datagram);
 		}
+
 	}
 
 	protected Message readMessage(EndPoint serverEndPoint) throws IOException {
-		Socket clientSocket = clientSockets.get(serverEndPoint);
-		BaseClient tcpSenderClient = tcpSenderClients.get(serverEndPoint);
-		final DataInputStream r = new DataInputStream(clientSocket
-				.getInputStream());
-
-		int length = r.readInt();
+		final DatagramPacket datagram = new DatagramPacket(buf, buf.length);
+		final DatagramSocket udpSocket = this.clientSockets.get(serverEndPoint);
+		try {
+			udpSocket.receive(datagram);
+		} catch (IOException e) {
+			System.out.println("I/O error while reading UDP socket.");
+			e.printStackTrace();
+		}
+		final DataInputStream r = new DataInputStream(new ByteArrayInputStream(
+				datagram.getData()));
+		final BaseClient udpSenderClient = udpSenderClients.get(serverEndPoint);
+		final int length = r.readInt();
 		byte[] serializedMessage = new byte[length];
 		r.readFully(serializedMessage);
-		Message m = tcpSenderClient.createMessage(serializedMessage);
-		m.setOrigin(serverEndPoint);
+		Message m = udpSenderClient.createMessage(serializedMessage);
+		m.origin = serverEndPoint;
 		return m;
+	}
+
+	protected EndPoint getEndPointFromDatagram(DatagramPacket datagram) {
+		String host = datagram.getAddress().getHostAddress();
+		int port = datagram.getPort();
+		return new EndPoint(host, port);
 	}
 
 }
