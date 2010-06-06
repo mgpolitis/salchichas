@@ -1,7 +1,10 @@
 package wdp;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import marshall.base.BaseServer;
 import marshall.model.Message;
@@ -20,13 +23,26 @@ public class WDPServer extends BaseServer {
 	@Override
 	public List<Message> messageReceived(Message m) {
 		List<Message> list = new LinkedList<Message>();
-		Message messageToSend = null;
+		WDPMessage messageToSend = null;
 		if (m instanceof WDPMessage) {
 			WDPMessage message = (WDPMessage) m;
 			if (message.getType().equals("PROCESS")) {
-				//TODO: pedir los logs al server de logs
-				//TODO: procesar el request
-				
+				String userAgentsString = message.getHeader("user-agents");
+				String countriesString = message.getHeader("countries");
+				String dates = message.getHeader("dates");
+				List<String> userAgents = null;
+				List<String> countries = null;
+				if(userAgentsString != null){
+					userAgents = Arrays.asList(userAgentsString.split(";"));
+				}
+				if(countriesString != null){
+					countries = Arrays.asList(countriesString.split(";"));
+				}
+				Map<String,Integer> result = workerService.processLogs(countries, userAgents, dates);
+				List<String> headers = new ArrayList<String>();
+				headers.add("HITS: "+result.get("hits"));
+				headers.add("BYTES: "+result.get("bytes"));
+				messageToSend = new WDPMessage("WORKDONE", headers, null); 
 			} else {
 				// TODO: unknown message
 			}

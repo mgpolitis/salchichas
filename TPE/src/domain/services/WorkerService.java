@@ -1,9 +1,12 @@
 package domain.services;
 
-import marshall.base.BaseServer;
+import java.util.List;
+import java.util.Map;
+
 import pdclogs.LogsClient;
 import tgp.TGPClient;
 import tmp.TMPServer;
+import wdp.WDPServer;
 
 public interface WorkerService {
 
@@ -25,5 +28,13 @@ public interface WorkerService {
 	public LogsClient getLogsClient();
 
 	public TMPServer getTmpServer();
+	
+	public WDPServer getWdpServer();
+	
+	public void setResource(String resource);
+	
+	public String getResource();
+	
+	public Map<String,Integer> processLogs(List<String> countries,List<String> userAgents, String datesParam);
 	
 }

@@ -14,7 +14,8 @@ public class Worker extends Node{
 		Reactor reactor = Reactor.getInstance();
 		//TODO: consultar sobre el tema de porque hace falta poner aca y en el logsclient el serverhost y port
 		reactor.subscribeTCPClient(workerService.getLogsClient(), "localhost", 8085);
-		reactor.subscribeUDPClient(workerService.getTgpClient(), "localhost", 8092);
+		//reactor.subscribeTCPClient(workerService.getTgpClient(), "localhost", 8092);
+		reactor.subscribeTCPServer(workerService.getWdpServer(), 8086);
 		reactor.subscribeTCPServer(workerService.getTmpServer(), 8099);
 		reactor.run();
 	}
