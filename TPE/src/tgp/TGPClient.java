@@ -89,6 +89,7 @@ public class TGPClient extends BaseClient {
 		message.origin = new EndPoint(this.tgpCliHost, this.tgpCliPort);
 
 		System.out.println("Message Sent to Server: " + message);
+		this.setCountdownForRestart();
 		return message;
 	}
 
@@ -157,12 +158,17 @@ public class TGPClient extends BaseClient {
 
 		TGPMessage messageToSend = new TGPMessage("TGPREQUEST", content);
 
-		timeOutScheduler.schedule(restartRunner, Configuration.TGP_TIMEOUT,
-				TimeUnit.SECONDS);
+		this.setCountdownForRestart();
 
 		messageToSend.broadcastMe = true;
 		messageToSend.origin = new EndPoint(this.tgpCliHost, this.tgpCliPort);
+		this.setCountdownForRestart();
 		return messageToSend;
+	}
+
+	private void setCountdownForRestart() {
+		timeOutScheduler.schedule(restartRunner, Configuration.TGP_TIMEOUT,
+				TimeUnit.SECONDS);
 	}
 
 }
