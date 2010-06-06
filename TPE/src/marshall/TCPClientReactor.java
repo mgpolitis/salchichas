@@ -108,10 +108,12 @@ public class TCPClientReactor implements ClientContainer {
 		BaseClient actualClient = tcpSenderClients.get(serverEndPoint);
 
 		Message greeting = actualClient.greet();
-		if (greeting.dest == null) {
-			greeting.dest = serverEndPoint;
+		if (greeting != null) {
+			if (greeting.dest == null) {
+				greeting.dest = serverEndPoint;
+			}
+			this.sendMessage(greeting);
 		}
-		this.sendMessage(greeting);
 
 		boolean continueReading = true;
 		while (continueReading) {

@@ -26,6 +26,8 @@ public class UDPServerReactor implements ServerContainer {
 	private byte[] buf = new byte[DATAGRAM_BUF_SIZE];
 	private BaseServer udpObserverServer;
 	private DatagramSocket udpSocket;
+	
+	// TODO: hacer q soporte varios servers UDP
 
 	public static UDPServerReactor getInstance() {
 		return instance;
