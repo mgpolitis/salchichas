@@ -62,7 +62,7 @@ public class LogsClient extends BaseClient {
 		List<Message> list = new LinkedList<Message>();
 		if (m instanceof PDCLogsMessage) {
 			PDCLogsMessage message = (PDCLogsMessage) m;
-			System.out.println("CLIENT: " + message);
+			System.out.println("Message Received in LogsClient: " + message);
 			switch (message.getStatusCode()) {
 			case 200:
 				if(message.getType().equals("GETRESP")){

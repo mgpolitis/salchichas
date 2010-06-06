@@ -28,9 +28,8 @@ public class LogsServer extends BaseServer {
 		List<Message> list = new LinkedList<Message>();
 		Message messageToSend = null;
 		if (m instanceof PDCLogsMessage) {
-			System.out.println(m);
 			PDCLogsMessage message = (PDCLogsMessage) m;
-			System.out.println("Server: " + message);
+			System.out.println("Message Received in LogsServer: " + message);
 			if (message.getType().equals("HEAD")) {
 				messageToSend = headRequest(message);
 			} else if (message.getType().equals("GET")) {
@@ -53,7 +52,7 @@ public class LogsServer extends BaseServer {
 		if (fileName != null) {
 			try {
 				File archive = new File(baseDirectory + fileName);
-				System.out.println(archive.getAbsolutePath());
+				System.out.println("Path absoluto donde buscar el archivo: "+archive.getAbsolutePath());
 				if (archive.exists()) {
 					BufferedReader file = new BufferedReader(new FileReader(baseDirectory
 							+ fileName));
@@ -101,6 +100,7 @@ public class LogsServer extends BaseServer {
 						int maxRange = Integer.valueOf(ranges[1]);
 						if (minRange <= maxRange) {
 							File archive = new File(baseDirectory + fileName);
+							System.out.println("Path absoluto donde buscar el archivo: "+archive.getAbsolutePath());
 							if (archive.exists()) {
 								BufferedReader file;
 								try {

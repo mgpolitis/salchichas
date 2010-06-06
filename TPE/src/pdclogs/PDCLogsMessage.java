@@ -73,6 +73,7 @@ public class PDCLogsMessage extends Message {
 			if (tempArray.length == 2) {
 				this.headers.put(tempArray[0], tempArray[1]);
 			} else {
+				if(!str.isEmpty())
 				System.out.println("invalid header: " + str);
 			}
 		} else {
