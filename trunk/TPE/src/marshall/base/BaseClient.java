@@ -10,7 +10,7 @@ public abstract class BaseClient {
 
 	private ClientContainer container;
 
-	protected void sendMessage(Message m) throws IOException {
+	public void sendMessage(Message m) throws IOException {
 		if (container == null) {
 			throw new IllegalStateException(
 					"container not initialized for BaseClient " + toString());
