@@ -10,17 +10,18 @@ import java.util.Map;
 import marshall.base.BaseServer;
 import marshall.model.EndPoint;
 import marshall.model.Message;
+import domain.services.WDPServerMessageHandler;
 import domain.services.WorkerService;
 
 public class WDPServer extends BaseServer {
 	
 
-	private final WorkerService workerService;
+	private final WDPServerMessageHandler messageHandler;
 	private EndPoint client = null;
 	
-	public WDPServer(WorkerService workerService){
+	public WDPServer(WDPServerMessageHandler messageHandler){
 		super();
-		this.workerService = workerService;
+		this.messageHandler = messageHandler;
 	}
 	
 	@Override
@@ -44,8 +45,8 @@ public class WDPServer extends BaseServer {
 				if(countriesString != null){
 					countries = Arrays.asList(countriesString.split(";"));
 				}
-				workerService.setParamsToProcess(countries, userAgents, dates); 
-				workerService.fetchResource(message.getFilename(),endPoint.host,endPoint.port);
+				messageHandler.setParamsToProcess(countries, userAgents, dates); 
+				messageHandler.fetchResource(message.getFilename(),endPoint.host,endPoint.port);
 			} else {
 				// TODO: unknown message
 			}
