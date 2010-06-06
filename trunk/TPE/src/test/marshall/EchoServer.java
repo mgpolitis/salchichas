@@ -8,7 +8,7 @@ import marshall.Reactor;
 import marshall.interfaces.BaseServer;
 import marshall.model.Message;
 
-public class EchoServer implements BaseServer {
+public class EchoServer extends BaseServer {
 
 	@Override
 	public Message createMessage(byte[] serialized) {

@@ -10,7 +10,7 @@ import marshall.model.EndPoint;
 import marshall.model.Message;
 import domain.DateRange;
 
-public class WDPClient implements BaseClient {
+public class WDPClient extends BaseClient {
 
 	private final String serverHost;
 	private final int serverPort;

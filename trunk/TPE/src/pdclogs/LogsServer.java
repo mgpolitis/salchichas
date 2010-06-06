@@ -12,7 +12,7 @@ import marshall.Reactor;
 import marshall.interfaces.BaseServer;
 import marshall.model.Message;
 
-public class LogsServer implements BaseServer {
+public class LogsServer extends BaseServer {
 	
 
 	

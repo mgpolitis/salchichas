@@ -11,7 +11,7 @@ import marshall.interfaces.BaseServer;
 import marshall.model.Message;
 import marshall.model.EndPoint;
 
-public class TGPServer implements BaseServer{
+public class TGPServer extends BaseServer{
 
 	private final String group;
 	private final Integer MAX_RANDOM = 39591394;

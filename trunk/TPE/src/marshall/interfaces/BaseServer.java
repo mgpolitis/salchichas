@@ -4,10 +4,10 @@ import java.util.List;
 
 import marshall.model.Message;
 
-public interface BaseServer {
+public abstract class BaseServer {
 
-	public List<Message> messageReceived(Message m);
+	public abstract List<Message> messageReceived(Message m);
 	
-	public Message createMessage(byte[] serialized);
+	public abstract Message createMessage(byte[] serialized);
 	
 }

@@ -10,7 +10,7 @@ import marshall.model.EndPoint;
 import marshall.model.Message;
 
 
-public class TMPServer implements BaseServer{
+public class TMPServer extends BaseServer{
 
 	
 	public static void main(String[] args) throws IOException {
