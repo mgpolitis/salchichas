@@ -17,7 +17,7 @@ import wdp.WDPServer;
 import domain.Configuration;
 import domain.data.DirectorDAO;
 
-public class DirectorServiceImpl implements DirectorService {
+public class DirectorServiceImpl implements DirectorService{
 
 	private DirectorDAO directorDao;
 	private Map<EndPoint, WDPClient> wdpClients = null;
@@ -157,4 +157,32 @@ public class DirectorServiceImpl implements DirectorService {
 		}
 		return "";
 	}
+
+
+	@Override
+	public EndPoint getDirector() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public List<EndPoint> getWorkers() {
+		return (List<EndPoint>) this.wdpClients.keySet();
+	}
+
+
+	@Override
+	public int getJobsDone() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int getLinesProcessed() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
