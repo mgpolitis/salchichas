@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import marshall.model.EndPoint;
 import net.sf.javainetlocator.InetAddressLocator;
 import net.sf.javainetlocator.InetAddressLocatorException;
 import pdclogs.LogsClient;
@@ -19,6 +20,7 @@ import tgp.TGPClient;
 import tmp.TMPServer;
 import wdp.WDPServer;
 import domain.data.WorkerDAO;
+import domain.services.CommonService.Type;
 
 public class WorkerServiceImpl implements WorkerService {
 
@@ -250,5 +252,25 @@ public class WorkerServiceImpl implements WorkerService {
 		this.lines = Integer.valueOf(lines);
 		this.contentLength = Integer.valueOf(contentLength);
 	}
+
+	@Override
+	public EndPoint getDirector() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getJobsDone() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getLinesProcessed() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	
 
 }

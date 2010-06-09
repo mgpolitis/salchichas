@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import domain.services.CommonService;
 import domain.services.DirectorService;
 import domain.services.WorkerService;
 
@@ -79,38 +80,39 @@ public class TMPServer extends BaseServer{
 		
 			switch(service){
 				case 1: 
-					resp = lines(resp);
+					resp = lines();
 					break;
 					
 				case 2: 
-					resp = jobs(resp);
+					resp = jobs();
 					break;
 					
 				case 3: 
-					resp = workers(resp);
+					resp = workers();
 					break;
 					
 				case 4: 
-					resp = director(resp);
+					resp = director();
 					break;
 					
 			}
 		}
 		else{
-			resp = all(resp);
+			resp = all();
 		}
 		
 		if(directorService!=null){
 			Collection<String> c = new ArrayList<String>();
 			//si soy director agrego la informacion para de mis hijos
-			//TODO: List workers = this.directorService.getActiveWorkers();
 			
-			List<EndPoint> workers = null;
+			List<EndPoint> workers = this.directorService.getWorkers();
 			
-			String myWorkers = "";
+			String myWorkers = "workers: ";
 			
-			for(EndPoint ep : workers){
-				myWorkers += ep.host + "-" + ep.port;
+			EndPoint ep = workers.get(0);
+			myWorkers +=  ep.host + "-" + ep.port ;
+			for( EndPoint ep1 : workers){
+				myWorkers += "|" + ep1.host + "-" + ep1.port ;
 			}
 			
 			c.add(myWorkers);
@@ -121,41 +123,98 @@ public class TMPServer extends BaseServer{
 		return resp;
 	}
 	
-	private TMPMessage lines(TMPMessage message){
+	private TMPMessage lines(){
+		List<String> content = new ArrayList<String>();
+		String str = "";
 		
-		//TODO: this.workerService.getLinesProcessed();
-		
+		if(workerService!=null){
+			str = "lines: " + this.workerService.getLinesProcessed();
+		}
+		else if(directorService!=null){
+			str = "lines:" +  this.directorService.getLinesProcessed();
+		}
+		content.add(str);
+		TMPMessage message = new TMPMessage("TMPRESPONSE",content);
 		return message;
 	}
 	
-	private TMPMessage jobs(TMPMessage message){
+	private TMPMessage jobs(){
+		List<String> content = new ArrayList<String>();
+		String str = "";
 		
-		//TODO:this.workerService.getJobsDone();	
-		
+		if(workerService!=null){
+			str = "lines: " + this.workerService.getJobsDone();
+		}
+		else if(directorService!=null){
+			str = "lines:" +  this.directorService.getJobsDone();
+		}
+		content.add(str);
+		TMPMessage message = new TMPMessage("TMPRESPONSE",content);
 		return message;
 	}
 	
-	private TMPMessage workers(TMPMessage message){
+	private TMPMessage workers(){
+		List<String> content = new ArrayList<String>();
+		String str = "";
 		
-		
+		if(workerService!=null){
+			// Soy worker. No me pidas workers...
+			str = "workers: " ;
+		}
+		else if(directorService!=null){
+			// se agrega afuera
+		}
+		content.add(str);
+		TMPMessage message = new TMPMessage("TMPRESPONSE",content);
 		return message;
 	}
 	
-	private TMPMessage director(TMPMessage message){
-		
-		
-		//TODO:this.workerService.getDirector();
-		
+	private TMPMessage director(){
+		List<String> content = new ArrayList<String>();
+		String str = "";
+		EndPoint ep = null;
+		if(workerService!=null){
+			ep = this.workerService.getDirector();
+			str = "director: " + ep.host + "-" + ep.port;
+		}
+		else if(directorService!=null){
+			ep = this.directorService.getDirector();
+			str = "director: " + ep.host + "-" + ep.port;
+		}
+		content.add(str);
+		TMPMessage message = new TMPMessage("TMPRESPONSE",content);
 		return message;
 	}
 	
-	private TMPMessage all(TMPMessage message){
-		// MMM!!!!
-		message = lines(message);
-		message = jobs(message);
-		message = workers(message);
-		message = director(message);
+	private TMPMessage all(){
+		List<String> content = new ArrayList<String>();
+		String linesStr = "";
+		String workersStr = "";
+		String directorStr = "";
+		String jobsStr = "";
+		EndPoint ep = null;
+		if(workerService!=null){
+			workersStr = "workers: " ;
+			ep = this.workerService.getDirector();
+			linesStr = "lines: " + this.workerService.getLinesProcessed();
+			jobsStr = "jobs: " + this.workerService.getJobsDone();
+			directorStr = "director: " + ep.host + "-" + ep.port;
+			content.add(workersStr);
+		}
+		else if(directorService!=null){
+			ep = this.directorService.getDirector();
+			directorStr = "director: " + ep.host + "-" + ep.port;
+			linesStr = "lines: " + this.directorService.getLinesProcessed();
+			jobsStr = "jobs: " + this.directorService.getJobsDone();
+			
+			
+		}
 		
+		content.add(directorStr);
+		content.add(jobsStr);
+		content.add(linesStr);
+		
+		TMPMessage message = new TMPMessage("TMPRESPONSE",content);
 		return message;	
 	}
 	

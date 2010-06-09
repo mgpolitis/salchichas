@@ -1,5 +1,6 @@
 package domain.services;
 
+import marshall.model.EndPoint;
 import pdclogs.LogsClient;
 import tgp.TGPClient;
 import tmp.TMPServer;
@@ -27,5 +28,11 @@ public interface WorkerService extends ProtocolsMessageHandler{
 	public WDPServer getWdpServer();
 	
 	public void setResource(String resource);
+
+	public EndPoint getDirector();
+
+	public int getJobsDone();
+
+	public int getLinesProcessed();
 	
 }

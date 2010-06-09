@@ -1,5 +1,7 @@
 package domain.services;
 
+import java.util.List;
+
 import pdclogs.LogsClient;
 import tgp.TGPServer;
 import tmp.TMPServer;
@@ -14,5 +16,13 @@ public interface DirectorService extends ProtocolsMessageHandler {
 	public LogsClient getLogsClient();
 	
 	public void startWorkingSession(EndPoint myEndPoint);
-	
+
+	public EndPoint getDirector();
+
+	public List<EndPoint> getWorkers();
+
+	public int getJobsDone();
+
+	public int getLinesProcessed();
+
 }
