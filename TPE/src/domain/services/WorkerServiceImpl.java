@@ -271,6 +271,12 @@ public class WorkerServiceImpl implements WorkerService {
 		return 0;
 	}
 
+	@Override
+	public void notifyWorkEnd(Map<String, Integer> results, EndPoint worker) {
+		// TODO avisar que recibir este mensaje aca trae error
+		
+	}
+
 	
 
 }

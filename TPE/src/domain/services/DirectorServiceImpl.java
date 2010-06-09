@@ -2,8 +2,11 @@ package domain.services;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +24,8 @@ public class DirectorServiceImpl implements DirectorService{
 
 	private DirectorDAO directorDao;
 	private Map<EndPoint, WDPClient> wdpClients = null;
+	private Set<EndPoint> workersBusy = null;
+	private Set<EndPoint> workersIdle = null;
 	private WDPServer wdpServer = null;
 	private TMPServer tmpServer = null;
 	private TGPServer tgpServer = null;
@@ -34,6 +39,8 @@ public class DirectorServiceImpl implements DirectorService{
 	public DirectorServiceImpl(DirectorDAO directorDao) {
 		this.directorDao = directorDao;
 		wdpClients = new HashMap<EndPoint, WDPClient>();
+		workersBusy = new HashSet<EndPoint>();
+		workersIdle = new HashSet<EndPoint>();
 		wdpServer = new WDPServer(this);
 		// tmpServer = new TMPServer(workerService);
 		tgpServer = new TGPServer("1", "localhost",
@@ -44,13 +51,14 @@ public class DirectorServiceImpl implements DirectorService{
 
 	@Override
 	public void startWorkingSession(EndPoint myEndPoint) {
-		WDPClient client = new WDPClient(myEndPoint.host, myEndPoint.port);
+		WDPClient client = new WDPClient(myEndPoint.host, myEndPoint.port,this);
 		Reactor reactor = Reactor.getInstance();
 		try {
 			reactor
 					.subscribeTCPClient(client, myEndPoint.host,
 							myEndPoint.port);
 			wdpClients.put(myEndPoint, client);
+			workersBusy.add(myEndPoint);
 		} catch (IOException e) {
 			// TODO ver porque no se puede agregrar el worker
 			System.out.println("no se puede agregar el worker en el director");
@@ -111,14 +119,19 @@ public class DirectorServiceImpl implements DirectorService{
 	}
 
 	private void distributeWork() throws IOException {
-		int workersQty = this.wdpClients.size();
+		int workersQty = this.workersIdle.size();
 		String resource = this.directorDao.getResource();
 		if (workersQty > 0) {
 			int linesPerWorker = lines / workersQty;
 			int counter = getMinRange(resource);
-			for(EndPoint ep: this.wdpClients.keySet()){
-				WDPClient client = this.wdpClients.get(ep);
-				client.getJobDone(ep, getNakedResource(resource)+"?"+counter+"-"+(counter+linesPerWorker-1), userAgents, countries, datesParam);
+			Iterator<EndPoint> it = this.workersIdle.iterator();
+			
+			while(it.hasNext()){
+				EndPoint endPoint = it.next();
+				WDPClient client = this.wdpClients.get(endPoint);
+				it.remove();
+				this.workersBusy.add(endPoint);
+				client.getJobDone(endPoint, getNakedResource(resource)+"?"+counter+"-"+(counter+linesPerWorker-1), userAgents, countries, datesParam);
 			}
 		}
 	}
@@ -183,6 +196,22 @@ public class DirectorServiceImpl implements DirectorService{
 	public int getLinesProcessed() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+
+	@Override
+	public void notifyWorkEnd(Map<String, Integer> results, EndPoint worker) {
+		if(this.wdpClients.get(worker) != null){
+			this.workersBusy.remove(worker);
+			this.workersIdle.add(worker);
+		}
+		Map<String,Integer> map = this.directorDao.getDataProccesed();
+		if(results.get("HITS") != null){
+			map.put("HITS", map.get("HITS")+results.get("HITS"));
+		}
+		if(results.get("BYTES") != null){
+			map.put("BYTES", map.get("BYTES")+results.get("BYTES"));
+		}
 	}
 
 }

@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,6 +17,7 @@ import marshall.base.BaseClient;
 import marshall.model.EndPoint;
 import marshall.model.Message;
 import domain.DateRange;
+import domain.services.ProtocolsMessageHandler;
 
 public class WDPClient extends BaseClient {
 
@@ -28,9 +31,11 @@ public class WDPClient extends BaseClient {
 	private List<String> countries = null;
 	private List<String> userAgents = null;
 	private DateRange dates = null;
+	private final ProtocolsMessageHandler messageHandler;
 
-	public WDPClient(String serverHost, int serverPort) {
+	public WDPClient(String serverHost, int serverPort, ProtocolsMessageHandler messageHandler) {
 		super();
+		this.messageHandler = messageHandler;
 		this.serverHost = serverHost;
 		this.serverPort = serverPort;
 	}
@@ -89,6 +94,10 @@ public class WDPClient extends BaseClient {
 					// pedido
 				}
 			} else if (message.getType().equals("WORKDONE")) {
+				Map<String,Integer> results = new HashMap<String,Integer>();
+				results.put("HITS",Integer.valueOf(message.getHeader("HITS")));
+				results.put("BYTES",Integer.valueOf(message.getHeader("BYTES")));
+				messageHandler.notifyWorkEnd(results,message.origin);
 				// TODO: obtener los resultados del trabajo procesado
 				// TODO: agregar el trabajador a la lista de disponibles
 			} else {
@@ -104,37 +113,6 @@ public class WDPClient extends BaseClient {
 		return message;
 	}
 
-	private String readGreetMessage() {
-		StringBuffer aux = new StringBuffer();
-
-		if (logFile == null) {
-			// TODO: send bad request back to client
-		}
-		aux.append("PROCESS " + logFile + '\n');
-		if (dates != null) {
-			aux
-					.append("DATES: " + dates.startDate + "-" + dates.endDate
-							+ '\n');
-		}
-		if (countries != null && !countries.isEmpty()) {
-			aux.append("COUNTRIES: ");
-			for (String str : countries) {
-				aux.append(str.trim() + ";");
-			}
-			aux.deleteCharAt(aux.length() - 1);
-			aux.append('\n');
-		}
-		if (userAgents != null && !userAgents.isEmpty()) {
-			aux.append("USER-AGENTS: ");
-			for (String str : userAgents) {
-				aux.append(str.trim() + ";");
-			}
-			aux.deleteCharAt(aux.length() - 1);
-			aux.append('\n');
-		}
-		aux.append('\n');
-		return aux.toString();
-	}
 
 	private String readMessage() {
 		StringBuffer aux = new StringBuffer();
@@ -152,16 +130,6 @@ public class WDPClient extends BaseClient {
 			e.printStackTrace();
 		}
 		return aux.toString();
-	}
-
-	public static void main(String[] args) throws IOException {
-		Reactor reactor = Reactor.getInstance();
-		// worker host port + tgp host port
-		// lo utiliza para indicarle al servidor a donde va a tener que
-		// conectarse el director
-		WDPClient c = new WDPClient("localhost", 8086);
-		reactor.subscribeTCPClient(c, "localhost", 8086);
-		reactor.run();
 	}
 
 	public void getJobDone(EndPoint server, String resource, List<String> userAgents, List<String> countries, String dateParams) throws IOException{
