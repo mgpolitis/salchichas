@@ -1,5 +1,5 @@
 package ar.com.tinkerbit.pod.printer;
-
+ 
 public class Document {
 
 	private int numberOfPages;
