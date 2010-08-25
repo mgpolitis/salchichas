@@ -71,8 +71,8 @@ public class LimitedAsyncPrinterDispatcher implements PrinterDispatcher {
 				LimitedAsyncPrinterDispatcher p = new LimitedAsyncPrinterDispatcher(
 						size);
 				long t0 = System.nanoTime();
-				for (int i = 0; i < 100; i++) {
-					p.printDocument(new Document(3, true, "prueba"));
+				for (int i = 0; i < 50; i++) {
+					p.printDocument(new Document(10, true, "prueba"));
 				}
 				p.finishPrintRequests();
 				long diff = System.nanoTime() - t0;

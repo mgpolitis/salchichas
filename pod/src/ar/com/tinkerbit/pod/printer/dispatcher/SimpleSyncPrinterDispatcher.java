@@ -24,9 +24,9 @@ public class SimpleSyncPrinterDispatcher implements PrinterDispatcher {
 		for (int run = 0; run < 10; run++) {
 			long t0 = System.nanoTime();
 			for (int i = 0; i<50; i++) {
-				p.printDocument(new Document(3, false, "prueba"));
-				//Thread.sleep(500);
+				p.printDocument(new Document(10, true, "prueba"));
 			}
+			p.finishPrintRequests();
 			long diff = System.nanoTime() - t0;
 			total += diff;
 			System.out.println(run+": "+diff);
