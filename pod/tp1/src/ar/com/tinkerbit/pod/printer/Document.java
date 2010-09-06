@@ -28,6 +28,7 @@ public class Document implements Serializable {
 		this.printed = false;
 	}
 
+	
 	public int getNumberOfPages() {
 		return this.numberOfPages;
 	}
