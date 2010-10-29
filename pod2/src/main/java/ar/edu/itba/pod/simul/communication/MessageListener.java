@@ -17,7 +17,7 @@ public interface MessageListener extends Remote {
 	public boolean onMessageArrive(Message message) throws RemoteException;
 
 	/**
-	 * Returns all the new messages from the node that were not synchronized with the remote node. Only fowardable
+	 * Returns all the new messages from the node that were not synchronized with the remote node. Only forwardable
 	 * messages are sent.
 	 * 
 	 * @param remoteNodeId

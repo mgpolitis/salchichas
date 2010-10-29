@@ -31,7 +31,7 @@ public interface SimulationManager {
 
 	/**
 	 * Removes an agent from the simulation. This method will return when the 
-	 * agent has finished execution and has been successfullt removed 
+	 * agent has finished execution and has been successfully removed 
 	 * @param agent Agent to remove
 	 */
 	public void removeAgent(Agent agent);

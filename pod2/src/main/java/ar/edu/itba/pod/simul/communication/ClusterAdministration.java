@@ -41,7 +41,7 @@ public interface ClusterAdministration extends Remote {
 	public void connectToGroup(String initialNode) throws RemoteException;
 
 	/**
-	 * Adds the target node to the destination node. The destination node returns a collection of nodes that belongs to
+	 * Adds the target node to the destination node. The destination node returns a collection of nodes that belong to
 	 * the cluster.
 	 * <p>
 	 * The size of the collection may not be the same of the number of nodes in the cluster or the number of nodes that

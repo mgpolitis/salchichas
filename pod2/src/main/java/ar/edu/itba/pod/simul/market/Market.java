@@ -67,11 +67,11 @@ public interface Market {
 	 * @see #offer(ResourceStock, int)
 	 */
 	public void offerMore(ResourceStock stock, int amount);
-	
-	
+
 	/**
-	 * @return the market data. It includes transfer history, transactions
-	 * per second and current snapshot of selling and buying resources in stock.
+	 * @return the market data. It includes transfer history, transactions per
+	 *         second and current snapshot of selling and buying resources in
+	 *         stock.
 	 */
 	MarketData marketData();
 }
