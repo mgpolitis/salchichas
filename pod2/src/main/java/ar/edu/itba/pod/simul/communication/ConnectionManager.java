@@ -30,8 +30,8 @@ public interface ConnectionManager extends Remote {
 	public ConnectionManager getConnectionManager(String nodeId) throws RemoteException;
 
 	/**
-	 * Finds a GroupCommunication in the cluster using the target node. All the exceptions are wrapped in a
-	 * NoConnectionAvailableException. Always a GroupCommunication is returned, unless an exception is thrown.
+	 * Finds a ClusterCommunication in the cluster using the target node. 
+	 * Always a ClusterCommunication is returned, unless RemoteException is thrown.
 	 * 
 	 * @return
 	 * @throws RemoteException
@@ -39,8 +39,8 @@ public interface ConnectionManager extends Remote {
 	public ClusterCommunication getGroupCommunication() throws RemoteException;
 
 	/**
-	 * Finds a ClusterCommunication in the cluster using the target node. All the exceptions are wrapped in a
-	 * NoConnectionAvailableException. Always a ClusterCommunication is returned, unless an exception is thrown.
+	 * Finds a ClusterAdministration in the cluster using the target node. 
+	 * Always a ClusterAdministration is returned, unless a RemoteException is thrown.
 	 * 
 	 * @return
 	 * @throws RemoteException
@@ -48,8 +48,8 @@ public interface ConnectionManager extends Remote {
 	public ClusterAdministration getClusterAdmimnistration() throws RemoteException;
 
 	/**
-	 * Finds a NodeCommunication in the cluster using the target node. All the exceptions are wrapped in a
-	 * NoConnectionAvailableException. Always a NodeCommunication is returned, unless an exception is thrown.
+	 * Finds a Transactionable in the cluster using the target node.
+	 * Always a Transactionable is returned, unless a RemoteException is thrown.
 	 * 
 	 * @return
 	 * @throws RemoteException
@@ -57,8 +57,8 @@ public interface ConnectionManager extends Remote {
 	public Transactionable getNodeCommunication() throws RemoteException;
 
 	/**
-	 * Finds a SimulationCommunication in the cluster using the target node. All the exceptions are wrapped in a
-	 * NoConnectionAvailableException. Always a SimulationCommunication is returned, unless an exception is thrown.
+	 * Finds a SimulationCommunication in the cluster using the target node. 
+	 * Always a SimulationCommunication is returned, unless a RemoteException is thrown.
 	 * 
 	 * @return
 	 * @throws RemoteException
@@ -66,8 +66,8 @@ public interface ConnectionManager extends Remote {
 	public SimulationCommunication getSimulationCommunication() throws RemoteException;
 
 	/**
-	 * Finds a ThreePhaseCommit in the cluster using the target node. All the exceptions are wrapped in a
-	 * NoConnectionAvailableException. Always a ThreePhaseCommit is returned, unless an exception is thrown.
+	 * Finds a ThreePhaseCommit in the cluster using the target node.
+	 * Always a ThreePhaseCommit is returned, unless a RemoteException is thrown.
 	 * 
 	 * @return
 	 * @throws RemoteException
