@@ -17,6 +17,4 @@ public enum MessageType {
 	RESOURCE_TRANSFER, 				// Resource been transfer from one node to another node
 	RESOURCE_TRANSFER_CANCELED,		// Resource transfer from one node to another node canceled
 	RESOURCE_REQUEST,				// Resource request from one node to the cluster
-	NEW_MESSAGE_REQUEST,			// New messages request from one node to another node
-	NEW_MESSAGE_RESPONSE			// New messages response from one node to another node
 }
