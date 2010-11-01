@@ -14,12 +14,13 @@ public class ClusterAdministrationRemote implements ClusterAdministration,
 
 	private static final ClusterAdministration INSTANCE = new ClusterAdministrationRemote();
 	private static final String DEFAULT_CLUSTER_NAME = "eva";
-	
+
 	private Set<String> clusterNodes = new HashSet<String>();
 
 	private String clusterName = null;
 	private boolean isConnected = false;
-	private ConnectionManager connectionManager = ConnectionManagerRemote.getInstance();
+	private ConnectionManager connectionManager = ConnectionManagerRemote
+			.getInstance();
 
 	private ClusterAdministrationRemote() {
 		// TODO Auto-generated constructor stub
@@ -44,6 +45,11 @@ public class ClusterAdministrationRemote implements ClusterAdministration,
 	}
 	
 	@Override
+	public String getGroupId() throws RemoteException {
+		return clusterName;
+	}
+
+	@Override
 	public void connectToGroup(String initialNode) throws RemoteException {
 		if (initialNode.equals(Node.NODE_ID)) {
 			throw new IllegalArgumentException(
@@ -53,9 +59,14 @@ public class ClusterAdministrationRemote implements ClusterAdministration,
 			throw new IllegalStateException(
 					"Cannot reconnect, node is already connected to a cluster");
 		}
+
+		ConnectionManager initialCM = connectionManager
+				.getConnectionManager(initialNode);
 		
-		ConnectionManager initialCM = connectionManager.getConnectionManager(initialNode);
-		Iterable<String> nodes = initialCM.getClusterAdmimnistration().addNewNode(Node.NODE_ID);
+		clusterName = initialCM.getClusterAdmimnistration().getGroupId();
+		
+		Iterable<String> nodes = initialCM.getClusterAdmimnistration()
+				.addNewNode(Node.NODE_ID);
 		for (String node : nodes) {
 			clusterNodes.add(node);
 		}
@@ -65,20 +76,24 @@ public class ClusterAdministrationRemote implements ClusterAdministration,
 
 	@Override
 	public Iterable<String> addNewNode(String newNode) throws RemoteException {
-		// TODO: hacelo
-		return null;
+		if (!this.isConnectedToGroup()) {
+			throw new IllegalStateException("Node " + Node.NODE_ID
+					+ " is not connected to a cluster.");
+		}
+		ConnectionManager newNodeCM = connectionManager
+				.getConnectionManager(newNode);
+		if (!this.getGroupId().equals(newNodeCM.getClusterAdmimnistration().getGroupId())) {
+			throw new IllegalArgumentException("Must belong to the same group to connect");
+		}
+		return clusterNodes;
 	}
 
+	
+	
 	@Override
 	public void disconnectFromGroup(String nodeId) throws RemoteException {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public String getGroupId() throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

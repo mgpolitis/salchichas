@@ -25,7 +25,7 @@ public class Node {
 	}
 
 	public static void main(String[] args) {
-		Node n = new Node();
+		new Node();
 
 	}
 
