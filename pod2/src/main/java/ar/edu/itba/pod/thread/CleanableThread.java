@@ -9,7 +9,7 @@ public class CleanableThread extends Thread {
 	private final AtomicBoolean finish = new AtomicBoolean();
 
 	/**
-	 * Check if the this thread should finish (because the simulation is shutting down)
+	 * Check if this thread should finish (because the simulation is shutting down)
 	 * @return true if this thread should finish
 	 */
 	protected final boolean shouldFinish() {

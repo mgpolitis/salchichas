@@ -11,7 +11,7 @@ package ar.edu.itba.pod.simul.communication.payload;
  * 1. A node is being removed and before shutting down, it informs to the cluster.
  * 2. A node has crashed and another node finds out.
  * 
- * This message has to be send to the entire cluster.
+ * This message has to be sent to the entire cluster.
  */
 public interface DisconnectPayload extends Payload {
 	

@@ -63,7 +63,7 @@ public class Message implements Serializable, Comparable<Message> {
 	}
 
 	/**
-	 * Two messages are equals if they are the same object instance, or the values of the original node identification
+	 * Two messages are equal if they are the same object instance, or the values of the original node identification
 	 * and time stamp are equals.
 	 */
 	@Override
