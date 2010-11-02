@@ -22,7 +22,7 @@ public interface ClusterCommunication extends Remote {
 	/**
 	 * A point to point communication is established between the two nodes and the message is sent. In case that the
 	 * destination node has already received the message, false is returned. Otherwise, true is returned. The receiver
-	 * must determine if the new messages has to be send in broadcast to the rest of the nodes or not.
+	 * must determine if the new messages has to be sent in broadcast to the rest of the nodes or not.
 	 * 
 	 * @param message
 	 *            The message to send to the cluster

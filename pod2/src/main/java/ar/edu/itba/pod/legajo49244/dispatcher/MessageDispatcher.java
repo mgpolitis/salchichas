@@ -2,27 +2,32 @@ package ar.edu.itba.pod.legajo49244.dispatcher;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
 import ar.edu.itba.pod.simul.communication.Message;
 import ar.edu.itba.pod.simul.communication.MessageListener;
 import ar.edu.itba.pod.simul.communication.MessageType;
+
+import com.google.common.collect.Lists;
 
 public class MessageDispatcher implements MessageListener {
 
 	final SimulationListener listener;
 	final BlockingQueue<Message> ear;
 
-	Map<Message, Long> history;
-	Map<String, Long> lastContacted;
+	Map<Message, Long> historyOfBroadcastables;
+	Map<String, Long> lastContactedForPull;
 
 	public MessageDispatcher(SimulationListener listener) {
 		this.listener = listener;
 		this.ear = new LinkedBlockingQueue<Message>();
-		this.history = new HashMap<Message, Long>();
-		this.lastContacted = new HashMap<String, Long>();
+		this.historyOfBroadcastables = new HashMap<Message, Long>();
+		this.lastContactedForPull = new HashMap<String, Long>();
 
 		new Thread(new DispatcherRunnable()).start();
 		new Thread(new MessageForgetterRunnable()).start();
@@ -31,23 +36,35 @@ public class MessageDispatcher implements MessageListener {
 	@Override
 	public Iterable<Message> getNewMessages(String remoteNodeId)
 			throws RemoteException {
-
-		return null;
+		Long nodeLastContactTimestamp = lastContactedForPull.get(remoteNodeId);
+		if (nodeLastContactTimestamp == null) {
+			// first time this node is contacting me
+			lastContactedForPull.put(remoteNodeId, System.currentTimeMillis());
+			return historyOfBroadcastables.keySet();
+		}
+		
+		// this node contacted me in the past
+		List<Message> ret = Lists.newArrayList();
+		for (Entry<Message, Long> entry : this.historyOfBroadcastables.entrySet()) {
+			Long messageTimeStamp = entry.getValue();
+			if (nodeLastContactTimestamp < messageTimeStamp) {
+				ret.add(entry.getKey());
+			}
+		}
+		return ret;
 	}
 
 	@Override
 	public boolean onMessageArrive(Message message) throws RemoteException {
 
-		if (history.containsKey(message)) {
+		if (historyOfBroadcastables.containsKey(message)) {
 			return false;
 		}
 
-		if (this.isForwardable(message)) {
-			// TODO: preguntar esto de forwardable
-			history.put(message, System.currentTimeMillis());
+		if (isForwardable(message)) {
+			historyOfBroadcastables.put(message, System.currentTimeMillis());
 		}
-		
-		// TODO: que retorno si no es forwardable y lo recibo 2 veces?
+
 		return true;
 
 	}
@@ -68,6 +85,9 @@ public class MessageDispatcher implements MessageListener {
 				}
 
 				MessageType type = message.getType();
+				System.out.println("Message read!!!");
+
+				// let delegate process message
 
 				switch (type) {
 				case DISCONNECT:
@@ -98,6 +118,17 @@ public class MessageDispatcher implements MessageListener {
 							+ type);
 				}
 
+				// broadcast if neccesary
+				if (MessageDispatcher.isForwardable(message)) {
+					try {
+						ConnectionManagerRemote.getInstance()
+								.getGroupCommunication().broadcast(message);
+					} catch (RemoteException e) {
+						System.out
+								.println("Broadcast failed, will wait for pull to fix it");
+					}
+				}
+
 			}
 
 		}
@@ -121,20 +152,20 @@ public class MessageDispatcher implements MessageListener {
 					e.printStackTrace();
 				}
 				long now = System.currentTimeMillis();
-				for (Message m : history.keySet()) {
-					long timeStamp = history.get(m);
+				for (Message m : historyOfBroadcastables.keySet()) {
+					long timeStamp = historyOfBroadcastables.get(m);
 					if (timeStamp < now - OBSOLETE_AMMOUNT_MILLIS) {
 						// old message, forget it
-						history.remove(m);
+						historyOfBroadcastables.remove(m);
 					}
 				}
 			}
-
 		}
 
 	}
 
-	private boolean isForwardable(Message message) {
+	private static boolean isForwardable(Message message) {
+		// TODO: do!
 		return true;
 	}
 

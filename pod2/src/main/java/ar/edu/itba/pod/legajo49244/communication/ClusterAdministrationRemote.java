@@ -9,10 +9,12 @@ import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.simul.communication.ClusterAdministration;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 
+import com.google.common.collect.Lists;
+
 public class ClusterAdministrationRemote implements ClusterAdministration,
 		Serializable {
 
-	private static final ClusterAdministration INSTANCE = new ClusterAdministrationRemote();
+	private static final ClusterAdministrationRemote INSTANCE = new ClusterAdministrationRemote();
 	private static final String DEFAULT_CLUSTER_NAME = "eva";
 
 	private Set<String> clusterNodes = new HashSet<String>();
@@ -26,7 +28,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration,
 		// TODO Auto-generated constructor stub
 	}
 
-	public static ClusterAdministration getInstance() {
+	public static ClusterAdministrationRemote getInstance() {
 		return INSTANCE;
 	}
 
@@ -85,7 +87,19 @@ public class ClusterAdministrationRemote implements ClusterAdministration,
 		if (!this.getGroupId().equals(newNodeCM.getClusterAdmimnistration().getGroupId())) {
 			throw new IllegalArgumentException("Must belong to the same group to connect");
 		}
-		return clusterNodes;
+		
+		
+		if (this.clusterNodes.contains(newNode)){
+			// I already knew this node, ignore
+			return Lists.newArrayList();
+		}
+		
+		Set<String> ret = new HashSet<String>();
+		ret.addAll(this.clusterNodes);
+		
+		this.clusterNodes.add(newNode);
+		
+		return ret;
 	}
 
 	
@@ -95,5 +109,10 @@ public class ClusterAdministrationRemote implements ClusterAdministration,
 		// TODO Auto-generated method stub
 
 	}
-
+	
+	
+	public Set<String> getClusterNodes() {
+		return clusterNodes;
+	}
+	
 }
