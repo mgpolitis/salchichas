@@ -8,8 +8,7 @@ import ar.edu.itba.pod.simul.communication.AgentDescriptor;
 import ar.edu.itba.pod.simul.communication.NodeAgentLoad;
 import ar.edu.itba.pod.simul.communication.SimulationCommunication;
 
-public class SimulationCommunicationRemote implements SimulationCommunication,
-		Serializable {
+public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	private static final SimulationCommunication INSTANCE = new SimulationCommunicationRemote();
 

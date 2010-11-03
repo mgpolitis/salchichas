@@ -11,8 +11,7 @@ import ar.edu.itba.pod.simul.communication.ConnectionManager;
 
 import com.google.common.collect.Lists;
 
-public class ClusterAdministrationRemote implements ClusterAdministration,
-		Serializable {
+public class ClusterAdministrationRemote implements ClusterAdministration {
 
 	private static final ClusterAdministrationRemote INSTANCE = new ClusterAdministrationRemote();
 	private static final String DEFAULT_CLUSTER_NAME = "eva";

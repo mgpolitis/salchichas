@@ -15,7 +15,7 @@ import ar.edu.itba.pod.simul.communication.SimulationCommunication;
 import ar.edu.itba.pod.simul.communication.ThreePhaseCommit;
 import ar.edu.itba.pod.simul.communication.Transactionable;
 
-public class ConnectionManagerRemote implements ConnectionManager, Serializable {
+public class ConnectionManagerRemote implements ConnectionManager {
 
 	private static final ConnectionManager INSTANCE = new ConnectionManagerRemote();
 

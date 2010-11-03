@@ -5,7 +5,7 @@ import java.rmi.RemoteException;
 
 import ar.edu.itba.pod.simul.communication.ThreePhaseCommit;
 
-public class ThreePhaseCommitRemote implements ThreePhaseCommit, Serializable {
+public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 
 	
 	private static final ThreePhaseCommit INSTANCE = new ThreePhaseCommitRemote();

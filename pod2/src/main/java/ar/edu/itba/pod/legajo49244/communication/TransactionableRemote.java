@@ -7,7 +7,7 @@ import ar.edu.itba.pod.simul.communication.Transactionable;
 import ar.edu.itba.pod.simul.communication.payload.Payload;
 import ar.edu.itba.pod.simul.market.Resource;
 
-public class TransactionableRemote implements Transactionable, Serializable {
+public class TransactionableRemote implements Transactionable {
 
 	private static final Transactionable INSTANCE = new TransactionableRemote();
 	

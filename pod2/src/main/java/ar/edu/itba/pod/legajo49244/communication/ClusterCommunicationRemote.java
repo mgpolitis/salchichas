@@ -15,8 +15,7 @@ import ar.edu.itba.pod.simul.communication.MessageListener;
 
 import com.google.common.collect.Lists;
 
-public class ClusterCommunicationRemote implements Serializable,
-		ClusterCommunication {
+public class ClusterCommunicationRemote implements ClusterCommunication {
 
 	private static final int BROADCAST_AMMOUNT = 3;
 
