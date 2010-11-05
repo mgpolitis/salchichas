@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.simul.communication;
 
+
 import java.io.Serializable;
 
 import ar.edu.itba.pod.simul.communication.payload.Payload;
@@ -63,7 +64,7 @@ public class Message implements Serializable, Comparable<Message> {
 	}
 
 	/**
-	 * Two messages are equal if they are the same object instance, or the values of the original node identification
+	 * Two messages are equals if they are the same object instance, or the values of the original node identification
 	 * and time stamp are equals.
 	 */
 	@Override
@@ -99,5 +100,10 @@ public class Message implements Serializable, Comparable<Message> {
 		} else {
 			return getTimeStamp().compareTo(other.getTimeStamp());
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Message created on %d from node %s and type %s", this.timeStamp, this.nodeId, this.type);
 	}
 }
