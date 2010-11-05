@@ -1,4 +1,6 @@
-wpackage ar.edu.itba.pod.legajo49244.communication;
+package ar.edu.itba.pod.legajo49244.communication;
+
+
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -15,8 +17,9 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	}
 	
 	private ThreePhaseCommitRemote() {
+		System.out.println("creating ThreePhaseCommit");
 		try {
-			UnicastRemoteObject.exportObject(this);
+			UnicastRemoteObject.exportObject(this,0);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

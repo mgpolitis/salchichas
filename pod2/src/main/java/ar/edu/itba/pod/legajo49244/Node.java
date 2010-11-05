@@ -18,7 +18,7 @@ public class Node {
 		try {
 			// starts message listener
 			connectionManager.getGroupCommunication();
-			connectionManager.getClusterAdmimnistration().connectToGroup("asd");
+			connectionManager.getClusterAdmimnistration().connectToGroup("10.6.0.82");
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

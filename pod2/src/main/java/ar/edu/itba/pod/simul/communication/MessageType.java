@@ -15,6 +15,6 @@ public enum MessageType {
 	NODE_MARKET_DATA_REQUEST,		// Node market data request to all nodes
 	DISCONNECT, 
 	RESOURCE_TRANSFER, 				// Resource been transfer from one node to another node
-	//RESOURCE_TRANSFER_CANCELED,		// Resource transfer from one node to another node canceled
+	RESOURCE_TRANSFER_CANCELED,		// Resource transfer from one node to another node canceled
 	RESOURCE_REQUEST,				// Resource request from one node to the cluster
 }

@@ -5,6 +5,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 import ar.edu.itba.pod.simul.communication.ClusterAdministration;
 import ar.edu.itba.pod.simul.communication.ClusterCommunication;
@@ -23,9 +24,11 @@ public class ConnectionManagerRemote implements ConnectionManager {
 	}
 
 	private ConnectionManagerRemote() {
+		System.out.println("Creating ConnectionManager");
 		try {
 			Registry registry = LocateRegistry
 					.createRegistry(Registry.REGISTRY_PORT);
+			UnicastRemoteObject.exportObject(this,0);
 			registry.bind(ReferenceName.CONNECTION_MANAGER_NAME, this);
 		} catch (AlreadyBoundException e) {
 			// TODO Auto-generated catch block

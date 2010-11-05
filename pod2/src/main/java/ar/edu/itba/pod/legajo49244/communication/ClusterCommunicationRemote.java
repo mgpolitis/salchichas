@@ -27,10 +27,11 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 	}
 
 	private ClusterCommunicationRemote() {
+		System.out.println("Creating ClusterCommunication");
 		SimulationListener simulationEventsHandler = new SimulationEventsHandler();
 		this.messageListener = new MessageDispatcher(simulationEventsHandler);
 		try {
-			UnicastRemoteObject.exportObject(this);
+			UnicastRemoteObject.exportObject(this,0);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

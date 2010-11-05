@@ -27,8 +27,9 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 			.getInstance();
 
 	private ClusterAdministrationRemote() {
+		System.out.println("Creating ClusterAdministration");
 		try {
-			UnicastRemoteObject.exportObject(this);
+			UnicastRemoteObject.exportObject(this, 0);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -46,7 +47,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		}
 		clusterName = DEFAULT_CLUSTER_NAME;
 		isConnected = true;
-		
+		System.out.println("group " + clusterName + " created");
 	}
 
 	@Override
@@ -69,6 +70,8 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 			throw new IllegalStateException(
 					"Cannot reconnect, node is already connected to a cluster");
 		}
+
+		System.out.println("connecting to group with node " + initialNode);
 
 		ConnectionManager initialCM = connectionManager
 				.getConnectionManager(initialNode);
@@ -102,6 +105,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 			// I already knew this node, ignore
 			return Lists.newArrayList();
 		}
+		System.out.println("Adding new node: "+newNode);
 
 		Set<String> ret = new HashSet<String>();
 		ret.addAll(this.clusterNodes);
@@ -113,9 +117,12 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 
 	@Override
 	public void disconnectFromGroup(String nodeId) throws RemoteException {
+		// TODO: call this where necessary
 		if (!isConnected) {
 			throw new IllegalArgumentException("El nodo no estaba conectado.");
 		}
+		
+		System.out.println("disconnecting from group: "+nodeId);
 
 		connectionManager.getGroupCommunication().broadcast(
 				new Message(Node.getNodeId(), System.currentTimeMillis(),

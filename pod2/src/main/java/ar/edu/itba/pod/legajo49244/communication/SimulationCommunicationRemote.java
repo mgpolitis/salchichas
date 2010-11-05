@@ -13,8 +13,9 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	private static final SimulationCommunication INSTANCE = new SimulationCommunicationRemote();
 
 	private SimulationCommunicationRemote() {
+		System.out.println("Creating SimulationCommunication");
 		try {
-			UnicastRemoteObject.exportObject(this);
+			UnicastRemoteObject.exportObject(this,0);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

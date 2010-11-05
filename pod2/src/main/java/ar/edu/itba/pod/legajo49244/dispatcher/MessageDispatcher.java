@@ -27,6 +27,7 @@ public class MessageDispatcher implements MessageListener {
 	Map<String, Long> lastContactedForPull;
 
 	public MessageDispatcher(SimulationListener listener) {
+		System.out.println("Creating Message Listener and Dispatcher");
 		this.listener = listener;
 		this.ear = new LinkedBlockingQueue<Message>();
 		this.historyOfBroadcastables = new HashMap<Message, Long>();
@@ -34,6 +35,7 @@ public class MessageDispatcher implements MessageListener {
 
 		new Thread(new DispatcherRunnable()).start();
 		new Thread(new MessageForgetterRunnable()).start();
+		new Thread(new MessageRequesterRunnable()).start();
 	}
 
 	@Override
@@ -60,7 +62,8 @@ public class MessageDispatcher implements MessageListener {
 
 	@Override
 	public boolean onMessageArrive(Message message) throws RemoteException {
-
+		System.out.println("Message arrived:");
+		System.out.println(message);
 		if (historyOfBroadcastables.containsKey(message)) {
 			return false;
 		}
@@ -114,9 +117,9 @@ public class MessageDispatcher implements MessageListener {
 				case RESOURCE_TRANSFER:
 					listener.onResourceTransfer(message);
 					break;
-				/*case RESOURCE_TRANSFER_CANCELED:
+				case RESOURCE_TRANSFER_CANCELED:
 					listener.onResourceTransferCanceled(message);
-					break;*/
+					break;
 				default:
 					throw new IllegalStateException("Unknown message type: "
 							+ type);
@@ -167,6 +170,31 @@ public class MessageDispatcher implements MessageListener {
 		}
 
 	}
+	
+	private class MessageRequesterRunnable implements Runnable {
+		private static final int SLEEP_AMMOUNT_MILLIS = 3000;
+		
+		public boolean continueRunning = true;
+
+		@Override
+		public void run() {
+			
+			// TODO: DOOOOOOOOOO!!!!!!!!!! 
+			// select random node and ask new messages
+			
+			while(continueRunning) {
+				try {
+					Thread.sleep(SLEEP_AMMOUNT_MILLIS);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Requesting new messages");
+			}
+		}
+		
+	}
+
 
 	private static Map<MessageType, Boolean> createIsForwardableHelper() {
 		Map<MessageType, Boolean> ret = Maps.newHashMap();
@@ -178,7 +206,8 @@ public class MessageDispatcher implements MessageListener {
 				MessageType.NODE_AGENTS_LOAD_REQUEST,
 				MessageType.NODE_MARKET_DATA,
 				MessageType.NODE_MARKET_DATA_REQUEST,
-				MessageType.RESOURCE_TRANSFER);
+				MessageType.RESOURCE_TRANSFER,
+				MessageType.RESOURCE_TRANSFER_CANCELED);
 		for (MessageType type : MessageType.values()) {
 			if (forwardables.contains(type)) {
 				ret.put(type, true);

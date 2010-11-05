@@ -12,8 +12,9 @@ public class TransactionableRemote implements Transactionable {
 	private static final Transactionable INSTANCE = new TransactionableRemote();
 
 	private TransactionableRemote() {
+		System.out.println("Creating Transactionable");
 		try {
-			UnicastRemoteObject.exportObject(this);
+			UnicastRemoteObject.exportObject(this,0);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
