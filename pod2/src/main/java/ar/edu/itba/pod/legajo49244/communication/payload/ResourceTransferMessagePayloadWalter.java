@@ -10,11 +10,13 @@ public class ResourceTransferMessagePayloadWalter implements
 	private String dest;
 	private String src;
 	private Resource resource;
-	
-	
 
 	public ResourceTransferMessagePayloadWalter(int ammount, String dest,
 			String src, Resource resource) {
+		if (src.equals(dest)) {
+			throw new IllegalArgumentException(
+					"Source and destination nodes must differ.");
+		}
 		this.ammount = ammount;
 		this.dest = dest;
 		this.src = src;

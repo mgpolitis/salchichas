@@ -103,16 +103,6 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		return ret;
 	}
 
-	/**
-	 * A broadcast message is created informing the nodes of the cluster that
-	 * the node sent by parameter has left the cluster.
-	 * <p>
-	 * The sender node sends the message to N random nodes. In each iteration,
-	 * the node is informed if this message is new or not. This information is
-	 * used to determine whether to continue or not with the broadcast. The
-	 * sender node can be the same node that is been disconnected. If the node
-	 * is already disconnected, an IllegalArgumentException is thrown.
-	 */
 	@Override
 	public void disconnectFromGroup(String nodeId) throws RemoteException {
 		if (!isConnected) {

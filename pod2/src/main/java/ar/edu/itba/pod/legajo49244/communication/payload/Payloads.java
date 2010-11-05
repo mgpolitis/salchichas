@@ -1,10 +1,7 @@
 package ar.edu.itba.pod.legajo49244.communication.payload;
 
 import ar.edu.itba.pod.simul.communication.MarketData;
-import ar.edu.itba.pod.simul.communication.Message;
 import ar.edu.itba.pod.simul.communication.payload.DisconnectPayload;
-import ar.edu.itba.pod.simul.communication.payload.NewMessageRequestPayload;
-import ar.edu.itba.pod.simul.communication.payload.NewMessageResponsePayload;
 import ar.edu.itba.pod.simul.communication.payload.NodeAgentLoadPayload;
 import ar.edu.itba.pod.simul.communication.payload.NodeAgentLoadRequestPayload;
 import ar.edu.itba.pod.simul.communication.payload.NodeMarketDataPayload;
@@ -22,15 +19,6 @@ public class Payloads {
 
 	public static DisconnectPayload newDisconnectPayload(String nodeId) {
 		return new DisconnectPayloadWalter(nodeId);
-	}
-
-	public static NewMessageRequestPayload newMessageRequestPayload() {
-		return new NewMessageRequestPayloadWalter();
-	}
-
-	public static NewMessageResponsePayload newMessageResponsePayload(
-			Iterable<Message> messages) {
-		return new NewMessageResponsePayloadWalter(messages);
 	}
 
 	public static NodeAgentLoadPayload newNodeAgentLoadPayload(int load) {

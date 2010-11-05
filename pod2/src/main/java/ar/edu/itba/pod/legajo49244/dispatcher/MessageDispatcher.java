@@ -14,8 +14,11 @@ import ar.edu.itba.pod.simul.communication.MessageListener;
 import ar.edu.itba.pod.simul.communication.MessageType;
 
 import com.google.common.collect.Lists;
+import com.google.inject.internal.Maps;
 
 public class MessageDispatcher implements MessageListener {
+
+	private static final Map<MessageType, Boolean> IS_FORWARDABLE_HELPER = createIsForwardableHelper();
 
 	final SimulationListener listener;
 	final BlockingQueue<Message> ear;
@@ -42,10 +45,11 @@ public class MessageDispatcher implements MessageListener {
 			lastContactedForPull.put(remoteNodeId, System.currentTimeMillis());
 			return historyOfBroadcastables.keySet();
 		}
-		
+
 		// this node contacted me in the past
 		List<Message> ret = Lists.newArrayList();
-		for (Entry<Message, Long> entry : this.historyOfBroadcastables.entrySet()) {
+		for (Entry<Message, Long> entry : this.historyOfBroadcastables
+				.entrySet()) {
 			Long messageTimeStamp = entry.getValue();
 			if (nodeLastContactTimestamp < messageTimeStamp) {
 				ret.add(entry.getKey());
@@ -110,9 +114,9 @@ public class MessageDispatcher implements MessageListener {
 				case RESOURCE_TRANSFER:
 					listener.onResourceTransfer(message);
 					break;
-				case RESOURCE_TRANSFER_CANCELED:
+				/*case RESOURCE_TRANSFER_CANCELED:
 					listener.onResourceTransferCanceled(message);
-					break;
+					break;*/
 				default:
 					throw new IllegalStateException("Unknown message type: "
 							+ type);
@@ -164,9 +168,30 @@ public class MessageDispatcher implements MessageListener {
 
 	}
 
+	private static Map<MessageType, Boolean> createIsForwardableHelper() {
+		Map<MessageType, Boolean> ret = Maps.newHashMap();
+		List<MessageType> forwardables = Lists.newArrayList(
+				MessageType.DISCONNECT, MessageType.NODE_AGENTS_LOAD,
+				MessageType.RESOURCE_REQUEST);
+		List<MessageType> nonForwardables = Lists.newArrayList(
+				MessageType.NODE_AGENTS_LOAD,
+				MessageType.NODE_AGENTS_LOAD_REQUEST,
+				MessageType.NODE_MARKET_DATA,
+				MessageType.NODE_MARKET_DATA_REQUEST,
+				MessageType.RESOURCE_TRANSFER);
+		for (MessageType type : MessageType.values()) {
+			if (forwardables.contains(type)) {
+				ret.put(type, true);
+			} else if (!nonForwardables.contains(type)) {
+				throw new IllegalStateException(
+						"All messages must be either forwardable or not forwardable");
+			}
+		}
+		return ret;
+	}
+
 	private static boolean isForwardable(Message message) {
-		// TODO: do!
-		return true;
+		return IS_FORWARDABLE_HELPER.get(message.getType());
 	}
 
 }
