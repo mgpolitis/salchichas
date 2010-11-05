@@ -25,7 +25,11 @@ public class Node {
 		}
 	}
 
-	private static String getNodeId() {
+	public static String getNodeId() {
+		if (NODE_ID != null) {
+			return NODE_ID;
+		}
+		
 		try {
 			return Inet4Address.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e) {

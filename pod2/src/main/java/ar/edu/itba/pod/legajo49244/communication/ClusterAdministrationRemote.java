@@ -1,13 +1,15 @@
 package ar.edu.itba.pod.legajo49244.communication;
 
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Set;
 
 import ar.edu.itba.pod.legajo49244.Node;
+import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
 import ar.edu.itba.pod.simul.communication.ClusterAdministration;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
+import ar.edu.itba.pod.simul.communication.Message;
+import ar.edu.itba.pod.simul.communication.MessageType;
 
 import com.google.common.collect.Lists;
 
@@ -24,7 +26,6 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 			.getInstance();
 
 	private ClusterAdministrationRemote() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public static ClusterAdministrationRemote getInstance() {
@@ -44,7 +45,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 	public boolean isConnectedToGroup() throws RemoteException {
 		return isConnected;
 	}
-	
+
 	@Override
 	public String getGroupId() throws RemoteException {
 		return clusterName;
@@ -63,9 +64,9 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 
 		ConnectionManager initialCM = connectionManager
 				.getConnectionManager(initialNode);
-		
+
 		clusterName = initialCM.getClusterAdmimnistration().getGroupId();
-		
+
 		Iterable<String> nodes = initialCM.getClusterAdmimnistration()
 				.addNewNode(Node.NODE_ID);
 		for (String node : nodes) {
@@ -83,35 +84,50 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		}
 		ConnectionManager newNodeCM = connectionManager
 				.getConnectionManager(newNode);
-		if (!this.getGroupId().equals(newNodeCM.getClusterAdmimnistration().getGroupId())) {
-			throw new IllegalArgumentException("Must belong to the same group to connect");
+		if (!this.getGroupId().equals(
+				newNodeCM.getClusterAdmimnistration().getGroupId())) {
+			throw new IllegalArgumentException(
+					"Must belong to the same group to connect");
 		}
-		
-		
-		if (this.clusterNodes.contains(newNode)){
+
+		if (this.clusterNodes.contains(newNode)) {
 			// I already knew this node, ignore
 			return Lists.newArrayList();
 		}
-		
+
 		Set<String> ret = new HashSet<String>();
 		ret.addAll(this.clusterNodes);
-		
+
 		this.clusterNodes.add(newNode);
-		
+
 		return ret;
 	}
 
-	
-	
+	/**
+	 * A broadcast message is created informing the nodes of the cluster that
+	 * the node sent by parameter has left the cluster.
+	 * <p>
+	 * The sender node sends the message to N random nodes. In each iteration,
+	 * the node is informed if this message is new or not. This information is
+	 * used to determine whether to continue or not with the broadcast. The
+	 * sender node can be the same node that is been disconnected. If the node
+	 * is already disconnected, an IllegalArgumentException is thrown.
+	 */
 	@Override
 	public void disconnectFromGroup(String nodeId) throws RemoteException {
-		// TODO Auto-generated method stub
+		if (!isConnected) {
+			throw new IllegalArgumentException("El nodo no estaba conectado.");
+		}
+
+		connectionManager.getGroupCommunication().broadcast(
+				new Message(Node.getNodeId(), System.currentTimeMillis(),
+						MessageType.DISCONNECT, Payloads
+								.newDisconnectPayload(nodeId)));
 
 	}
-	
-	
+
 	public Set<String> getClusterNodes() {
 		return clusterNodes;
 	}
-	
+
 }

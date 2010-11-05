@@ -1,6 +1,5 @@
 package ar.edu.itba.pod.legajo49244.communication;
 
-import java.io.Serializable;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;

@@ -1,6 +1,5 @@
 package ar.edu.itba.pod.legajo49244.communication;
 
-import java.io.Serializable;
 import java.rmi.RemoteException;
 
 import ar.edu.itba.pod.simul.communication.ThreePhaseCommit;
