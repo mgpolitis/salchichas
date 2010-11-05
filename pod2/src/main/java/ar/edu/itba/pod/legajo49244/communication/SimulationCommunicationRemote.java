@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.legajo49244.communication;
 
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Collection;
 
 import ar.edu.itba.pod.simul.communication.AgentDescriptor;
@@ -12,7 +13,12 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	private static final SimulationCommunication INSTANCE = new SimulationCommunicationRemote();
 
 	private SimulationCommunicationRemote() {
-		// TODO: method stub
+		try {
+			UnicastRemoteObject.exportObject(this);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static SimulationCommunication getInstance() {

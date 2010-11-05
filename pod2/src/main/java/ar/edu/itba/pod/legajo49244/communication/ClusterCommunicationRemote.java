@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.legajo49244.communication;
 
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,6 +29,12 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 	private ClusterCommunicationRemote() {
 		SimulationListener simulationEventsHandler = new SimulationEventsHandler();
 		this.messageListener = new MessageDispatcher(simulationEventsHandler);
+		try {
+			UnicastRemoteObject.exportObject(this);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

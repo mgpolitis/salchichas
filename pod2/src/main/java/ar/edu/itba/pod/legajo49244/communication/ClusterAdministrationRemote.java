@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.legajo49244.communication;
 
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,6 +27,12 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 			.getInstance();
 
 	private ClusterAdministrationRemote() {
+		try {
+			UnicastRemoteObject.exportObject(this);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static ClusterAdministrationRemote getInstance() {
@@ -39,6 +46,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		}
 		clusterName = DEFAULT_CLUSTER_NAME;
 		isConnected = true;
+		
 	}
 
 	@Override
