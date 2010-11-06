@@ -39,8 +39,9 @@ public class Main {
 			}
 
 		} catch (RemoteException e) {
-			System.out.println(e.getMessage());
 			System.out.println("There was a problem joining the cluster, now exiting");
+			System.out.println("Reason: ");
+			System.out.println("\t+ "+e.getMessage());
 			System.exit(0);
 		}
 

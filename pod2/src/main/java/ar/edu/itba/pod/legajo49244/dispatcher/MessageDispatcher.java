@@ -1,6 +1,5 @@
 package ar.edu.itba.pod.legajo49244.dispatcher;
 
-import java.io.ObjectInputStream.GetField;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Collections;
@@ -18,6 +17,7 @@ import ar.edu.itba.pod.simul.communication.Message;
 import ar.edu.itba.pod.simul.communication.MessageListener;
 import ar.edu.itba.pod.simul.communication.MessageType;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Maps;
 
@@ -74,9 +74,11 @@ public class MessageDispatcher implements MessageListener {
 
 	@Override
 	public boolean onMessageArrive(Message message) throws RemoteException {
+		Preconditions.checkNotNull(message);
+
 		System.out.println("Message arrived:");
-		System.out.println("\t- "+message);
-		
+		System.out.println("\t- " + message);
+
 		if (historyOfBroadcastables.containsKey(message)) {
 			return false;
 		}
@@ -193,12 +195,7 @@ public class MessageDispatcher implements MessageListener {
 		public void run() {
 
 			while (continueRunning) {
-				try {
-					Thread.sleep(SLEEP_AMMOUNT_MILLIS);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
 				List<String> nodes = Lists
 						.newArrayList(ClusterAdministrationRemote.getInstance()
 								.getClusterNodes());
@@ -206,9 +203,6 @@ public class MessageDispatcher implements MessageListener {
 				if (nodes.size() > 0) {
 
 					String randomNode = nodes.get(0);
-					System.out.println("Requesting new messages from "
-							+ randomNode);
-
 					try {
 						ConnectionManagerRemote.getInstance()
 								.getConnectionManager(randomNode)
@@ -220,12 +214,21 @@ public class MessageDispatcher implements MessageListener {
 							MessageDispatcher.this.onMessageArrive(m);
 						}
 					} catch (RemoteException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						// don't sleep, immediately choose other node to get
+						// messages from
+						continue;
 					}
-
+					System.out.println("Requesting new messages from "
+							+ randomNode);
 				} else {
 					System.out.println("No peers to request messages from.");
+				}
+
+				try {
+					Thread.sleep(SLEEP_AMMOUNT_MILLIS);
+				} catch (InterruptedException e) {
+					System.out.println("thread interrupted while sleeping?");
+					e.printStackTrace();
 				}
 
 			}
@@ -256,11 +259,9 @@ public class MessageDispatcher implements MessageListener {
 	}
 
 	private static boolean isForwardable(Message message) {
-		if (IS_FORWARDABLE_HELPER == null) {
-			System.out.println("Creating IsForwardableHelper");
-			IS_FORWARDABLE_HELPER = createIsForwardableHelper();
-		}
-		return IS_FORWARDABLE_HELPER.get(message.getType());
+		Preconditions.checkNotNull(message);
+		MessageType type = message.getType();
+		return IS_FORWARDABLE_HELPER.get(type);
 	}
 
 }

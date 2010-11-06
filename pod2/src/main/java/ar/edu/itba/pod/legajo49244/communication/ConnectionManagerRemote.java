@@ -62,11 +62,14 @@ public class ConnectionManagerRemote implements ConnectionManager {
 			throw new RemoteException("REASON UNKNOWN COMPLETE ME!!");
 		} catch (RemoteException e) {
 
-			this.getClusterAdmimnistration().disconnectFromGroup(nodeId);
+			String message = "Node "+nodeId+" was found to be down.";
+			System.out.println(message);
+			if (this.getClusterAdmimnistration().isConnectedToGroup()) {
+				// if connected to cluster notify others of node down
+				this.getClusterAdmimnistration().disconnectFromGroup(nodeId);
+			}
 
-			e.printStackTrace();
-			// TODO see if this exception needs to be raised
-			throw new RemoteException("Node was found to be down.");
+			throw new RemoteException(message);
 		}
 		return ret;
 	}
