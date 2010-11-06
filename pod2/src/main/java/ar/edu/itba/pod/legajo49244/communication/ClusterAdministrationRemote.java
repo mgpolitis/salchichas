@@ -109,6 +109,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 
 		Set<String> ret = new HashSet<String>();
 		ret.addAll(this.clusterNodes);
+		ret.add(Node.getNodeId());
 
 		this.clusterNodes.add(newNode);
 
@@ -124,6 +125,10 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		
 		System.out.println("disconnecting from group: "+nodeId);
 
+		clusterNodes.remove(nodeId);
+		
+		
+		// TODO: deprecated, use MessageFactory
 		connectionManager.getGroupCommunication().broadcast(
 				new Message(Node.getNodeId(), System.currentTimeMillis(),
 						MessageType.DISCONNECT, Payloads

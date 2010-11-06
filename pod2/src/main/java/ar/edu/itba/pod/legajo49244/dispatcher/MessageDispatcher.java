@@ -1,6 +1,8 @@
 package ar.edu.itba.pod.legajo49244.dispatcher;
 
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import ar.edu.itba.pod.legajo49244.Node;
+import ar.edu.itba.pod.legajo49244.communication.ClusterAdministrationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
 import ar.edu.itba.pod.simul.communication.Message;
 import ar.edu.itba.pod.simul.communication.MessageListener;
@@ -36,6 +40,13 @@ public class MessageDispatcher implements MessageListener {
 		new Thread(new DispatcherRunnable()).start();
 		new Thread(new MessageForgetterRunnable()).start();
 		new Thread(new MessageRequesterRunnable()).start();
+
+		try {
+			UnicastRemoteObject.exportObject(this, 0);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -45,7 +56,7 @@ public class MessageDispatcher implements MessageListener {
 		if (nodeLastContactTimestamp == null) {
 			// first time this node is contacting me
 			lastContactedForPull.put(remoteNodeId, System.currentTimeMillis());
-			return historyOfBroadcastables.keySet();
+			return Lists.newArrayList(historyOfBroadcastables.keySet());
 		}
 
 		// this node contacted me in the past
@@ -170,31 +181,54 @@ public class MessageDispatcher implements MessageListener {
 		}
 
 	}
-	
+
 	private class MessageRequesterRunnable implements Runnable {
 		private static final int SLEEP_AMMOUNT_MILLIS = 3000;
-		
+
 		public boolean continueRunning = true;
 
 		@Override
 		public void run() {
-			
-			// TODO: DOOOOOOOOOO!!!!!!!!!! 
-			// select random node and ask new messages
-			
-			while(continueRunning) {
+
+			while (continueRunning) {
 				try {
 					Thread.sleep(SLEEP_AMMOUNT_MILLIS);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				System.out.println("Requesting new messages");
+				List<String> nodes = Lists
+						.newArrayList(ClusterAdministrationRemote.getInstance()
+								.getClusterNodes());
+				Collections.shuffle(nodes);
+				if (nodes.size() > 0) {
+
+					String randomNode = nodes.get(0);
+					System.out.println("Requesting new messages from "
+							+ randomNode);
+
+					try {
+						ConnectionManagerRemote.getInstance()
+								.getConnectionManager(randomNode)
+								.getGroupCommunication().getListener()
+								.getNewMessages(Node.getNodeId());
+						Iterable<Message> messages = Lists.newArrayList();
+
+						for (Message m : messages) {
+							MessageDispatcher.this.onMessageArrive(m);
+						}
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+				} else {
+					System.out.println("No peers to request messages from.");
+				}
+
 			}
 		}
-		
 	}
-
 
 	private static Map<MessageType, Boolean> createIsForwardableHelper() {
 		Map<MessageType, Boolean> ret = Maps.newHashMap();

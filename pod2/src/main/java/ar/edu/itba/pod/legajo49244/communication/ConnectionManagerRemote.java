@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.legajo49244.communication;
 
+import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -28,7 +29,7 @@ public class ConnectionManagerRemote implements ConnectionManager {
 		try {
 			Registry registry = LocateRegistry
 					.createRegistry(Registry.REGISTRY_PORT);
-			UnicastRemoteObject.exportObject(this,0);
+			UnicastRemoteObject.exportObject(this, 0);
 			registry.bind(ReferenceName.CONNECTION_MANAGER_NAME, this);
 		} catch (AlreadyBoundException e) {
 			// TODO Auto-generated catch block
@@ -51,6 +52,17 @@ public class ConnectionManagerRemote implements ConnectionManager {
 			e.printStackTrace();
 			throw new RemoteException(
 					"Connection manager not bound in that node.");
+		} catch (AccessException e) {
+			// TODO Auto-generated catch block, analize case
+			e.printStackTrace();
+			throw new RemoteException("REASON UNKNOWN COMPLETE ME!!");
+		} catch (RemoteException e) {
+
+			this.getClusterAdmimnistration().disconnectFromGroup(nodeId);
+
+			e.printStackTrace();
+			// TODO see if this exception needs to be raised
+			throw new RemoteException("Node was found to be down.");
 		}
 		return ret;
 	}

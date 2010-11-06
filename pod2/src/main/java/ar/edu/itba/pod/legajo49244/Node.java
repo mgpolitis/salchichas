@@ -1,11 +1,15 @@
 package ar.edu.itba.pod.legajo49244;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 
 import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
+import ar.edu.itba.pod.simul.communication.Message;
 
 public class Node {
 
@@ -18,11 +22,24 @@ public class Node {
 		try {
 			// starts message listener
 			connectionManager.getGroupCommunication();
-			connectionManager.getClusterAdmimnistration().connectToGroup("10.6.0.82");
+			if (NODE_ID.equals("10.6.0.167")) {
+				connectionManager.getClusterAdmimnistration().createGroup();
+			} else {
+				connectionManager.getClusterAdmimnistration().connectToGroup("10.6.0.167");
+			}
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+		try {
+			r.readLine();
+			connectionManager.getGroupCommunication().broadcast(null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public static String getNodeId() {
