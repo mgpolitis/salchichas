@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.legajo49244.dispatcher;
 
+import java.io.ObjectInputStream.GetField;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Collections;
@@ -22,7 +23,7 @@ import com.google.inject.internal.Maps;
 
 public class MessageDispatcher implements MessageListener {
 
-	private static final Map<MessageType, Boolean> IS_FORWARDABLE_HELPER = createIsForwardableHelper();
+	private static Map<MessageType, Boolean> IS_FORWARDABLE_HELPER = createIsForwardableHelper();
 
 	final SimulationListener listener;
 	final BlockingQueue<Message> ear;
@@ -74,7 +75,8 @@ public class MessageDispatcher implements MessageListener {
 	@Override
 	public boolean onMessageArrive(Message message) throws RemoteException {
 		System.out.println("Message arrived:");
-		System.out.println(message);
+		System.out.println("\t- "+message);
+		
 		if (historyOfBroadcastables.containsKey(message)) {
 			return false;
 		}
@@ -254,6 +256,10 @@ public class MessageDispatcher implements MessageListener {
 	}
 
 	private static boolean isForwardable(Message message) {
+		if (IS_FORWARDABLE_HELPER == null) {
+			System.out.println("Creating IsForwardableHelper");
+			IS_FORWARDABLE_HELPER = createIsForwardableHelper();
+		}
 		return IS_FORWARDABLE_HELPER.get(message.getType());
 	}
 

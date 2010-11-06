@@ -11,7 +11,7 @@ import ar.edu.itba.pod.thread.doc.NotThreadSafe;
 import com.google.common.base.Preconditions;
 
 /**
- * Simulation managerfor local thread-based simulation
+ * Simulation manager for local thread-based simulation
  */
 @NotThreadSafe
 public class LocalSimulationManager implements SimulationManager {

@@ -77,6 +77,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 				.getConnectionManager(initialNode);
 
 		clusterName = initialCM.getClusterAdmimnistration().getGroupId();
+		System.out.println("Connected to group with name "+clusterName);
 
 		Iterable<String> nodes = initialCM.getClusterAdmimnistration()
 				.addNewNode(Node.NODE_ID);

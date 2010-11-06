@@ -31,6 +31,10 @@ public class ConnectionManagerRemote implements ConnectionManager {
 					.createRegistry(Registry.REGISTRY_PORT);
 			UnicastRemoteObject.exportObject(this, 0);
 			registry.bind(ReferenceName.CONNECTION_MANAGER_NAME, this);
+			
+			// start message listener
+			this.getGroupCommunication();
+			
 		} catch (AlreadyBoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
