@@ -8,8 +8,10 @@ import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 
 import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
+import ar.edu.itba.pod.legajo49244.communication.payload.ResourceTransferMessagePayloadWalter;
+import ar.edu.itba.pod.legajo49244.message.Messages;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
-import ar.edu.itba.pod.simul.communication.Message;
+import ar.edu.itba.pod.simul.market.Resource;
 
 public class Node {
 
@@ -35,18 +37,20 @@ public class Node {
 		BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
 		try {
 			r.readLine();
-			connectionManager.getGroupCommunication().broadcast(null);
+			connectionManager.getGroupCommunication().broadcast(
+					Messages.newResourceTransferMessage(
+							new ResourceTransferMessagePayloadWalter(10, "a", "b", new Resource("cat", "name"))));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	public static String getNodeId() {
 		if (NODE_ID != null) {
 			return NODE_ID;
 		}
-		
+
 		try {
 			return Inet4Address.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e) {
