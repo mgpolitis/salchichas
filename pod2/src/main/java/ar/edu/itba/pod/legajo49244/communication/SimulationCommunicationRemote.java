@@ -4,17 +4,16 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
-
-import com.google.common.collect.Sets;
-import com.google.inject.internal.Maps;
 
 import ar.edu.itba.pod.simul.communication.AgentDescriptor;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.NodeAgentLoad;
 import ar.edu.itba.pod.simul.communication.SimulationCommunication;
+
+import com.google.common.collect.Sets;
+import com.google.inject.internal.Maps;
 
 public class SimulationCommunicationRemote implements SimulationCommunication {
 

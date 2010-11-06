@@ -250,7 +250,9 @@ public class MessageDispatcher implements MessageListener {
 		for (MessageType type : MessageType.values()) {
 			if (forwardables.contains(type)) {
 				ret.put(type, true);
-			} else if (!nonForwardables.contains(type)) {
+			} else if (nonForwardables.contains(type)) {
+				ret.put(type, false);
+			} else {
 				throw new IllegalStateException(
 						"All messages must be either forwardable or not forwardable");
 			}
@@ -261,7 +263,11 @@ public class MessageDispatcher implements MessageListener {
 	private static boolean isForwardable(Message message) {
 		Preconditions.checkNotNull(message);
 		MessageType type = message.getType();
-		return IS_FORWARDABLE_HELPER.get(type);
+		Boolean ret = IS_FORWARDABLE_HELPER.get(type);
+		if (ret == null) {
+			throw new IllegalArgumentException("I don't message type "+type);
+		}
+		return ret;
 	}
 
 }
