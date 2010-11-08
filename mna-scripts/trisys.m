@@ -13,18 +13,6 @@ function X = trisys(A,D,C,B)
 % Return
 %   X   solution vector
 %
-% NUMERICAL METHODS: MATLAB Programs, (c) John H. Mathews 1995
-% To accompany the text:
-% NUMERICAL METHODS for Mathematics, Science and Engineering, 2nd Ed, 1992
-% Prentice Hall, Englewood Cliffs, New Jersey, 07632, U.S.A.
-% Prentice Hall, Inc.; USA, Canada, Mexico ISBN 0-13-624990-6
-% Prentice Hall, International Editions:   ISBN 0-13-625047-5
-% This free software is compliments of the author.
-% E-mail address:      in%"mathews@fullerton.edu"
-%
-% Algorithm 10.3 (Crank-Nicholson Method for the Heat Equation).
-% Section	10.2, Parabolic Equations, Page 517
-%---------------------------------------------------------------------------
 
 n = length(B);
 for k = 2:n,

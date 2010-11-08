@@ -1,3 +1,3 @@
 function y=f(x)
-	y=-x.*(x-1)*8;
+	y=1;
 end

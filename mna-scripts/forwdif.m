@@ -1,5 +1,7 @@
 function U=forwdif(f,c1,c2,a,b,c,n,m)
 
+% solves heat equation u_t = c*u_xx
+
 % Input	
 % 	- f = u(x,0) as a string 'f'
 %	- c1 = u(0,t) and c2 = u(a,t)

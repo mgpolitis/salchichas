@@ -1,4 +1,7 @@
 function U=crnich(f,c1,c2,a,b,c,n,m)
+
+% implicit method to solve heat equation u_t = c*u_xx
+
 % Input
 % 	- f=u(x,0) as string 'f'
 % 	- c1=u(0,t) and c2=u(a,t)
