@@ -25,13 +25,13 @@ public class MessageDispatcher implements MessageListener {
 
 	private static Map<MessageType, Boolean> IS_FORWARDABLE_HELPER = createIsForwardableHelper();
 
-	final SimulationListener listener;
+	final DispatcherListener listener;
 	final BlockingQueue<Message> ear;
 
 	Map<Message, Long> historyOfBroadcastables;
 	Map<String, Long> lastContactedForPull;
 
-	public MessageDispatcher(SimulationListener listener) {
+	public MessageDispatcher(DispatcherListener listener) {
 		System.out.println("Creating Message Listener and Dispatcher");
 		this.listener = listener;
 		this.ear = new LinkedBlockingQueue<Message>();

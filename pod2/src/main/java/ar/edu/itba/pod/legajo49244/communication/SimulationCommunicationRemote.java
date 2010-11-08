@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedSet;
 
+import ar.edu.itba.pod.legajo49244.communication.payload.NodeAgentLoadRequestPayloadWalter;
+import ar.edu.itba.pod.legajo49244.message.Messages;
 import ar.edu.itba.pod.simul.communication.AgentDescriptor;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.NodeAgentLoad;
@@ -20,6 +22,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	private static final SimulationCommunication INSTANCE = new SimulationCommunicationRemote();
 
 	private boolean isCoordinator = false;
+	private boolean isWaitingLoads = false;
 	private String coodinatorId = null;
 
 	private SortedSet<NodeAgentLoad> sortedLoadPerNode;
@@ -79,6 +82,22 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	public void startAgent(AgentDescriptor descriptor) throws RemoteException {
 		// TODO aca ya seguro hay que levantar el agent, alguien
 		// se ocupo de controlar que sea lo que se debe.
+		
+		
+		
+		// le aviso al coordinador que cambio mi carga
+		NodeAgentLoad newLoad = null;
+		try {
+			getCoordinatorConnectionManager()
+				.getSimulationCommunication()
+				.nodeLoadModified(newLoad);
+		} catch (RemoteException e) {
+			// TODO: coordinator down, check if correct
+			this.becomeCoordinator();
+		}
+		
+		
+		
 	}
 
 	private void becomeCoordinator() {
@@ -97,7 +116,19 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		});
 		mapLoadPerNode = Maps.newHashMap();
 
-		// TODO: obtain loads and complete method
+		// TODO: analyze fully
+		
+		
+		isWaitingLoads = true;
+		try {
+			ClusterCommunicationRemote.getInstance().broadcast(
+					Messages.newNodeAgentLoadRequestMessage(new NodeAgentLoadRequestPayloadWalter()));
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 
 	}
 

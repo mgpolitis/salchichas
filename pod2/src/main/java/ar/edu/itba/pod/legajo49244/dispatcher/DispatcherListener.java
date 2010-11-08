@@ -2,7 +2,7 @@ package ar.edu.itba.pod.legajo49244.dispatcher;
 
 import ar.edu.itba.pod.simul.communication.Message;
 
-public interface SimulationListener {
+public interface DispatcherListener {
 
 	public boolean onNodeAgentsLoad(Message message);
 

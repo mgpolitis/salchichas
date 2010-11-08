@@ -7,7 +7,7 @@ import java.util.List;
 
 import ar.edu.itba.pod.legajo49244.SimulationEventsHandler;
 import ar.edu.itba.pod.legajo49244.dispatcher.MessageDispatcher;
-import ar.edu.itba.pod.legajo49244.dispatcher.SimulationListener;
+import ar.edu.itba.pod.legajo49244.dispatcher.DispatcherListener;
 import ar.edu.itba.pod.simul.communication.ClusterCommunication;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.Message;
@@ -28,7 +28,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 
 	private ClusterCommunicationRemote() {
 		System.out.println("Creating ClusterCommunication");
-		SimulationListener simulationEventsHandler = new SimulationEventsHandler();
+		DispatcherListener simulationEventsHandler = new SimulationEventsHandler();
 		this.messageListener = new MessageDispatcher(simulationEventsHandler);
 		try {
 			UnicastRemoteObject.exportObject(this,0);

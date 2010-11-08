@@ -1,9 +1,9 @@
 package ar.edu.itba.pod.legajo49244;
 
-import ar.edu.itba.pod.legajo49244.dispatcher.SimulationListener;
+import ar.edu.itba.pod.legajo49244.dispatcher.DispatcherListener;
 import ar.edu.itba.pod.simul.communication.Message;
 
-public class SimulationEventsHandler implements SimulationListener {
+public class SimulationEventsHandler implements DispatcherListener {
 
 	@Override
 	public boolean onDisconnect(Message message) {
