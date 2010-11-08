@@ -9,7 +9,7 @@ import ar.edu.itba.pod.simul.simulation.Simulation;
 import ar.edu.itba.pod.simul.simulation.SimulationInspector;
 import ar.edu.itba.pod.simul.simulation.SimulationManager;
 
-public class DistributedSimulationManager implements SimulationManager, DispatcherListener{
+public class DistributedSimulationManager implements SimulationManager, DispatcherListener {
 
 	@Override
 	public void addAgent(Agent agent) {
