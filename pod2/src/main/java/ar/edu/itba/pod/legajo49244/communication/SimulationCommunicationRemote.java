@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedSet;
 
+import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.payload.NodeAgentLoadRequestPayloadWalter;
 import ar.edu.itba.pod.legajo49244.message.Messages;
 import ar.edu.itba.pod.simul.communication.AgentDescriptor;
@@ -19,10 +20,9 @@ import com.google.inject.internal.Maps;
 
 public class SimulationCommunicationRemote implements SimulationCommunication {
 
-	private static final SimulationCommunication INSTANCE = new SimulationCommunicationRemote();
+	private static final SimulationCommunicationRemote INSTANCE = new SimulationCommunicationRemote();
 
 	private boolean isCoordinator = false;
-	private boolean isWaitingLoads = false;
 	private String coodinatorId = null;
 
 	private SortedSet<NodeAgentLoad> sortedLoadPerNode;
@@ -38,7 +38,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		}
 	}
 
-	public static SimulationCommunication getInstance() {
+	public static SimulationCommunicationRemote getInstance() {
 		return INSTANCE;
 	}
 
@@ -60,6 +60,8 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	@Override
 	public void nodeLoadModified(NodeAgentLoad newLoad) throws RemoteException {
+		
+		// TODO: REFACTOR MORTAL, no me lo llama otro...
 		if (!isCoordinator) {
 			// the caller node should now be coordinator
 			throw new IllegalStateException(
@@ -82,22 +84,17 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	public void startAgent(AgentDescriptor descriptor) throws RemoteException {
 		// TODO aca ya seguro hay que levantar el agent, alguien
 		// se ocupo de controlar que sea lo que se debe.
-		
-		
-		
-		// le aviso al coordinador que cambio mi carga
-		NodeAgentLoad newLoad = null;
-		try {
-			getCoordinatorConnectionManager()
-				.getSimulationCommunication()
-				.nodeLoadModified(newLoad);
-		} catch (RemoteException e) {
-			// TODO: coordinator down, check if correct
-			this.becomeCoordinator();
-		}
-		
-		
-		
+
+		// TODO: no le aviso al coordinador que cambio mi carga, no es necesario?
+//		NodeAgentLoad newLoad = null;
+//		try {
+//			getCoordinatorConnectionManager().getSimulationCommunication()
+//					.nodeLoadModified(newLoad);
+//		} catch (RemoteException e) {
+//			// TODO: coordinator down, check if correct
+//			this.becomeCoordinator();
+//		}
+
 	}
 
 	private void becomeCoordinator() {
@@ -117,25 +114,70 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		mapLoadPerNode = Maps.newHashMap();
 
 		// TODO: analyze fully
-		
-		
-		isWaitingLoads = true;
+
 		try {
-			ClusterCommunicationRemote.getInstance().broadcast(
-					Messages.newNodeAgentLoadRequestMessage(new NodeAgentLoadRequestPayloadWalter()));
+			ClusterCommunicationRemote
+					.getInstance()
+					.broadcast(
+							Messages
+									.newNodeAgentLoadRequestMessage(new NodeAgentLoadRequestPayloadWalter()));
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
 
+	}
+	
+	public synchronized void leaveCoordination() {
+		isCoordinator = false;
+		mapLoadPerNode = null;
+		sortedLoadPerNode = null;
 	}
 
 	private ConnectionManager getCoordinatorConnectionManager()
 			throws RemoteException {
 		return ConnectionManagerRemote.getInstance().getConnectionManager(
 				coodinatorId);
+	}
+
+	public void onNodeDisconnected(String disconnectedNode) {
+		// TODO: ver los sysos estos, son informales
+		if (Node.getNodeId().equals(disconnectedNode)) {
+			try {
+				if (ClusterAdministrationRemote.getInstance()
+						.isConnectedToGroup()) {
+					System.out
+							.println("Me dijeron que yo me desconecte y estoy conectado! WTF? ");
+				}
+			} catch (RemoteException e) {
+				System.out.println("ESTO NO DEBERIA APARECER NUNCA");
+				// do nothing, will never fail
+			}
+		}
+		if (isCoordinator) {
+			NodeAgentLoad disconnectedAgentLoad = mapLoadPerNode.get(disconnectedNode);
+			if (disconnectedAgentLoad == null) {
+				System.out.println("I was notified of a node's disconection,"
+						+ "but I didn't know of it's existance= "
+						+ disconnectedNode);
+
+			} else {
+				sortedLoadPerNode.remove(disconnectedAgentLoad);
+			}
+			mapLoadPerNode.remove(disconnectedNode);
+		}
+	}
+
+	public void onNodeAgentsLoadInfoArrived(String informerNode, int load) {
+		if (isCoordinator) {
+			//TODO: update node info and update sleep interval
+			
+			
+		}
+	}
+	
+	public void nodeBalancingInfoCallback(Long dt) {
+		
 	}
 
 }

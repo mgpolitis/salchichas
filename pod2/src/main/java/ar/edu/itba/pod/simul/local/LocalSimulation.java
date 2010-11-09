@@ -21,7 +21,7 @@ import com.google.common.collect.Maps;
  * This implementation uses a different threrad for each agent
  */
 @ThreadSafe
-class LocalSimulation implements Simulation, SimulationInspector {
+public class LocalSimulation implements Simulation, SimulationInspector {
 	private final List<Agent> agents = new CopyOnWriteArrayList<Agent>();
 	private final List<SimulationEventHandler> handlers =  new CopyOnWriteArrayList<SimulationEventHandler>();
 	private final Map<Class<?>, Object> env = Maps.newHashMap();

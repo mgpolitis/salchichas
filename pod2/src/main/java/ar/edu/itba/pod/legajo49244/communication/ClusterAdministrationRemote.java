@@ -7,10 +7,9 @@ import java.util.Set;
 
 import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
+import ar.edu.itba.pod.legajo49244.message.Messages;
 import ar.edu.itba.pod.simul.communication.ClusterAdministration;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
-import ar.edu.itba.pod.simul.communication.Message;
-import ar.edu.itba.pod.simul.communication.MessageType;
 
 import com.google.common.collect.Lists;
 
@@ -129,16 +128,18 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		clusterNodes.remove(nodeId);
 		
 		
-		// TODO: deprecated, use MessageFactory
 		connectionManager.getGroupCommunication().broadcast(
-				new Message(Node.getNodeId(), System.currentTimeMillis(),
-						MessageType.DISCONNECT, Payloads
-								.newDisconnectPayload(nodeId)));
-
+				Messages.newDisconnectMessage(Payloads
+						.newDisconnectPayload(nodeId)));
+		
 	}
 
 	public Set<String> getClusterNodes() {
 		return clusterNodes;
+	}
+
+	public void onNodeDisconnected(String disconnectedNode) {
+		clusterNodes.remove(disconnectedNode);
 	}
 
 }

@@ -1,48 +1,14 @@
 package ar.edu.itba.pod.legajo49244.simulation;
 
-import java.util.concurrent.TimeUnit;
-
+import ar.edu.itba.pod.simul.local.LocalSimulation;
 import ar.edu.itba.pod.simul.simulation.Simulation;
-import ar.edu.itba.pod.simul.simulation.SimulationEvent;
-import ar.edu.itba.pod.simul.simulation.SimulationEventHandler;
 import ar.edu.itba.pod.simul.simulation.SimulationInspector;
+import ar.edu.itba.pod.simul.time.TimeMapper;
 
-public class DistributedSimulation implements Simulation, SimulationInspector {
+public class DistributedSimulation extends LocalSimulation implements Simulation, SimulationInspector {
 
-	@Override
-	public void add(SimulationEventHandler handler) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public <T> T env(Class<T> param) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void raise(SimulationEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void remove(SimulationEventHandler handler) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void wait(int amount, TimeUnit unit) throws InterruptedException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int runningAgents() {
-		// TODO Auto-generated method stub
-		return 0;
+	public DistributedSimulation(TimeMapper timeMapper) {
+		super(timeMapper);
 	}
 
 }
