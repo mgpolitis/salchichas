@@ -10,6 +10,9 @@ function U = finedif(f,g,a,b,c,n,m)
 %            - n and m number of grid points over [0,a] and [0,b]
 %Output - U solution matrix; analogous to Table 10.1
 
+% exact, d'alambert:
+% u(x,t) = [F(x+ct) + F(x-ct)]/2 + 1/2c \int {x-ct}{x+ct} G(z)dz
+
 % If f and g are M-file functions call U = finedif(@f,@g,a,b,c,n,m).
 % if f and g are anonymous functions call U = finedif(f,g,a,b,c,n,m).
 
