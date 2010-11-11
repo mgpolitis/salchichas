@@ -5,9 +5,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Collections;
 import java.util.List;
 
-import ar.edu.itba.pod.legajo49244.SimulationEventsHandler;
 import ar.edu.itba.pod.legajo49244.dispatcher.MessageDispatcher;
-import ar.edu.itba.pod.legajo49244.dispatcher.DispatcherListener;
+import ar.edu.itba.pod.legajo49244.simulation.DistributedSimulationManager;
 import ar.edu.itba.pod.simul.communication.ClusterCommunication;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.Message;
@@ -21,6 +20,12 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 
 	private static final ClusterCommunication INSTANCE = new ClusterCommunicationRemote();
 	private MessageListener messageListener;
+	
+	private DistributedSimulationManager distributedSimulationManager;
+
+	public DistributedSimulationManager getDistributedSimulationManager() {
+		return distributedSimulationManager;
+	}
 
 	public static ClusterCommunication getInstance() {
 		return INSTANCE;
@@ -28,8 +33,8 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 
 	private ClusterCommunicationRemote() {
 		System.out.println("Creating ClusterCommunication");
-		DispatcherListener simulationEventsHandler = new SimulationEventsHandler();
-		this.messageListener = new MessageDispatcher(simulationEventsHandler);
+		distributedSimulationManager = new DistributedSimulationManager();
+		this.messageListener = new MessageDispatcher(distributedSimulationManager);
 		try {
 			UnicastRemoteObject.exportObject(this,0);
 		} catch (RemoteException e) {

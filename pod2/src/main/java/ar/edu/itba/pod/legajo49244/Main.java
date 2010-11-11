@@ -3,59 +3,47 @@ package ar.edu.itba.pod.legajo49244;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.rmi.RemoteException;
 
-import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
-import ar.edu.itba.pod.legajo49244.communication.payload.ResourceTransferMessagePayloadWalter;
+import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
 import ar.edu.itba.pod.legajo49244.message.Messages;
+import ar.edu.itba.pod.simul.ObjectFactory;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
+import ar.edu.itba.pod.simul.market.Market;
+import ar.edu.itba.pod.simul.market.MarketManager;
 import ar.edu.itba.pod.simul.market.Resource;
+import ar.edu.itba.pod.simul.simulation.SimulationManager;
+import ar.edu.itba.pod.simul.time.TimeMappers;
 
 public class Main {
 
 	public static void main(String[] args) {
 
-		if (args.length > 0) {
-			System.out.println("User set my nodeId to " + args[0]);
-			Node.setUserNodeId(args[0]);
-		}
-
+		ObjectFactory factory = new MegaFactory();
+		ConnectionManager conn = null;
 		if (args.length > 1) {
-			System.out.println("User set my entry point to cluster as "
-					+ args[1]);
-			Node.setUserEntryPoint(args[1]);
+			conn = factory.createConnectionManager(args[0], args[1]);
+		} else if (args.length > 0) {
+			conn = factory.createConnectionManager(args[0]);
+		} else {
+			System.err.println("Must provide local IP and (optionally) entry point IP.");
 		}
 
-		ConnectionManager connectionManager = ConnectionManagerRemote
-				.getInstance();
-		System.out.println("My node id is " + Node.getNodeId());
-
-		try {
-			if (Node.getEntryPoint() == null) {
-				connectionManager.getClusterAdmimnistration().createGroup();
-			} else {
-				connectionManager.getClusterAdmimnistration().connectToGroup(
-						Node.getEntryPoint());
-			}
-
-		} catch (RemoteException e) {
-			System.out.println("There was a problem joining the cluster, now exiting");
-			System.out.println("Reason: ");
-			System.out.println("\t+ "+e.getMessage());
-			System.exit(0);
-		}
-
+		MarketManager market = factory.getMarketManager(conn);
+		SimulationManager simul = factory.getSimulationManager(conn,
+				TimeMappers.realtime());
+		simul.register(Market.class, market.market());
+		// ...
+		simul.start();
+		
+		
 		BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
 		try {
 			r.readLine();
 
-			connectionManager
-					.getGroupCommunication()
-					.broadcast(
-							Messages
-									.newResourceTransferMessage(new ResourceTransferMessagePayloadWalter(
-											10, "a", "b", new Resource("cat",
-													"name"))));
+			conn.getGroupCommunication().broadcast(
+					Messages.newResourceTransferMessage(Payloads
+							.newResourceTransferMessagePayload("asd", "asd",
+									new Resource("cat", "name"), 8)));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -8,8 +8,10 @@ import com.google.common.base.Preconditions;
 public class DistributedMarketManager implements MarketManager {
 
 	private DistributedMarket market;
-	
-	
+
+	public DistributedMarketManager() {
+		market = new DistributedMarket();
+	}
 
 	@Override
 	public MarketInspector inspector() {
@@ -18,20 +20,19 @@ public class DistributedMarketManager implements MarketManager {
 
 	@Override
 	public DistributedMarket market() {
-		Preconditions.checkState(market != null, "There is no active market to be retrieved");
+		Preconditions.checkState(market != null,
+				"There is no active market to be retrieved");
 		return market;
 	}
 
 	@Override
 	public void start() {
-		market = new DistributedMarket();
 		market.start();
 	}
-	
+
 	@Override
 	public void shutdown() {
 		market.finish();
 	}
-
 
 }

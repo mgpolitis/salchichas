@@ -200,6 +200,7 @@ public class LocalMarket extends CleanableThread implements Market, MarketInspec
 	public void logTransfer(ResourceStock from, ResourceStock to, int amount) {
 		transactionCount++;
 		createhistory(from, to, amount);
+		//TODO: erase
 		System.out.printf("SELL: from %s to %s --> %d of %s\n", from.name(), to.name(), amount, from.resource());
 	}
 
