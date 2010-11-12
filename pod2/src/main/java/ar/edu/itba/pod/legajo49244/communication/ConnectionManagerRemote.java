@@ -20,7 +20,7 @@ public class ConnectionManagerRemote implements ConnectionManager {
 
 	private static final ConnectionManager INSTANCE = new ConnectionManagerRemote();
 
-	public static ConnectionManager getInstance() {
+	public static ConnectionManager get() {
 		return INSTANCE;
 	}
 
@@ -77,7 +77,7 @@ public class ConnectionManagerRemote implements ConnectionManager {
 	@Override
 	public ClusterAdministration getClusterAdmimnistration()
 			throws RemoteException {
-		return ClusterAdministrationRemote.getInstance();
+		return ClusterAdministrationRemote.get();
 	}
 
 	@Override
@@ -87,23 +87,23 @@ public class ConnectionManagerRemote implements ConnectionManager {
 
 	@Override
 	public ClusterCommunication getGroupCommunication() throws RemoteException {
-		return ClusterCommunicationRemote.getInstance();
+		return ClusterCommunicationRemote.get();
 	}
 
 	@Override
 	public Transactionable getNodeCommunication() throws RemoteException {
-		return TransactionableRemote.getInstance();
+		return TransactionableRemote.get();
 	}
 
 	@Override
 	public SimulationCommunication getSimulationCommunication()
 			throws RemoteException {
-		return SimulationCommunicationRemote.getInstance();
+		return SimulationCommunicationRemote.get();
 	}
 
 	@Override
 	public ThreePhaseCommit getThreePhaseCommit() throws RemoteException {
-		return ThreePhaseCommitRemote.getInstance();
+		return ThreePhaseCommitRemote.get();
 	}
 
 }

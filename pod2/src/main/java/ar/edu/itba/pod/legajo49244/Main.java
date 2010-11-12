@@ -3,6 +3,7 @@ package ar.edu.itba.pod.legajo49244;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
 import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
 import ar.edu.itba.pod.legajo49244.message.Messages;
@@ -30,7 +31,7 @@ public class Main {
 
 		MarketManager market = factory.getMarketManager(conn);
 		SimulationManager simul = factory.getSimulationManager(conn,
-				TimeMappers.realtime());
+				TimeMappers.oneSecondEach(6, TimeUnit.HOURS));
 		simul.register(Market.class, market.market());
 		// ...
 		simul.start();
@@ -42,7 +43,7 @@ public class Main {
 
 			conn.getGroupCommunication().broadcast(
 					Messages.newResourceTransferMessage(Payloads
-							.newResourceTransferMessagePayload("asd", "asd",
+							.newResourceTransferMessagePayload("asd", "asd2",
 									new Resource("cat", "name"), 8)));
 		} catch (IOException e) {
 			e.printStackTrace();

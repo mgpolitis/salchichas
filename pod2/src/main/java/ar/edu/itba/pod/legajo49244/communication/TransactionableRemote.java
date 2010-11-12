@@ -21,7 +21,7 @@ public class TransactionableRemote implements Transactionable {
 		}
 	}
 
-	public static Transactionable getInstance() {
+	public static Transactionable get() {
 		return INSTANCE;
 	}
 

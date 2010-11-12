@@ -68,9 +68,9 @@ public class DistributedSimulationManager implements SimulationManager,
 	public boolean onDisconnect(Message message) {
 		String disconnectedNode = ((DisconnectPayload) message.getPayload())
 				.getDisconnectedNodeId();
-		ClusterAdministrationRemote.getInstance().onNodeDisconnected(
+		ClusterAdministrationRemote.get().onNodeDisconnected(
 				disconnectedNode);
-		SimulationCommunicationRemote.getInstance().onNodeDisconnected(
+		SimulationCommunicationRemote.get().onNodeDisconnected(
 				disconnectedNode);
 
 		return true;
@@ -80,15 +80,14 @@ public class DistributedSimulationManager implements SimulationManager,
 	public boolean onNodeAgentsLoad(Message message) {
 		int load = ((NodeAgentLoadPayload) message.getPayload()).getLoad();
 		String informerNode = message.getNodeId();
-		SimulationCommunicationRemote.getInstance()
+		SimulationCommunicationRemote.get()
 				.onNodeAgentsLoadInfoArrived(informerNode, load);
 		return true;
 	}
 
 	@Override
 	public boolean onNodeAgentsLoadRequest(Message message) {
-		// TODO: calling node is coordinator
-
+		
 		return false;
 	}
 

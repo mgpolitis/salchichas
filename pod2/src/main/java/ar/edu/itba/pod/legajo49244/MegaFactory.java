@@ -48,7 +48,7 @@ public class MegaFactory implements ObjectFactory {
 			Node.setUserEntryPoint(entryPoint);
 		}
 
-		connectionManager = ConnectionManagerRemote.getInstance();
+		connectionManager = ConnectionManagerRemote.get();
 		System.out.println("My node id is " + Node.getNodeId());
 
 		try {

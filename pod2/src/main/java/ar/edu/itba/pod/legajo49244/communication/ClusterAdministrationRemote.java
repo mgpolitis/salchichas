@@ -23,7 +23,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 	private String clusterName = null;
 	private boolean isConnected = false;
 	private ConnectionManager connectionManager = ConnectionManagerRemote
-			.getInstance();
+			.get();
 
 	private ClusterAdministrationRemote() {
 		System.out.println("Creating ClusterAdministration");
@@ -35,7 +35,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		}
 	}
 
-	public static ClusterAdministrationRemote getInstance() {
+	public static ClusterAdministrationRemote get() {
 		return INSTANCE;
 	}
 

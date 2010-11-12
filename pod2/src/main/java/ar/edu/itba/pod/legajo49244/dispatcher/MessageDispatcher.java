@@ -143,7 +143,7 @@ public class MessageDispatcher implements MessageListener {
 				// broadcast if neccesary
 				if (MessageDispatcher.isForwardable(message)) {
 					try {
-						ConnectionManagerRemote.getInstance()
+						ConnectionManagerRemote.get()
 								.getGroupCommunication().broadcast(message);
 					} catch (RemoteException e) {
 						System.out
@@ -197,14 +197,14 @@ public class MessageDispatcher implements MessageListener {
 			while (continueRunning) {
 
 				List<String> nodes = Lists
-						.newArrayList(ClusterAdministrationRemote.getInstance()
+						.newArrayList(ClusterAdministrationRemote.get()
 								.getClusterNodes());
 				Collections.shuffle(nodes);
 				if (nodes.size() > 0) {
 
 					String randomNode = nodes.get(0);
 					try {
-						ConnectionManagerRemote.getInstance()
+						ConnectionManagerRemote.get()
 								.getConnectionManager(randomNode)
 								.getGroupCommunication().getListener()
 								.getNewMessages(Node.getNodeId());

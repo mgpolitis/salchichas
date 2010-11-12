@@ -12,7 +12,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	
 	private static final ThreePhaseCommit INSTANCE = new ThreePhaseCommitRemote();
 
-	public static ThreePhaseCommit getInstance() {
+	public static ThreePhaseCommit get() {
 		return INSTANCE;
 	}
 	

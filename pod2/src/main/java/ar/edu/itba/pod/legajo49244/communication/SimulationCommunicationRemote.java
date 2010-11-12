@@ -38,7 +38,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		}
 	}
 
-	public static SimulationCommunicationRemote getInstance() {
+	public static SimulationCommunicationRemote get() {
 		return INSTANCE;
 	}
 
@@ -117,7 +117,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 		try {
 			ClusterCommunicationRemote
-					.getInstance()
+					.get()
 					.broadcast(
 							Messages
 									.newNodeAgentLoadRequestMessage(new NodeAgentLoadRequestPayloadWalter()));
@@ -136,7 +136,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	private ConnectionManager getCoordinatorConnectionManager()
 			throws RemoteException {
-		return ConnectionManagerRemote.getInstance().getConnectionManager(
+		return ConnectionManagerRemote.get().getConnectionManager(
 				coodinatorId);
 	}
 
@@ -144,7 +144,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		// TODO: ver los sysos estos, son informales
 		if (Node.getNodeId().equals(disconnectedNode)) {
 			try {
-				if (ClusterAdministrationRemote.getInstance()
+				if (ClusterAdministrationRemote.get()
 						.isConnectedToGroup()) {
 					System.out
 							.println("Me dijeron que yo me desconecte y estoy conectado! WTF? ");
@@ -177,7 +177,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	}
 	
 	public void nodeBalancingInfoCallback(Long dt) {
-		
+		// TODO: do
 	}
 
 }

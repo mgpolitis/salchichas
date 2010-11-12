@@ -27,7 +27,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 		return distributedSimulationManager;
 	}
 
-	public static ClusterCommunication getInstance() {
+	public static ClusterCommunication get() {
 		return INSTANCE;
 	}
 
@@ -51,7 +51,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 	@Override
 	public void broadcast(Message message) throws RemoteException {
 		List<String> nodes = Lists.newArrayList(ClusterAdministrationRemote
-				.getInstance().getClusterNodes());
+				.get().getClusterNodes());
 		Collections.shuffle(nodes);
 		int limit = nodes.size();
 		if (nodes.size() >= BROADCAST_AMMOUNT) {
@@ -68,7 +68,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 
 	@Override
 	public boolean send(Message message, String nodeId) throws RemoteException {
-		ConnectionManager otherManager = ConnectionManagerRemote.getInstance()
+		ConnectionManager otherManager = ConnectionManagerRemote.get()
 				.getConnectionManager(nodeId);
 		return otherManager.getGroupCommunication().getListener()
 				.onMessageArrive(message);
