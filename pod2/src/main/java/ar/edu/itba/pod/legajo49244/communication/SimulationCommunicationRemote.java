@@ -6,15 +6,18 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.payload.NodeAgentLoadRequestPayloadWalter;
 import ar.edu.itba.pod.legajo49244.message.Messages;
+import ar.edu.itba.pod.legajo49244.simulation.DistributedMarketManager;
 import ar.edu.itba.pod.simul.communication.AgentDescriptor;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.NodeAgentLoad;
 import ar.edu.itba.pod.simul.communication.SimulationCommunication;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.google.inject.internal.Maps;
 
@@ -60,40 +63,31 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	@Override
 	public void nodeLoadModified(NodeAgentLoad newLoad) throws RemoteException {
-		
-		// TODO: REFACTOR MORTAL, no me lo llama otro...
-		if (!isCoordinator) {
-			// the caller node should now be coordinator
-			throw new IllegalStateException(
-					"I am not coordinator, go bug other");
+
+		// TODO: todo esto es opcional, analizar si se deja o se saca
+		if (isCoordinator) {
+			String node = newLoad.getNodeId();
+			this.updateRecordsFor(newLoad);
 		}
-		String node = newLoad.getNodeId();
-		NodeAgentLoad oldLoad = mapLoadPerNode.get(node);
-		if (oldLoad != null) {
-			sortedLoadPerNode.remove(oldLoad);
-			sortedLoadPerNode.add(newLoad);
-		} else {
-			sortedLoadPerNode.add(newLoad);
-		}
-		mapLoadPerNode.put(node, newLoad);
-		System.out.println("this should be always true: "
-				+ (mapLoadPerNode.keySet().size() == sortedLoadPerNode.size()));
 	}
 
 	@Override
 	public void startAgent(AgentDescriptor descriptor) throws RemoteException {
 		// TODO aca ya seguro hay que levantar el agent, alguien
 		// se ocupo de controlar que sea lo que se debe.
+		
+		
 
-		// TODO: no le aviso al coordinador que cambio mi carga, no es necesario?
-//		NodeAgentLoad newLoad = null;
-//		try {
-//			getCoordinatorConnectionManager().getSimulationCommunication()
-//					.nodeLoadModified(newLoad);
-//		} catch (RemoteException e) {
-//			// TODO: coordinator down, check if correct
-//			this.becomeCoordinator();
-//		}
+		// TODO: no le aviso al coordinador que cambio mi carga, no es
+		// necesario?
+		// NodeAgentLoad newLoad = null;
+		// try {
+		// getCoordinatorConnectionManager().getSimulationCommunication()
+		// .nodeLoadModified(newLoad);
+		// } catch (RemoteException e) {
+		// // TODO: coordinator down, check if correct
+		// this.becomeCoordinator();
+		// }
 
 	}
 
@@ -121,13 +115,15 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 					.broadcast(
 							Messages
 									.newNodeAgentLoadRequestMessage(new NodeAgentLoadRequestPayloadWalter()));
+			// deploy waiter thread
+			new Thread(new WaiterRunnable()).start();
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
-	
+
 	public synchronized void leaveCoordination() {
 		isCoordinator = false;
 		mapLoadPerNode = null;
@@ -136,16 +132,14 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	private ConnectionManager getCoordinatorConnectionManager()
 			throws RemoteException {
-		return ConnectionManagerRemote.get().getConnectionManager(
-				coodinatorId);
+		return ConnectionManagerRemote.get().getConnectionManager(coodinatorId);
 	}
 
 	public void onNodeDisconnected(String disconnectedNode) {
 		// TODO: ver los sysos estos, son informales
 		if (Node.getNodeId().equals(disconnectedNode)) {
 			try {
-				if (ClusterAdministrationRemote.get()
-						.isConnectedToGroup()) {
+				if (ClusterAdministrationRemote.get().isConnectedToGroup()) {
 					System.out
 							.println("Me dijeron que yo me desconecte y estoy conectado! WTF? ");
 				}
@@ -155,29 +149,69 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 			}
 		}
 		if (isCoordinator) {
-			NodeAgentLoad disconnectedAgentLoad = mapLoadPerNode.get(disconnectedNode);
-			if (disconnectedAgentLoad == null) {
-				System.out.println("I was notified of a node's disconection,"
-						+ "but I didn't know of it's existance= "
-						+ disconnectedNode);
-
-			} else {
-				sortedLoadPerNode.remove(disconnectedAgentLoad);
-			}
-			mapLoadPerNode.remove(disconnectedNode);
+			this.removeRecordsFor(disconnectedNode);
 		}
+	}
+
+	private void removeRecordsFor(String nodeId) {
+		Preconditions.checkState(isCoordinator);
+		NodeAgentLoad disconnectedAgentLoad = mapLoadPerNode.get(nodeId);
+		if (disconnectedAgentLoad == null) {
+			System.out.println("I was ordered to delete records of a node,"
+					+ "but I didn't know of it's existance= " + nodeId);
+
+		} else {
+			sortedLoadPerNode.remove(disconnectedAgentLoad);
+		}
+		mapLoadPerNode.remove(nodeId);
+
+	}
+
+	private void updateRecordsFor(NodeAgentLoad newLoad) {
+		Preconditions.checkState(isCoordinator);
+		String node = newLoad.getNodeId();
+		NodeAgentLoad oldLoad = mapLoadPerNode.get(node);
+		if (oldLoad != null) {
+			sortedLoadPerNode.remove(oldLoad);
+			sortedLoadPerNode.add(newLoad);
+		} else {
+			sortedLoadPerNode.add(newLoad);
+		}
+		mapLoadPerNode.put(node, newLoad);
+		System.out.println("this should be always true: "
+				+ (mapLoadPerNode.keySet().size() == sortedLoadPerNode.size()));
 	}
 
 	public void onNodeAgentsLoadInfoArrived(String informerNode, int load) {
 		if (isCoordinator) {
-			//TODO: update node info and update sleep interval
-			
-			
+			NodeAgentLoad newLoad = new NodeAgentLoad(informerNode, load);
+			this.updateRecordsFor(newLoad);
+		} else {
+			System.out
+					.println("node agent load info arrived, but i-m not coordinator AFAIK");
 		}
 	}
-	
-	public void nodeBalancingInfoCallback(Long dt) {
-		// TODO: do
+
+	public void onWaitTimeForBalancingResponsesExpired() {
+		// TODO balance
 	}
 
+	private class WaiterRunnable implements Runnable {
+
+		private final static long WAIT_TIME = 2000;
+
+		@Override
+		public void run() {
+
+			try {
+				Thread.sleep(WAIT_TIME);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			SimulationCommunicationRemote.this
+					.onWaitTimeForBalancingResponsesExpired();
+		}
+	}
 }

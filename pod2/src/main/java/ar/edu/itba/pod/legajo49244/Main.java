@@ -19,7 +19,7 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		ObjectFactory factory = new MegaFactory();
+		ObjectFactory factory = new MegaEpicFactory();
 		ConnectionManager conn = null;
 		if (args.length > 1) {
 			conn = factory.createConnectionManager(args[0], args[1]);

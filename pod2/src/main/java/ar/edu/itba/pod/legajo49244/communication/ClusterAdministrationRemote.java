@@ -22,8 +22,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 
 	private String clusterName = null;
 	private boolean isConnected = false;
-	private ConnectionManager connectionManager = ConnectionManagerRemote
-			.get();
+	private ConnectionManager connectionManager = ConnectionManagerRemote.get();
 
 	private ClusterAdministrationRemote() {
 		System.out.println("Creating ClusterAdministration");
@@ -76,7 +75,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 				.getConnectionManager(initialNode);
 
 		clusterName = initialCM.getClusterAdmimnistration().getGroupId();
-		System.out.println("Connected to group with name "+clusterName);
+		System.out.println("Connected to group with name " + clusterName);
 
 		Iterable<String> nodes = initialCM.getClusterAdmimnistration()
 				.addNewNode(Node.NODE_ID);
@@ -105,7 +104,8 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 			// I already knew this node, ignore
 			return Lists.newArrayList();
 		}
-		System.out.println("Adding new node: "+newNode);
+		System.out.println("Adding new node: " + newNode + " (count: "
+				+ this.clusterNodes.size() + ")");
 
 		Set<String> ret = new HashSet<String>();
 		ret.addAll(this.clusterNodes);
@@ -122,16 +122,15 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		if (!isConnected) {
 			throw new IllegalArgumentException("El nodo no estaba conectado.");
 		}
-		
-		System.out.println("disconnecting from group: "+nodeId);
+
+		System.out.println("disconnecting from group: " + nodeId);
 
 		clusterNodes.remove(nodeId);
-		
-		
+
 		connectionManager.getGroupCommunication().broadcast(
 				Messages.newDisconnectMessage(Payloads
 						.newDisconnectPayload(nodeId)));
-		
+
 	}
 
 	public Set<String> getClusterNodes() {

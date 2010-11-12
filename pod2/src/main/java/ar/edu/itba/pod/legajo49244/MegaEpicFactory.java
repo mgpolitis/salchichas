@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 
 import com.google.common.base.Preconditions;
 
+import ar.edu.itba.pod.legajo49244.communication.ClusterCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
 import ar.edu.itba.pod.legajo49244.simulation.DistributedMarketManager;
 import ar.edu.itba.pod.legajo49244.simulation.DistributedSimulationManager;
@@ -13,11 +14,11 @@ import ar.edu.itba.pod.simul.market.MarketManager;
 import ar.edu.itba.pod.simul.simulation.SimulationManager;
 import ar.edu.itba.pod.simul.time.TimeMapper;
 
-public class MegaFactory implements ObjectFactory {
+public class MegaEpicFactory implements ObjectFactory {
 
 	private ConnectionManager connectionManager;
 	private MarketManager marketManager;
-	private SimulationManager simulationManager;
+	private DistributedSimulationManager simulationManager;
 
 	@Override
 	public ConnectionManager createConnectionManager(String localIp) {
@@ -71,7 +72,7 @@ public class MegaFactory implements ObjectFactory {
 		marketManager = new DistributedMarketManager();
 
 		// create SimulationManager and store
-		simulationManager = new DistributedSimulationManager();
+		simulationManager = ClusterCommunicationRemote.get().getDistributedSimulationManager();
 
 		return connectionManager;
 	}

@@ -18,7 +18,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 
 	private static final int BROADCAST_AMMOUNT = 3;
 
-	private static final ClusterCommunication INSTANCE = new ClusterCommunicationRemote();
+	private static final ClusterCommunicationRemote INSTANCE = new ClusterCommunicationRemote();
 	private MessageListener messageListener;
 	
 	private DistributedSimulationManager distributedSimulationManager;
@@ -27,7 +27,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 		return distributedSimulationManager;
 	}
 
-	public static ClusterCommunication get() {
+	public static ClusterCommunicationRemote get() {
 		return INSTANCE;
 	}
 
