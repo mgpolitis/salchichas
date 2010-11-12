@@ -51,9 +51,8 @@ public class DistributedSimulationManager implements SimulationManager,
 
 	@Override
 	public void addAgent(Agent agent) {
-		// TODO check where in the world to insert, and do it!
+		// check where in the world to insert, and do it!
 
-		// usar getMinimumNodeKnownLoad() de SimulationCommunicationRemote
 		ConnectionManager ccm = SimulationCommunicationRemote.get()
 				.getCoordinatorConnectionManager();
 		if (ccm == null) {
@@ -92,6 +91,8 @@ public class DistributedSimulationManager implements SimulationManager,
 
 	public void addAgentHere(Agent agent) {
 		simulation.addAgent(agent);
+		// TODO: ver si esto va aca, no va, o va antes!
+		//agent.start();
 	}
 
 	@Override

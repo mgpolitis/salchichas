@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -15,9 +16,11 @@ import ar.edu.itba.pod.simul.communication.AgentDescriptor;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.NodeAgentLoad;
 import ar.edu.itba.pod.simul.communication.SimulationCommunication;
+import ar.edu.itba.pod.simul.simulation.Agent;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.google.inject.internal.Lists;
 import com.google.inject.internal.Maps;
 
 public class SimulationCommunicationRemote implements SimulationCommunication {
@@ -49,10 +52,6 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		if (!isCoordinator) {
 			return null;
 		}
-		System.out.println("I-ve been requested node with min load, lets see:");
-		for (NodeAgentLoad nal : sortedLoadPerNode){ 
-			System.out.println(nal.getNodeId()+":"+nal.getNumberOfAgents());
-		}
 		NodeAgentLoad lowestLoad = sortedLoadPerNode.first();
 		return lowestLoad;
 	}
@@ -60,8 +59,16 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	@Override
 	public Collection<AgentDescriptor> migrateAgents(int numberOfAgents)
 			throws RemoteException {
-		// TODO get agents from local simulation and release them!
-		return null;
+		List<AgentDescriptor> migrationBus = Lists.newArrayList();
+		for (Agent a : DistributedSimulationManager.get().getAgents()) {
+			// TODO: we should stop them before sending them!!!! HOW???
+			migrationBus.add(a.getAgentDescriptor());
+			numberOfAgents--;
+			if (numberOfAgents <= 0) {
+				break;
+			}
+		}
+		return migrationBus;
 	}
 
 	@Override
@@ -103,13 +110,13 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 		isCoordinator = true;
 		coordinatorId = null;
-		
+
 		sortedLoadPerNode = Sets.newTreeSet(new Comparator<NodeAgentLoad>() {
 
 			@Override
 			public int compare(NodeAgentLoad o1, NodeAgentLoad o2) {
 				int intCmp = new Integer(o1.getNumberOfAgents())
-					.compareTo(new Integer(o2.getNumberOfAgents()));
+						.compareTo(new Integer(o2.getNumberOfAgents()));
 				if (intCmp == 0) {
 					return o1.getNodeId().compareTo(o2.getNodeId());
 				}
@@ -200,8 +207,10 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	private void updateRecordsFor(NodeAgentLoad newLoad) {
 		Preconditions.checkState(isCoordinator);
-		Preconditions.checkState(mapLoadPerNode.keySet().size() == sortedLoadPerNode.size());
-		
+		Preconditions
+				.checkState(mapLoadPerNode.keySet().size() == sortedLoadPerNode
+						.size());
+
 		String node = newLoad.getNodeId();
 		NodeAgentLoad oldLoad = mapLoadPerNode.get(node);
 		if (oldLoad != null) {
@@ -211,7 +220,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 			sortedLoadPerNode.add(newLoad);
 		}
 		mapLoadPerNode.put(node, newLoad);
-		
+
 	}
 
 	public void onNodeAgentsLoadInfoArrived(String informerNode, int load) {
@@ -225,8 +234,43 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	}
 
 	public void onWaitTimeForBalancingResponsesExpired() {
-		// TODO balance
-		System.out.println("Should be balancing now... l'doit later, dude...");
+		// TODO balance, is this OK?
+		System.out.println("Commencing load balancing, doc.");
+		float sum = 0;
+		for (NodeAgentLoad nal : this.sortedLoadPerNode) {
+			sum += nal.getNumberOfAgents();
+		}
+		float mean = sum / this.sortedLoadPerNode.size();
+
+		NodeAgentLoad minLoad = this.sortedLoadPerNode.first();
+		NodeAgentLoad maxLoad = this.sortedLoadPerNode.last();
+
+		int delta = maxLoad.getNumberOfAgents() - minLoad.getNumberOfAgents();
+		if (delta >= 2) {
+			// commence migration process
+			String saturatedNode = maxLoad.getNodeId();
+			String freeNode = minLoad.getNodeId();
+			System.out.println("Migrating "+(delta/2)+"agents from "+saturatedNode+" to "+freeNode);
+			int numberOfAgentsToMigrate = delta / 2;
+			
+			try {
+				Collection<AgentDescriptor> migrationBus = ConnectionManagerRemote
+						.get().getConnectionManager(saturatedNode)
+						.getSimulationCommunication().migrateAgents(
+								numberOfAgentsToMigrate);
+				for (AgentDescriptor immigrant : migrationBus) {
+					ConnectionManagerRemote.get()
+							.getConnectionManager(freeNode)
+							.getSimulationCommunication().startAgent(immigrant);
+				}
+			} catch (RemoteException e) {
+				// TODO ask what to do in this case, error while migrating
+				System.out.println("Error while migrating agents. HECATOMB !!!!!!!!!!");
+			}
+		} else {
+			System.out.println("Nothing to do, this is balanced, yeah!");
+		}
+
 	}
 
 	private class WaiterRunnable implements Runnable {

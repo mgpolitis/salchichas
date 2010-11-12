@@ -47,7 +47,7 @@ public class Main {
 		Resource copper = new Resource("Mineral", "Copper");
 		Resource steel = new Resource("Alloy", "Steel");
 		
-		if (args.length == 1 || true) {
+		if (args.length == 1) {
 				
 			Agent mine1 = SimpleProducer.named("pig iron mine")
 										.producing(2).of(pigIron)
