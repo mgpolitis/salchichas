@@ -5,11 +5,15 @@ import java.util.Collection;
 
 import ar.edu.itba.pod.legajo49244.communication.ClusterAdministrationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ClusterCommunicationRemote;
+import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
 import ar.edu.itba.pod.legajo49244.communication.SimulationCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
 import ar.edu.itba.pod.legajo49244.dispatcher.DispatcherListener;
 import ar.edu.itba.pod.legajo49244.message.Messages;
+import ar.edu.itba.pod.simul.communication.AgentDescriptor;
+import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.Message;
+import ar.edu.itba.pod.simul.communication.NodeAgentLoad;
 import ar.edu.itba.pod.simul.communication.payload.DisconnectPayload;
 import ar.edu.itba.pod.simul.communication.payload.NodeAgentLoadPayload;
 import ar.edu.itba.pod.simul.simulation.Agent;
@@ -17,19 +21,18 @@ import ar.edu.itba.pod.simul.simulation.SimulationInspector;
 import ar.edu.itba.pod.simul.simulation.SimulationManager;
 import ar.edu.itba.pod.simul.time.TimeMapper;
 
-import com.google.common.base.Preconditions;
-
 public class DistributedSimulationManager implements SimulationManager,
 		DispatcherListener {
 
 	private static DistributedSimulationManager INSTANCE = new DistributedSimulationManager();
+
 	private DistributedSimulationManager() {
 	}
-	
+
 	public static DistributedSimulationManager get() {
 		return INSTANCE;
 	}
-	
+
 	private DistributedSimulation simulation;
 	private boolean started;
 
@@ -52,10 +55,42 @@ public class DistributedSimulationManager implements SimulationManager,
 	@Override
 	public void addAgent(Agent agent) {
 		// TODO check where in the world to insert, and do it!
-		// TODO: THIS IS COMPLETELY WRONG AND TEMPORARY
-		
+
 		// usar getMinimumNodeKnownLoad() de SimulationCommunicationRemote
+		ConnectionManager ccm = SimulationCommunicationRemote.get()
+				.getCoordinatorConnectionManager();
+		if (ccm == null) {
+			// coordinator is not known or down
+			this.noCoordinatorAddAgent(agent);
+		} else {
+			try {
+				// coordinator is known
+				NodeAgentLoad nodeAgentLoad = ccm.getSimulationCommunication()
+						.getMinimumNodeKnownLoad();
+				if (nodeAgentLoad == null) {
+					// coordinator was UP, but he is no longer coordinator
+					this.noCoordinatorAddAgent(agent);
+				} else {
+					// coordinator is UP and informed of lower load node
+					System.out.println("I think  node " + nodeAgentLoad.getNodeId()
+							+ " has " + nodeAgentLoad.getNumberOfAgents()
+							+ " and is the node with lowest node load.");
+					String minNode = nodeAgentLoad.getNodeId();
+					AgentDescriptor descriptor = agent.getAgentDescriptor();
+					ConnectionManagerRemote.get().getConnectionManager(minNode)
+							.getSimulationCommunication()
+							.startAgent(descriptor);
+				}
+			} catch (RemoteException e) {
+				this.noCoordinatorAddAgent(agent);
+			}
+		}
+	}
+
+	private void noCoordinatorAddAgent(Agent agent) {
+		// no coordinator is known, become TEH COORDINATORRRRR
 		this.addAgentHere(agent);
+		SimulationCommunicationRemote.get().becomeCoordinator();
 	}
 
 	public void addAgentHere(Agent agent) {
@@ -86,7 +121,6 @@ public class DistributedSimulationManager implements SimulationManager,
 
 	@Override
 	public DistributedSimulation simulation() {
-		Preconditions.checkState(started, "No simulation has been started!");
 		return simulation;
 	}
 
@@ -135,6 +169,8 @@ public class DistributedSimulationManager implements SimulationManager,
 	public boolean onNodeAgentsLoadRequest(Message message) {
 		// sender node is coordinator, tell him your load
 		String coordId = message.getNodeId();
+		SimulationCommunicationRemote.get().leaveCoordination(coordId);
+		
 		int load = inspector().runningAgents();
 		try {
 			ClusterCommunicationRemote.get().send(

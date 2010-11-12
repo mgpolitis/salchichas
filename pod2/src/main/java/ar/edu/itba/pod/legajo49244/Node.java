@@ -5,8 +5,8 @@ import java.net.UnknownHostException;
 
 public class Node {
 
-	public static String USER_NODE_ID = null;
-	public static String USER_ENTRY_POINT = null;
+	private static String USER_NODE_ID = null;
+	private static String USER_ENTRY_POINT = null;
 
 	public static void setUserNodeId(String nodeId) {
 		USER_NODE_ID = nodeId;

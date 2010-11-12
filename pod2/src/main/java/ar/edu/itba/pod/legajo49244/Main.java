@@ -47,7 +47,7 @@ public class Main {
 		Resource copper = new Resource("Mineral", "Copper");
 		Resource steel = new Resource("Alloy", "Steel");
 		
-		if (args.length == 1) {
+		if (args.length == 1 || true) {
 				
 			Agent mine1 = SimpleProducer.named("pig iron mine")
 										.producing(2).of(pigIron)
@@ -66,6 +66,7 @@ public class Main {
 										.consuming(10).of(steel)
 										.every(2, TimeUnit.DAYS)
 										.build();
+			
 			simul.addAgent(mine1);
 			simul.addAgent(mine2);
 			simul.addAgent(refinery);

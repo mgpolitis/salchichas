@@ -78,7 +78,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		System.out.println("Connected to group with name " + clusterName);
 
 		Iterable<String> nodes = initialCM.getClusterAdmimnistration()
-				.addNewNode(Node.NODE_ID);
+				.addNewNode(Node.getNodeId());
 		for (String node : nodes) {
 			clusterNodes.add(node);
 		}
@@ -105,7 +105,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 			return Lists.newArrayList();
 		}
 		System.out.println("Adding new node: " + newNode + " (count: "
-				+ this.clusterNodes.size() + ")");
+				+ (this.clusterNodes.size()+1) + ")");
 
 		Set<String> ret = new HashSet<String>();
 		ret.addAll(this.clusterNodes);

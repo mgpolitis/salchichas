@@ -25,7 +25,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	private static final SimulationCommunicationRemote INSTANCE = new SimulationCommunicationRemote();
 
 	private boolean isCoordinator = false;
-	private String coodinatorId = null;
+	private String coordinatorId = null;
 
 	private SortedSet<NodeAgentLoad> sortedLoadPerNode;
 	private Map<String, NodeAgentLoad> mapLoadPerNode;
@@ -46,11 +46,15 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	@Override
 	public NodeAgentLoad getMinimumNodeKnownLoad() throws RemoteException {
-		// TODO: complete and make thread safe
 		if (!isCoordinator) {
 			return null;
 		}
-		return sortedLoadPerNode.first();
+		System.out.println("I-ve been requested node with min load, lets see:");
+		for (NodeAgentLoad nal : sortedLoadPerNode){ 
+			System.out.println(nal.getNodeId()+":"+nal.getNumberOfAgents());
+		}
+		NodeAgentLoad lowestLoad = sortedLoadPerNode.first();
+		return lowestLoad;
 	}
 
 	@Override
@@ -76,25 +80,30 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 		DistributedSimulationManager.get().addAgentHere(descriptor.build());
 
-		// TODO: no le aviso al coordinador que cambio mi carga, no es
-		// necesario?
-		// NodeAgentLoad newLoad = null;
-		// try {
-		// getCoordinatorConnectionManager().getSimulationCommunication()
-		// .nodeLoadModified(newLoad);
-		// } catch (RemoteException e) {
-		// // TODO: coordinator down, check if correct
-		// this.becomeCoordinator();
-		// }
+		// le aviso al coordinador que cambio mi carga, por cortesia
+		int newLoadAmmount = DistributedSimulationManager.get().inspector()
+				.runningAgents();
+		NodeAgentLoad newLoad = new NodeAgentLoad(Node.getNodeId(),
+				newLoadAmmount);
+		try {
+			ConnectionManager coordCM = this.getCoordinatorConnectionManager();
+			if (coordCM != null) {
+				coordCM.getSimulationCommunication().nodeLoadModified(newLoad);
+			}
+		} catch (RemoteException e) {
+			// made my best effort to inform, too bad
+		}
 
 	}
 
-	private void becomeCoordinator() {
+	public synchronized void becomeCoordinator() {
 		if (isCoordinator) {
 			throw new IllegalStateException("Node is coodinator already.");
 		}
 
 		isCoordinator = true;
+		coordinatorId = null;
+		
 		sortedLoadPerNode = Sets.newTreeSet(new Comparator<NodeAgentLoad>() {
 
 			@Override
@@ -105,32 +114,52 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		});
 		mapLoadPerNode = Maps.newHashMap();
 
+		// add your info
+		int myLoad = DistributedSimulationManager.get().inspector()
+				.runningAgents();
+		NodeAgentLoad myAgentLoad = new NodeAgentLoad(Node.getNodeId(), myLoad);
+		this.updateRecordsFor(myAgentLoad);
+
 		// TODO: analyze fully
 
+		// get info from all other nodes
 		try {
 			ClusterCommunicationRemote
 					.get()
 					.broadcast(
 							Messages
 									.newNodeAgentLoadRequestMessage(new NodeAgentLoadRequestPayloadWalter()));
-			// deploy waiter thread
-			new Thread(new WaiterRunnable()).start();
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// TODO: formalize this syso or delete it
+			System.out.println("SHOULD NEVER REACH HERE");
 		}
+		// deploy waiter thread to make callback after a while
+		new Thread(new WaiterRunnable()).start();
 
 	}
 
-	public synchronized void leaveCoordination() {
+	public synchronized void leaveCoordination(String newCoordinator) {
 		isCoordinator = false;
 		mapLoadPerNode = null;
 		sortedLoadPerNode = null;
+		coordinatorId = newCoordinator;
 	}
 
-	private ConnectionManager getCoordinatorConnectionManager()
-			throws RemoteException {
-		return ConnectionManagerRemote.get().getConnectionManager(coodinatorId);
+	public ConnectionManager getCoordinatorConnectionManager() {
+		if (isCoordinator) {
+			return ConnectionManagerRemote.get();
+		}
+		if (coordinatorId == null) {
+			return null;
+		}
+		ConnectionManager coordManager = null;
+		try {
+			coordManager = ConnectionManagerRemote.get().getConnectionManager(
+					coordinatorId);
+		} catch (RemoteException e) {
+			// coordinator was unreachable, will return null
+		}
+		return coordManager;
 	}
 
 	public void onNodeDisconnected(String disconnectedNode) {
@@ -192,6 +221,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	public void onWaitTimeForBalancingResponsesExpired() {
 		// TODO balance
+		System.out.println("Should be balancing now... l'doit later, dude...");
 	}
 
 	private class WaiterRunnable implements Runnable {

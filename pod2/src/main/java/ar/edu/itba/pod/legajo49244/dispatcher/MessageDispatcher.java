@@ -76,12 +76,19 @@ public class MessageDispatcher implements MessageListener {
 	public boolean onMessageArrive(Message message) throws RemoteException {
 		Preconditions.checkNotNull(message);
 
-		System.out.println("Message arrived:");
+		System.out.println("[Message arrived:]");
 		System.out.println("\t- " + message);
+
+		if (message.getNodeId() != null
+				&& message.getNodeId().equals(Node.getNodeId())) {
+			return false;
+		}
 
 		if (historyOfBroadcastables.containsKey(message)) {
 			return false;
 		}
+
+		this.ear.add(message);
 
 		if (isForwardable(message)) {
 			historyOfBroadcastables.put(message, System.currentTimeMillis());
@@ -142,9 +149,11 @@ public class MessageDispatcher implements MessageListener {
 
 				// broadcast if neccesary
 				if (MessageDispatcher.isForwardable(message)) {
+					System.out.println("[Forwarding message: ]");
+					System.out.println("\t- " + message);
 					try {
-						ConnectionManagerRemote.get()
-								.getGroupCommunication().broadcast(message);
+						ConnectionManagerRemote.get().getGroupCommunication()
+								.broadcast(message);
 					} catch (RemoteException e) {
 						System.out
 								.println("Broadcast failed, will wait for pull to fix it");
@@ -204,10 +213,9 @@ public class MessageDispatcher implements MessageListener {
 
 					String randomNode = nodes.get(0);
 					try {
-						ConnectionManagerRemote.get()
-								.getConnectionManager(randomNode)
-								.getGroupCommunication().getListener()
-								.getNewMessages(Node.getNodeId());
+						ConnectionManagerRemote.get().getConnectionManager(
+								randomNode).getGroupCommunication()
+								.getListener().getNewMessages(Node.getNodeId());
 						Iterable<Message> messages = Lists.newArrayList();
 
 						for (Message m : messages) {
@@ -238,8 +246,7 @@ public class MessageDispatcher implements MessageListener {
 	private static Map<MessageType, Boolean> createIsForwardableHelper() {
 		Map<MessageType, Boolean> ret = Maps.newHashMap();
 		List<MessageType> forwardables = Lists.newArrayList(
-				MessageType.DISCONNECT, MessageType.NODE_AGENTS_LOAD,
-				MessageType.RESOURCE_REQUEST);
+				MessageType.DISCONNECT, MessageType.RESOURCE_REQUEST);
 		List<MessageType> nonForwardables = Lists.newArrayList(
 				MessageType.NODE_AGENTS_LOAD,
 				MessageType.NODE_AGENTS_LOAD_REQUEST,
@@ -265,7 +272,7 @@ public class MessageDispatcher implements MessageListener {
 		MessageType type = message.getType();
 		Boolean ret = IS_FORWARDABLE_HELPER.get(type);
 		if (ret == null) {
-			throw new IllegalArgumentException("I don't message type "+type);
+			throw new IllegalArgumentException("I don't message type " + type);
 		}
 		return ret;
 	}
