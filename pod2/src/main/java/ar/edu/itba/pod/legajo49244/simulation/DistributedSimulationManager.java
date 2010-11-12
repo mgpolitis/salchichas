@@ -34,7 +34,6 @@ public class DistributedSimulationManager implements SimulationManager,
 	}
 
 	private DistributedSimulation simulation;
-	private boolean started;
 
 	public void setTimeMapper(TimeMapper timeMapper) {
 		simulation = new DistributedSimulation(timeMapper);
@@ -43,13 +42,11 @@ public class DistributedSimulationManager implements SimulationManager,
 	@Override
 	public void start() {
 		simulation.start();
-		started = true;
 	}
 
 	@Override
 	public void shutdown() {
 		simulation().shutdown();
-		started = false;
 	}
 
 	@Override

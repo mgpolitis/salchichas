@@ -108,8 +108,12 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 			@Override
 			public int compare(NodeAgentLoad o1, NodeAgentLoad o2) {
-				return new Integer(o1.getNumberOfAgents())
-						.compareTo(new Integer(o2.getNumberOfAgents()));
+				int intCmp = new Integer(o1.getNumberOfAgents())
+					.compareTo(new Integer(o2.getNumberOfAgents()));
+				if (intCmp == 0) {
+					return o1.getNodeId().compareTo(o2.getNodeId());
+				}
+				return intCmp;
 			}
 		});
 		mapLoadPerNode = Maps.newHashMap();
@@ -196,6 +200,8 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	private void updateRecordsFor(NodeAgentLoad newLoad) {
 		Preconditions.checkState(isCoordinator);
+		Preconditions.checkState(mapLoadPerNode.keySet().size() == sortedLoadPerNode.size());
+		
 		String node = newLoad.getNodeId();
 		NodeAgentLoad oldLoad = mapLoadPerNode.get(node);
 		if (oldLoad != null) {
@@ -205,8 +211,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 			sortedLoadPerNode.add(newLoad);
 		}
 		mapLoadPerNode.put(node, newLoad);
-		System.out.println("this should be always true: "
-				+ (mapLoadPerNode.keySet().size() == sortedLoadPerNode.size()));
+		
 	}
 
 	public void onNodeAgentsLoadInfoArrived(String informerNode, int load) {
