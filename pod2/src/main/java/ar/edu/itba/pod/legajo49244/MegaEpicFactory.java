@@ -2,9 +2,6 @@ package ar.edu.itba.pod.legajo49244;
 
 import java.rmi.RemoteException;
 
-import com.google.common.base.Preconditions;
-
-import ar.edu.itba.pod.legajo49244.communication.ClusterCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
 import ar.edu.itba.pod.legajo49244.simulation.DistributedMarketManager;
 import ar.edu.itba.pod.legajo49244.simulation.DistributedSimulationManager;
@@ -13,6 +10,8 @@ import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.market.MarketManager;
 import ar.edu.itba.pod.simul.simulation.SimulationManager;
 import ar.edu.itba.pod.simul.time.TimeMapper;
+
+import com.google.common.base.Preconditions;
 
 public class MegaEpicFactory implements ObjectFactory {
 
@@ -72,7 +71,7 @@ public class MegaEpicFactory implements ObjectFactory {
 		marketManager = new DistributedMarketManager();
 
 		// create SimulationManager and store
-		simulationManager = ClusterCommunicationRemote.get().getDistributedSimulationManager();
+		simulationManager = DistributedSimulationManager.get();
 
 		return connectionManager;
 	}
@@ -89,12 +88,13 @@ public class MegaEpicFactory implements ObjectFactory {
 
 	@Override
 	public SimulationManager getSimulationManager(ConnectionManager mgr,
-			TimeMapper timeMappers) {
+			TimeMapper timeMapper) {
 		Preconditions.checkNotNull(mgr);
 		if (simulationManager == null) {
 			throw new IllegalStateException(
 					"Must create connection manager with this Factory first.");
 		}
+		simulationManager.setTimeMapper(timeMapper);
 		return simulationManager;
 	}
 

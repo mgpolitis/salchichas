@@ -6,12 +6,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.concurrent.atomic.AtomicLong;
 
 import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.payload.NodeAgentLoadRequestPayloadWalter;
 import ar.edu.itba.pod.legajo49244.message.Messages;
-import ar.edu.itba.pod.legajo49244.simulation.DistributedMarketManager;
+import ar.edu.itba.pod.legajo49244.simulation.DistributedSimulationManager;
 import ar.edu.itba.pod.simul.communication.AgentDescriptor;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.NodeAgentLoad;
@@ -66,17 +65,16 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 		// TODO: todo esto es opcional, analizar si se deja o se saca
 		if (isCoordinator) {
-			String node = newLoad.getNodeId();
 			this.updateRecordsFor(newLoad);
 		}
 	}
 
 	@Override
 	public void startAgent(AgentDescriptor descriptor) throws RemoteException {
-		// TODO aca ya seguro hay que levantar el agent, alguien
+		// aca ya seguro hay que levantar el agent, alguien
 		// se ocupo de controlar que sea lo que se debe.
-		
-		
+
+		DistributedSimulationManager.get().addAgentHere(descriptor.build());
 
 		// TODO: no le aviso al coordinador que cambio mi carga, no es
 		// necesario?

@@ -21,19 +21,13 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 	private static final ClusterCommunicationRemote INSTANCE = new ClusterCommunicationRemote();
 	private MessageListener messageListener;
 	
-	private DistributedSimulationManager distributedSimulationManager;
-
-	public DistributedSimulationManager getDistributedSimulationManager() {
-		return distributedSimulationManager;
-	}
-
 	public static ClusterCommunicationRemote get() {
 		return INSTANCE;
 	}
 
 	private ClusterCommunicationRemote() {
 		System.out.println("Creating ClusterCommunication");
-		distributedSimulationManager = new DistributedSimulationManager();
+		DistributedSimulationManager distributedSimulationManager = DistributedSimulationManager.get();
 		this.messageListener = new MessageDispatcher(distributedSimulationManager);
 		try {
 			UnicastRemoteObject.exportObject(this,0);

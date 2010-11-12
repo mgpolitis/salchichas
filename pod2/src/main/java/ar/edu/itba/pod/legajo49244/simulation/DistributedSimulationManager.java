@@ -22,6 +22,14 @@ import com.google.common.base.Preconditions;
 public class DistributedSimulationManager implements SimulationManager,
 		DispatcherListener {
 
+	private static DistributedSimulationManager INSTANCE = new DistributedSimulationManager();
+	private DistributedSimulationManager() {
+	}
+	
+	public static DistributedSimulationManager get() {
+		return INSTANCE;
+	}
+	
 	private DistributedSimulation simulation;
 	private boolean started;
 
@@ -44,6 +52,10 @@ public class DistributedSimulationManager implements SimulationManager,
 	@Override
 	public void addAgent(Agent agent) {
 		// TODO check where in the world to insert, and do it!
+		// TODO: THIS IS COMPLETELY WRONG AND TEMPORARY
+		
+		// usar getMinimumNodeKnownLoad() de SimulationCommunicationRemote
+		this.addAgentHere(agent);
 	}
 
 	public void addAgentHere(Agent agent) {
@@ -62,8 +74,7 @@ public class DistributedSimulationManager implements SimulationManager,
 
 	@Override
 	public <T> void register(Class<T> type, T instance) {
-		// TODO Auto-generated method stub
-
+		simulation.register(type, instance);
 	}
 
 	@Override
