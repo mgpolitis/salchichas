@@ -123,6 +123,7 @@ public class DistributedSimulationManager implements SimulationManager,
 							.startAgent(descriptor);
 				}
 			} catch (RemoteException e) {
+				e.printStackTrace();
 				this.noCoordinatorKnownAddAgent(agent);
 			}
 		}
