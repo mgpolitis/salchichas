@@ -57,7 +57,7 @@ public class DistributedSimulationManager implements SimulationManager,
 				.getCoordinatorConnectionManager();
 		if (ccm == null) {
 			// coordinator is not known or down
-			this.noCoordinatorAddAgent(agent);
+			this.noCoordinatorKnownAddAgent(agent);
 		} else {
 			try {
 				// coordinator is known
@@ -65,7 +65,7 @@ public class DistributedSimulationManager implements SimulationManager,
 						.getMinimumNodeKnownLoad();
 				if (nodeAgentLoad == null) {
 					// coordinator was UP, but he is no longer coordinator
-					this.noCoordinatorAddAgent(agent);
+					this.noCoordinatorKnownAddAgent(agent);
 				} else {
 					// coordinator is UP and informed of lower load node
 					System.out.println("I think  node " + nodeAgentLoad.getNodeId()
@@ -78,12 +78,12 @@ public class DistributedSimulationManager implements SimulationManager,
 							.startAgent(descriptor);
 				}
 			} catch (RemoteException e) {
-				this.noCoordinatorAddAgent(agent);
+				this.noCoordinatorKnownAddAgent(agent);
 			}
 		}
 	}
 
-	private void noCoordinatorAddAgent(Agent agent) {
+	private void noCoordinatorKnownAddAgent(Agent agent) {
 		// no coordinator is known, become TEH COORDINATORRRRR
 		this.addAgentHere(agent);
 		SimulationCommunicationRemote.get().becomeCoordinator();

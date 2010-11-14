@@ -26,7 +26,7 @@ public interface ThreePhaseCommit extends Remote {
 	/**
 	 * If the cohort is in prepared state, a commit is done. Only the same coordinator that invoked canCommit can invoke
 	 * this method. Otherwise, an IllegalArgumentException is thrown. If it is invoked before canCommit method, and
-	 * IllegalStateException is thrown. At this stage, the cohort do make the commit.
+	 * IllegalStateException is thrown. At this stage, the cohort does make the commit.
 	 * 
 	 * @param coordinatorId
 	 *            The coordinator identification
