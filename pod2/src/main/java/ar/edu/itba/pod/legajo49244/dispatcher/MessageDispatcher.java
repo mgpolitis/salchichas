@@ -53,6 +53,13 @@ public class MessageDispatcher implements MessageListener {
 	@Override
 	public Iterable<Message> getNewMessages(String remoteNodeId)
 			throws RemoteException {
+		
+		// if I didn't know of nodes existance, add it
+		if (ClusterAdministrationRemote.get().getClusterNodes().contains(remoteNodeId)) {
+			ClusterAdministrationRemote.get().getClusterNodes().add(remoteNodeId);
+		}
+		
+		
 		Long nodeLastContactTimestamp = lastContactedForPull.get(remoteNodeId);
 		if (nodeLastContactTimestamp == null) {
 			// first time this node is contacting me

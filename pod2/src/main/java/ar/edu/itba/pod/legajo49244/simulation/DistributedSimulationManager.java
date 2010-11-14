@@ -2,7 +2,10 @@ package ar.edu.itba.pod.legajo49244.simulation;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.Deque;
+import java.util.LinkedList;
 
+import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.ClusterAdministrationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ClusterCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
@@ -25,6 +28,7 @@ public class DistributedSimulationManager implements SimulationManager,
 		DispatcherListener {
 
 	private static DistributedSimulationManager INSTANCE = new DistributedSimulationManager();
+	private boolean isStarted = false;
 
 	private DistributedSimulationManager() {
 	}
@@ -42,11 +46,52 @@ public class DistributedSimulationManager implements SimulationManager,
 	@Override
 	public void start() {
 		simulation.start();
+		//SimulationCommunicationRemote.get().becomeCoordinator();
+		isStarted = true;
 	}
 
 	@Override
 	public void shutdown() {
+		Deque<AgentDescriptor> ads = new LinkedList<AgentDescriptor>();
+		for (Agent agent : this.simulation().getAgents()) {
+			AgentDescriptor ad = agent.getAgentDescriptor();
+			ads.add(ad);
+			this.simulation().removeAgent(agent);
+		}
+		System.out.println("agents removed from local simulation");
+		
+		if (ClusterAdministrationRemote.get().getClusterNodes().size() == 0) {
+			return;
+		}
+		int time = 0;
+		while(ads.size() != 0) {
+			time++;
+			for (String node : ClusterAdministrationRemote.get().getClusterNodes()) {
+				if (ads.isEmpty()) {
+					break;
+				}
+				AgentDescriptor ad = ads.pop();
+				try {
+					ConnectionManagerRemote.get().getConnectionManager(node).getSimulationCommunication().startAgent(ad);
+				} catch (RemoteException e) {
+					ads.push(ad);
+				}
+			}
+			if (time > 30) {
+				System.out.println("Timeout");
+				return;
+			}
+		}
+		
+		try {
+			ConnectionManagerRemote.get().getClusterAdmimnistration().disconnectFromGroup(Node.getNodeId());
+		} catch (RemoteException e) {
+			System.out.println("Cant tell others to disconnect");
+			e.printStackTrace();
+		}
+		
 		simulation().shutdown();
+		isStarted = false;
 	}
 
 	@Override
@@ -92,7 +137,9 @@ public class DistributedSimulationManager implements SimulationManager,
 	public void addAgentHere(Agent agent) {
 		simulation.addAgent(agent);
 		// TODO: ver si esto va aca, no va, o va antes!
-		//agent.start();
+		if (isStarted) {
+			agent.start();
+		}
 	}
 
 	@Override

@@ -66,7 +66,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 			
 			// shouldnt we get descriptor AFTER removing?
 			DistributedSimulationManager.get().simulation().removeAgent(a);
-			System.out.println("Agent "+a+" is beeing removed from simulation");
+			System.out.println("Agent "+a.getName()+" is beeing removed from simulation");
 			
 			numberOfAgents--;
 			if (numberOfAgents <= 0) {
@@ -268,6 +268,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 				}
 			} catch (RemoteException e) {
 				// TODO ask what to do in this case, error while migrating
+				e.printStackTrace();
 				System.out
 						.println("Error while migrating agents. HECATOMB !!!!!!!!!!");
 			}
@@ -279,7 +280,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	private class WaiterRunnable implements Runnable {
 
-		private final static long WAIT_TIME = 2000;
+		private final static long WAIT_TIME = 10000;
 
 		@Override
 		public void run() {

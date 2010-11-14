@@ -60,6 +60,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 			} catch (RemoteException e) {
 				// could not send message to that node
 				System.out.println("could not broadcast to node "+node+", he was down.");
+				e.printStackTrace();
 			}
 		}
 
@@ -72,7 +73,9 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 				.getConnectionManager(nodeId);
 		System.out.println("[Sending message to "+nodeId+":]");
 		System.out.println("\t- "+message);
-		return otherManager.getGroupCommunication().getListener()
-				.onMessageArrive(message);
+		boolean ret = otherManager.getGroupCommunication().getListener()
+		.onMessageArrive(message);
+		System.out.println("[message sent]");
+		return ret;
 	}
 }

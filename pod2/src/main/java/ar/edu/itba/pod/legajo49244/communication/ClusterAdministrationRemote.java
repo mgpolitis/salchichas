@@ -2,7 +2,9 @@ package ar.edu.itba.pod.legajo49244.communication;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import ar.edu.itba.pod.legajo49244.Node;
@@ -60,7 +62,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 
 	@Override
 	public void connectToGroup(String initialNode) throws RemoteException {
-		if (initialNode.equals(Node.NODE_ID)) {
+		if (initialNode.equals(Node.getNodeId())) {
 			throw new IllegalArgumentException(
 					"Cannot connect to cluster through yourself, node!");
 		}
@@ -77,19 +79,23 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		clusterName = initialCM.getClusterAdmimnistration().getGroupId();
 		System.out.println("Connected to group with name " + clusterName);
 
+		isConnected = true;
 		Iterable<String> nodes = initialCM.getClusterAdmimnistration()
 				.addNewNode(Node.getNodeId());
 		for (String node : nodes) {
 			clusterNodes.add(node);
 		}
-		isConnected = true;
+		clusterNodes.add(initialNode);
 
 	}
 
 	@Override
 	public Iterable<String> addNewNode(String newNode) throws RemoteException {
+		if (Node.getNodeId().equals(newNode)) {
+			return Lists.newArrayList();
+		}
 		if (!this.isConnectedToGroup()) {
-			throw new IllegalStateException("Node " + Node.NODE_ID
+			throw new IllegalStateException("Node " + Node.getNodeId()
 					+ " is not connected to a cluster.");
 		}
 		ConnectionManager newNodeCM = connectionManager
@@ -106,12 +112,24 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		}
 		System.out.println("Adding new node: " + newNode + " (count: "
 				+ (this.clusterNodes.size()+1) + ")");
-
+		
 		Set<String> ret = new HashSet<String>();
 		ret.addAll(this.clusterNodes);
 		ret.add(Node.getNodeId());
-
+		
 		this.clusterNodes.add(newNode);
+		
+		if (this.clusterNodes.size() > 0) {
+			List<String> nodes = Lists.newArrayList(this.clusterNodes);
+			Collections.shuffle(nodes);
+			String contactNode = nodes.get(0);
+			try {
+				connectionManager.getConnectionManager(contactNode).getClusterAdmimnistration().addNewNode(newNode);
+			} catch (RemoteException e) {
+				// do nothing, cannot propagate further
+			}
+		}
+		
 
 		return ret;
 	}

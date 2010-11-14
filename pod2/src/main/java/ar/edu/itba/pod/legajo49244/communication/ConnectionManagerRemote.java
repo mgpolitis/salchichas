@@ -8,6 +8,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
+import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.simul.communication.ClusterAdministration;
 import ar.edu.itba.pod.simul.communication.ClusterCommunication;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
@@ -28,7 +29,7 @@ public class ConnectionManagerRemote implements ConnectionManager {
 		System.out.println("Creating ConnectionManager");
 		try {
 			Registry registry = LocateRegistry
-					.createRegistry(Registry.REGISTRY_PORT);
+					.createRegistry(getClusterPort());
 			UnicastRemoteObject.exportObject(this, 0);
 			registry.bind(ReferenceName.CONNECTION_MANAGER_NAME, this);
 			
@@ -47,7 +48,10 @@ public class ConnectionManagerRemote implements ConnectionManager {
 	@Override
 	public ConnectionManager getConnectionManager(String nodeId)
 			throws RemoteException {
-		final Registry registry = LocateRegistry.getRegistry(nodeId);
+		if (nodeId.equals(Node.getNodeId())) {
+			return this;
+		}
+		final Registry registry = LocateRegistry.getRegistry(nodeId,getClusterPort());
 		ConnectionManager ret;
 		try {
 			ret = (ConnectionManager) registry

@@ -24,6 +24,9 @@ public class TransactionableRemote implements Transactionable {
 	public static Transactionable get() {
 		return INSTANCE;
 	}
+	
+	
+	
 
 	/**
 	 * A transaction context is created between two nodes. Changes between two nodes can only be done in a
@@ -40,7 +43,9 @@ public class TransactionableRemote implements Transactionable {
 	 * @throws RemoteException
 	 */
 	public void beginTransaction(String remoteNodeId, long timeout) throws RemoteException {
+		
 		//TODO: do me!
+		// a llama al metodo de a con el parametro B
 	}
 
 	/**
