@@ -5,7 +5,9 @@ package ar.edu.itba.pod.legajo49244.communication;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.simul.communication.ThreePhaseCommit;
+import ar.edu.itba.pod.simul.communication.payload.ResourceTransferMessagePayload;
 
 public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 
@@ -31,18 +33,9 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 		try {
 			UnicastRemoteObject.exportObject(this,0);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Node.exportError(this.getClass());
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	/**
 	 * Called by the coordinator to gather votes for doing a commit. The cohorts can return true or false, whether they
@@ -56,13 +49,15 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 */
 	public boolean canCommit(String coordinatorId, long timeout) throws RemoteException {
 		if (coordId != null) {
+			// interface doesnt say I should throw exception, :(, god help us
 			System.out.println("ALREADY HAD COORDINATOR, ALTO QUILOMBO!!!");
 		}
 		coordId = coordinatorId;
+		// El timeOut lo necesitas para controlar si la transacción se quedo colgada en el medio.
+		new Thread(new WaiterRunnable(timeout)).start();
 		
-		// TODO: do waiter thread and that stuff
 		this.state = State.CAN_COMMIT_CALLED;
-		return false;
+		return true;
 	}
 
 	/**
@@ -81,7 +76,12 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 			throw new IllegalStateException("canCommit must be called first!");
 		}
 		
-		//TODO: do
+		//TODO: do changes! wiii
+//		La implementación de este método, en el nodo A, pide el Payload,
+//		genera un mensaje con el recurso a aumentar. El nodo B hace lo mismo pero para disminuir.
+		
+		ResourceTransferMessagePayload payload = (ResourceTransferMessagePayload) TransactionableRemote.get().getPayload();
+		// TODO: agarrar el market y hacer los cambios
 		
 		this.state = State.PRE_COMMIT_CALLED;
 		return;
@@ -103,7 +103,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 		if (!this.state.equals(State.PRE_COMMIT_CALLED)) {
 			throw new IllegalStateException("canCommit must be called first!");
 		}
-		// TODO: do
+		// TODO: do, tengo que hacer algo???? me parece q nada
 		
 		coordinatorId = null;
 		this.state = State.IDLE;
@@ -137,7 +137,42 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 			throw new IllegalStateException("canCommit must be called first!");
 		}
 		
-		//TODO: do
+		//TODO: do, depnde del state que hago?
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	private class WaiterRunnable implements Runnable {
+
+		private long waitTime;
+
+		public WaiterRunnable(long waitTime) {
+			this.waitTime = waitTime;
+		}
+		
+		@Override
+		public void run() {
+
+			try {
+				Thread.sleep(this.waitTime);
+			} catch (InterruptedException e) {
+				// do nothing, and will probably abort transaction :(
+			}
+
+			try {
+				ThreePhaseCommitRemote.this.onTimeout();
+			} catch (RemoteException e) {
+				System.out.println("remote exception on waiter runnable of 3PC");
+				e.printStackTrace();
+				// will never fail
+			}
+		}
 	}
 	
 	

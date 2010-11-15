@@ -2,26 +2,27 @@ package ar.edu.itba.pod.legajo49244.communication;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import com.google.common.base.Preconditions;
-
+import ar.edu.itba.pod.legajo49244.Node;
+import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
 import ar.edu.itba.pod.simul.communication.Transactionable;
 import ar.edu.itba.pod.simul.communication.payload.Payload;
+import ar.edu.itba.pod.simul.communication.payload.ResourceTransferMessagePayload;
 import ar.edu.itba.pod.simul.market.Resource;
+
+import com.google.common.base.Preconditions;
 
 public class TransactionableRemote implements Transactionable {
 
 	private static final Transactionable INSTANCE = new TransactionableRemote();
+	private static final long ACCEPT_SLEEP_TIME = 1000;
 
 	private TransactionableRemote() {
 		System.out.println("Creating Transactionable");
 		try {
 			UnicastRemoteObject.exportObject(this, 0);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Node.exportError(this.getClass());
 		}
 	}
 
@@ -30,7 +31,8 @@ public class TransactionableRemote implements Transactionable {
 	}
 
 	private String transactionContextNode = null;
-	private Object lock = new Object();
+	private Payload transactionPayload = null;
+	private Long transactionTimeout = null;
 
 	/**
 	 * A transaction context is created between two nodes. Changes between two
@@ -51,14 +53,26 @@ public class TransactionableRemote implements Transactionable {
 	 */
 	public void beginTransaction(String remoteNodeId, long timeout)
 			throws RemoteException {
+		//Hace sus validaciones correspondientes
 		Preconditions.checkNotNull(remoteNodeId);
 		if (transactionContextNode != null) {
 			throw new IllegalStateException("A transaction is already running");
 		}
-		// TODO: do me!
-		// a llama al metodo de a con el parametro B
-		ConnectionManagerRemote.get().getNodeCommunication().acceptTransaction(
-				remoteNodeId);
+		
+		//Invoca el acceptTransaction del nodo B
+		try {
+			ConnectionManagerRemote.get().getNodeCommunication().acceptTransaction(
+					Node.getNodeId());
+		} catch (Exception e) {
+			//Si lanza una exception, considera que no se pudo hacer la transacción
+			e.printStackTrace();
+			System.out.println("Could not create transaction, abort.");
+			return;
+		}
+		
+		//Si retorna bien, considera la transacción creada
+		transactionContextNode = remoteNodeId;
+		transactionTimeout = timeout;
 	}
 
 	/**
@@ -81,20 +95,28 @@ public class TransactionableRemote implements Transactionable {
 	 * @throws RemoteException
 	 */
 	public void acceptTransaction(String remoteNodeId) throws RemoteException {
-		// TODO: do me!
-	}
-
-	/**
-	 * Finalize a transaction context. All the changes done in the context are
-	 * persisted, and the two nodes are free for creating new transaction
-	 * context.
-	 * <p>
-	 * If no transaction context exists, an exception is thrown
-	 * 
-	 * @throws RemoteException
-	 */
-	public void endTransaction() throws RemoteException {
-		// TODO: do me!
+		
+		//Si no esta en una transacción, retorna
+		if (transactionContextNode == null) {
+			transactionContextNode = remoteNodeId;
+			return;
+		}
+		
+		// Si ya estaba en una transacción, hace un sleep de un cierto tiempo.
+		try {
+			Thread.sleep(ACCEPT_SLEEP_TIME);
+		} catch (InterruptedException e) {
+			// do nothing, just cancel waiting
+		}
+		// Al salir del sleep verifica si sigue en la transacción
+		// Si continua en la transacción, lanza una excepción
+		if (transactionContextNode != null) {
+			throw new IllegalStateException("Could not obtain transaction priviledges");
+		} else {
+			// Si no se encuentra en una transacción retorna
+			return;
+		}
+		
 	}
 
 	/**
@@ -119,7 +141,19 @@ public class TransactionableRemote implements Transactionable {
 	 */
 	public void exchange(Resource resource, int amount, String sourceNode,
 			String destinationNode) throws RemoteException {
-		// TODO: do me!
+		if (transactionContextNode == null) {
+			throw new IllegalStateException("cannot exchange without a transaction context");
+		}
+		if (sourceNode.equals(destinationNode)) {
+			throw new IllegalStateException("source and dest nodes must be different");
+		}
+		if (!sourceNode.equals(transactionContextNode) && !destinationNode.equals(transactionContextNode)) {
+			throw new IllegalStateException("Transaction nodes must be the same as the transaction context");
+		}
+		
+		transactionPayload = Payloads.newResourceTransferMessagePayload(sourceNode, destinationNode, resource, amount);
+		
+		return;
 	}
 
 	/**
@@ -133,10 +167,69 @@ public class TransactionableRemote implements Transactionable {
 	 * @throws RemoteException
 	 */
 	public Payload getPayload() throws RemoteException {
-		// TODO: do me!
-		return null;
+		Preconditions.checkState(transactionContextNode != null, "Must have a transaction context!");
+		Preconditions.checkState(transactionPayload != null, "Must have made an exchange before calling this!");
+		return transactionPayload;
 	}
 
+	/**
+	 * Finalize a transaction context. All the changes done in the context are
+	 * persisted, and the two nodes are free for creating new transaction
+	 * context.
+	 * 
+	 */
+	public void endTransaction() throws RemoteException {
+		Preconditions.checkState(transactionContextNode != null, "A transaction context must exist");
+//		Luego, el nodo B invoca el endTransaction.
+//		Este método, asume que el nodo B es el coordinador.
+		
+		
+//		El coordinador invoca el canCommit en ambos nodos.
+		boolean otherOK = false;
+		try {
+			otherOK = ConnectionManagerRemote.get().getConnectionManager(transactionContextNode).getThreePhaseCommit().canCommit(Node.getNodeId(), transactionTimeout);
+		} catch (RemoteException e) {
+		}
+		boolean meOK = ThreePhaseCommitRemote.get().canCommit(Node.getNodeId(), transactionTimeout);
+		
+		if (!otherOK || !meOK) {
+			this.rollback();
+			return;
+		}
+		
+//		El coordinador invoca el preCommit en ambos nodos.
+		otherOK = false;
+		try {
+			ConnectionManagerRemote.get().getConnectionManager(transactionContextNode).getThreePhaseCommit().preCommit(Node.getNodeId());
+			otherOK = true;
+		} catch (RemoteException e) {
+		}
+		ThreePhaseCommitRemote.get().preCommit((Node.getNodeId()));
+		
+		if (!otherOK || !meOK) {
+			this.rollback();
+			return;
+		}
+		
+		
+//		El coordinador invoca el doCommit en ambos nodos.
+		try {
+			ConnectionManagerRemote.get().getConnectionManager(transactionContextNode).getThreePhaseCommit().doCommit(Node.getNodeId());
+		} catch (RemoteException e) {
+			// no importa, la transaccion se realizo
+		}
+		ThreePhaseCommitRemote.get().doCommit((Node.getNodeId()));
+
+		
+//		Antes de terminar el endTransaction, no te olvides de limpiar los datos del exchange.
+	
+		transactionTimeout = null;
+		transactionPayload = null;
+		transactionContextNode = null;
+		
+	}
+	
+	
 	/**
 	 * Reverts all the changes pending in the transaction context. If this
 	 * method is invoked outside a transaction context, an IllegalStateException
@@ -144,7 +237,9 @@ public class TransactionableRemote implements Transactionable {
 	 * thrown. Otherwise, it is guaranteed that the changes are reverted.
 	 */
 	public void rollback() throws RemoteException {
-		// TODO: do me!
+		Preconditions.checkState(transactionContextNode != null, "A transaction context must exist");
+		ResourceTransferMessagePayload payload = (ResourceTransferMessagePayload) this.getPayload();
+		// TODO: revert fucking changes!!!
 	}
 
 }

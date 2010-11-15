@@ -40,4 +40,11 @@ public class Node {
 		return USER_ENTRY_POINT;
 	}
 
+	public static void exportError(Class<?> clazz) {
+		System.out.println("Error exporting remote object of class: "
+				+ clazz.getCanonicalName());
+		System.out.println("Now aborting.");
+		System.exit(1);
+	}
+
 }

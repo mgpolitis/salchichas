@@ -84,6 +84,9 @@ public class Main {
 			BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
 			try {
 				String line = r.readLine();
+				if (line == null) {
+					return;
+				}
 				if (line.equals("1")) {
 					line = "new agent simple-producer name=Pig-Iron-Mine producing=2 of=Pig-Iron every=12h";
 				} else if (line.equals("quit")) {
