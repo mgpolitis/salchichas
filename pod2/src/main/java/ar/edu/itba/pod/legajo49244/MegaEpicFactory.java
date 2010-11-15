@@ -68,7 +68,7 @@ public class MegaEpicFactory implements ObjectFactory {
 		}
 
 		// create Market Manager and store
-		marketManager = new DistributedMarketManager();
+		marketManager = DistributedMarketManager.get();
 
 		// create SimulationManager and store
 		simulationManager = DistributedSimulationManager.get();

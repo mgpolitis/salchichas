@@ -254,4 +254,6 @@ public class LocalMarket extends CleanableThread implements Market, MarketInspec
 		long time = System.currentTimeMillis() - startTime.getTime();
 		return ((double)transactionCount())/time;
 	}
+	
+	
 }

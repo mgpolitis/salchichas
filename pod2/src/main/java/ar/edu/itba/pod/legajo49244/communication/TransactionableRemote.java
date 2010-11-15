@@ -237,8 +237,10 @@ public class TransactionableRemote implements Transactionable {
 	 */
 	public void rollback() throws RemoteException {
 		Preconditions.checkState(transactionContextNode != null, "A transaction context must exist");
-		//ResourceTransferMessagePayload payload = (ResourceTransferMessagePayload) this.getPayload();
-		// TODO: revert fucking changes!!!
+		transactionTimeout = null;
+		transactionPayload = null;
+		transactionContextNode = null;
+		
 	}
 
 }

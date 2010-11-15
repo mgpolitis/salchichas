@@ -8,8 +8,13 @@ import com.google.common.base.Preconditions;
 public class DistributedMarketManager implements MarketManager {
 
 	private DistributedMarket market;
+	private static DistributedMarketManager INSTANCE = new DistributedMarketManager();
 
-	public DistributedMarketManager() {
+	public static DistributedMarketManager get() {
+		return INSTANCE;
+	}
+	
+	private DistributedMarketManager() {
 		market = new DistributedMarket();
 	}
 
@@ -34,5 +39,7 @@ public class DistributedMarketManager implements MarketManager {
 	public void shutdown() {
 		market.finish();
 	}
+	
+	
 
 }
