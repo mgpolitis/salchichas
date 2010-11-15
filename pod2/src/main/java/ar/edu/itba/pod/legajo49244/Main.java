@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
+import ar.edu.itba.pod.legajo49244.message.TimeProvider;
 import ar.edu.itba.pod.legajo49244.parser.Delegate;
 import ar.edu.itba.pod.legajo49244.parser.InvalidCommandException;
 import ar.edu.itba.pod.legajo49244.parser.SimulationNewEntityCommandParser;
@@ -16,6 +17,10 @@ import ar.edu.itba.pod.simul.market.Resource;
 import ar.edu.itba.pod.simul.simulation.Agent;
 import ar.edu.itba.pod.simul.simulation.SimulationManager;
 import ar.edu.itba.pod.simul.time.TimeMappers;
+import ar.edu.itba.pod.simul.ui.ConsoleFeedbackCallback;
+import ar.edu.itba.pod.simul.ui.FeedbackCallback;
+import ar.edu.itba.pod.simul.ui.FeedbackMarketManager;
+import ar.edu.itba.pod.simul.ui.FeedbackSimulationManager;
 import ar.edu.itba.pod.simul.units.Factory;
 import ar.edu.itba.pod.simul.units.SimpleConsumer;
 import ar.edu.itba.pod.simul.units.SimpleProducer;
@@ -23,10 +28,12 @@ import ar.edu.itba.pod.simul.units.SimpleProducer;
 public class Main {
 
 	public static void main(String[] args) {
-		
-		if (System.getSecurityManager() == null) { 
-            System.setSecurityManager(new SecurityManager());
-        }
+
+		if (System.getSecurityManager() == null) {
+			System.setSecurityManager(new SecurityManager());
+		}
+
+		FeedbackCallback callback = new ConsoleFeedbackCallback();
 
 		ObjectFactory factory = new MegaEpicFactory();
 		ConnectionManager conn = null;
@@ -41,8 +48,10 @@ public class Main {
 		}
 
 		MarketManager marketManager = factory.getMarketManager(conn);
-		final SimulationManager simul = factory.getSimulationManager(conn,
-				TimeMappers.oneSecondEach(6, TimeUnit.HOURS));
+		marketManager = new FeedbackMarketManager(callback, marketManager);
+		final SimulationManager simul = new FeedbackSimulationManager(callback,
+				factory.getSimulationManager(conn, TimeMappers.oneSecondEach(6,
+						TimeUnit.HOURS)));
 		simul.register(Market.class, marketManager.market());
 		// ...
 
@@ -78,73 +87,98 @@ public class Main {
 		parser.addResource(pigIron);
 		parser.addResource(copper);
 		parser.addResource(steel);
-		
-		
+
+		long start = TimeProvider.now();
+		boolean rampage = false;
+		BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
 		while (true) {
-			BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+			if (rampage && TimeProvider.now() > start + 1000 * 5) {
+				// rampage fades in 5 seconds
+				System.out.println("rampage is fading...");
+				rampage = false;
+			}
 			try {
-				String line = r.readLine();
+				String line;
+				if (rampage) {
+					line = "1";
+				} else {
+					line = r.readLine();
+				}
 				if (line == null) {
 					return;
 				}
 				if (line.equals("1")) {
 					line = "new agent simple-producer name=Pig-Iron-Mine producing=2 of=Pig-Iron every=12h";
-				} else if (line.equals("quit")) {
+				} else if (line.equalsIgnoreCase("rampage")) {
+					System.out.println("Entering rampage mode");
+					rampage = true;
+					start = TimeProvider.now();
+				} else if (line.equalsIgnoreCase("quit")) {
 					System.out.println("Commencing QUIT.");
 					simul.shutdown();
 					System.exit(0);
 				}
 				System.out.println("Command read: " + line);
 				parser.parseCommand(line, new Delegate() {
-					
+
 					@Override
 					public void handleNewResource(Resource resource) {
 						System.out.println("new resource");
 					}
-					
+
 					@Override
 					public void handleNewAgent(Agent agent) {
 						System.out.println("new agent");
 						simul.addAgent(agent);
 					}
 				});
-				
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InvalidCommandException e) {
 				e.printStackTrace();
-//			System.out
-//					.println("new (resource | agent) parameters\n"
-//							+ "Creates a new resource or agent. \n"
-//							+ "\nResource options:"
-//							+ "\n\tcategory: The resource's category."
-//							+ "\n\tname: The resource's name"
-//							+ "\n\n\tExample: new resource category=Mineral name=Pig-Iron\n"
-//							+ "\nAgent options:\n\tsimple-producer\n\tsimple-consumer\n\tfactory\n"
-//							+ "\n\tSimple producer parameters:"
-//							+ "\n\t\tname: The agent's name."
-//							+ "\n\t\tproducing: The amount of resources to be produced."
-//							+ "\n\t\tof: The resource name to be produced."
-//							+ "\n\t\tevery: The production rate. An integer followed by the time unit."
-//							+ "\n\n\t\tExample: new agent simple-producer name=Pig-Iron-Mine producing=2 of=Pig-Iron every=12h."
-//							+ "\n\n\tSimple consumer parameters:"
-//							+ "\n\t\tname: The agent's name."
-//							+ "\n\t\tconsuming: The amount of resources to be produced."
-//							+ "\n\t\tof: The resource name to be produced."
-//							+ "\n\t\tevery: The production rate. An integer followed by the time unit."
-//							+ "\n\n\t\tExample: new agent simple-consumer name=Factory consuming=2 of=Pig-Iron every=12h."
-//							+ "\n\n\tFactory parameters:"
-//							+ "\n\t\tname: The agent's name."
-//							+ "\n\t\tusing: The resource needed for production. The expected format is the amount of resources and the resource name separated with a comma."
-//							+ "\n\t\tproducing: The amount of resources to be produced."
-//							+ "\n\t\tof: The resource name to be produced."
-//							+ "\n\t\tevery: The production rate. An integer followed by the time unit."
-//							+ "\n\n\t\tExample: new agent factory name=Steel-Refinery using=5,Pig-Iron using=2,Copper producing=2 of=Steel every=12h."
-//							+ "\n\nNote:"
-//							+ "\n\tValid Time units [Day=d, Hour=h, Minute=m, Seconds=s, MicroSeconds=ms, MicroSecconds=mms, NanoSeconds=ns]"
-//							+ "\n\tDO NOT USE white spaces. Only to separete parameters.");
+				// System.out
+				// .println("new (resource | agent) parameters\n"
+				// + "Creates a new resource or agent. \n"
+				// + "\nResource options:"
+				// + "\n\tcategory: The resource's category."
+				// + "\n\tname: The resource's name"
+				// +
+				// "\n\n\tExample: new resource category=Mineral name=Pig-Iron\n"
+				// +
+				// "\nAgent options:\n\tsimple-producer\n\tsimple-consumer\n\tfactory\n"
+				// + "\n\tSimple producer parameters:"
+				// + "\n\t\tname: The agent's name."
+				// + "\n\t\tproducing: The amount of resources to be produced."
+				// + "\n\t\tof: The resource name to be produced."
+				// +
+				// "\n\t\tevery: The production rate. An integer followed by the time unit."
+				// +
+				// "\n\n\t\tExample: new agent simple-producer name=Pig-Iron-Mine producing=2 of=Pig-Iron every=12h."
+				// + "\n\n\tSimple consumer parameters:"
+				// + "\n\t\tname: The agent's name."
+				// + "\n\t\tconsuming: The amount of resources to be produced."
+				// + "\n\t\tof: The resource name to be produced."
+				// +
+				// "\n\t\tevery: The production rate. An integer followed by the time unit."
+				// +
+				// "\n\n\t\tExample: new agent simple-consumer name=Factory consuming=2 of=Pig-Iron every=12h."
+				// + "\n\n\tFactory parameters:"
+				// + "\n\t\tname: The agent's name."
+				// +
+				// "\n\t\tusing: The resource needed for production. The expected format is the amount of resources and the resource name separated with a comma."
+				// + "\n\t\tproducing: The amount of resources to be produced."
+				// + "\n\t\tof: The resource name to be produced."
+				// +
+				// "\n\t\tevery: The production rate. An integer followed by the time unit."
+				// +
+				// "\n\n\t\tExample: new agent factory name=Steel-Refinery using=5,Pig-Iron using=2,Copper producing=2 of=Steel every=12h."
+				// + "\n\nNote:"
+				// +
+				// "\n\tValid Time units [Day=d, Hour=h, Minute=m, Seconds=s, MicroSeconds=ms, MicroSecconds=mms, NanoSeconds=ns]"
+				// +
+				// "\n\tDO NOT USE white spaces. Only to separete parameters.");
 			}
 		}
 	}
-
 }

@@ -27,6 +27,7 @@ import ar.edu.itba.pod.simul.time.TimeMapper;
 public class DistributedSimulationManager implements SimulationManager,
 		DispatcherListener {
 
+	private static final int MAX_ROUNDROBIN_TIMES = 100;
 	private static DistributedSimulationManager INSTANCE = new DistributedSimulationManager();
 	private boolean isStarted = false;
 
@@ -61,6 +62,7 @@ public class DistributedSimulationManager implements SimulationManager,
 		System.out.println("agents removed from local simulation");
 		
 		if (ClusterAdministrationRemote.get().getClusterNodes().size() == 0) {
+			System.out.println("I knew no other nodes in cluster, so I cant migrate agents.");
 			return;
 		}
 		int time = 0;
@@ -73,12 +75,13 @@ public class DistributedSimulationManager implements SimulationManager,
 				AgentDescriptor ad = ads.pop();
 				try {
 					ConnectionManagerRemote.get().getConnectionManager(node).getSimulationCommunication().startAgent(ad);
+					System.out.println("Agent migrated, "+ads.size()+" remaining...");
 				} catch (RemoteException e) {
 					ads.push(ad);
 				}
 			}
-			if (time > 30) {
-				System.out.println("Timeout");
+			if (time > MAX_ROUNDROBIN_TIMES) {
+				System.out.println("Timeout!");
 				return;
 			}
 		}
