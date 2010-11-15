@@ -5,6 +5,7 @@ import ar.edu.itba.pod.simul.market.Resource;
 
 public class ResourceRequestPayloadWalter implements ResourceRequestPayload {
 
+	private static final long serialVersionUID = -3767514090210072423L;
 	private int ammountRequested;
 	private Resource resource;
 

@@ -242,7 +242,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		for (NodeAgentLoad nal : this.sortedLoadPerNode) {
 			sum += nal.getNumberOfAgents();
 		}
-		float mean = sum / this.sortedLoadPerNode.size();
+		//float mean = sum / this.sortedLoadPerNode.size();
 
 		NodeAgentLoad minLoad = this.sortedLoadPerNode.first();
 		NodeAgentLoad maxLoad = this.sortedLoadPerNode.last();

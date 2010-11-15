@@ -6,6 +6,7 @@ import ar.edu.itba.pod.simul.market.Resource;
 public class ResourceTransferMessagePayloadWalter implements
 		ResourceTransferMessagePayload {
 
+	private static final long serialVersionUID = -2002529584254354901L;
 	private int ammount;
 	private String dest;
 	private String src;

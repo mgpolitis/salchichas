@@ -7,7 +7,6 @@ import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
 import ar.edu.itba.pod.simul.communication.Transactionable;
 import ar.edu.itba.pod.simul.communication.payload.Payload;
-import ar.edu.itba.pod.simul.communication.payload.ResourceTransferMessagePayload;
 import ar.edu.itba.pod.simul.market.Resource;
 
 import com.google.common.base.Preconditions;
@@ -238,7 +237,7 @@ public class TransactionableRemote implements Transactionable {
 	 */
 	public void rollback() throws RemoteException {
 		Preconditions.checkState(transactionContextNode != null, "A transaction context must exist");
-		ResourceTransferMessagePayload payload = (ResourceTransferMessagePayload) this.getPayload();
+		//ResourceTransferMessagePayload payload = (ResourceTransferMessagePayload) this.getPayload();
 		// TODO: revert fucking changes!!!
 	}
 

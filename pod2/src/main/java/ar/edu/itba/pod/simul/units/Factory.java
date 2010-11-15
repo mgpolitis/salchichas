@@ -98,6 +98,9 @@ public class Factory extends MarketAgent {
 	}
 	
 	public static class FactoryBuilder extends MarketAgentBuilder {
+		
+		private static final long serialVersionUID = 2827984953291690148L;
+		
 		private Multiset<Resource> requirements = HashMultiset.create();
 		private Multiset<Resource> production = HashMultiset.create();
 		
@@ -212,6 +215,7 @@ public class Factory extends MarketAgent {
 	
 	
 	public static class FactoryDescriptor implements AgentDescriptor {
+		private static final long serialVersionUID = -8471506720239074166L;
 		private Multiset<Resource> rawResources;
 		private Multiset<Resource> refinedResources;
 		private FactoryBuilder builder;

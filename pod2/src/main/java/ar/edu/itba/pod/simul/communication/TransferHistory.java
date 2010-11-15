@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
  * @author POD
  */
 public class TransferHistory implements Serializable {
+	private static final long serialVersionUID = 6003956857275629231L;
 	private final List<TransferHistoryItem> historyItems;
 	private final double transactionsPerSecond;
 

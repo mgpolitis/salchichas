@@ -77,6 +77,7 @@ public class SimpleConsumer extends MarketAgent implements ResourceStock {
 	}
 
 	public static class SimpleConsumerBuilder extends MarketAgentBuilder {
+		private static final long serialVersionUID = -3009126123391491111L;
 		private Resource resource;
 
 		private SimpleConsumerBuilder(String name) {
@@ -105,6 +106,7 @@ public class SimpleConsumer extends MarketAgent implements ResourceStock {
 	}
 	
 	public static class SimpleConsumerDescriptor implements AgentDescriptor {
+		private static final long serialVersionUID = -592617801693139675L;
 		private AtomicInteger amount;
 		private SimpleConsumerBuilder builder;
 		

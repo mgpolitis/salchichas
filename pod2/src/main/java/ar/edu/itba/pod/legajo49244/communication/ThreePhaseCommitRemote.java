@@ -7,7 +7,6 @@ import java.rmi.server.UnicastRemoteObject;
 
 import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.simul.communication.ThreePhaseCommit;
-import ar.edu.itba.pod.simul.communication.payload.ResourceTransferMessagePayload;
 
 public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 
@@ -80,7 +79,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 //		La implementación de este método, en el nodo A, pide el Payload,
 //		genera un mensaje con el recurso a aumentar. El nodo B hace lo mismo pero para disminuir.
 		
-		ResourceTransferMessagePayload payload = (ResourceTransferMessagePayload) TransactionableRemote.get().getPayload();
+		//ResourceTransferMessagePayload payload = (ResourceTransferMessagePayload) TransactionableRemote.get().getPayload();
 		// TODO: agarrar el market y hacer los cambios
 		
 		this.state = State.PRE_COMMIT_CALLED;

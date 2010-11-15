@@ -9,6 +9,7 @@ import java.io.Serializable;
  * Represents the number of agents running on a node.
  */
 public class NodeAgentLoad implements Serializable {
+	private static final long serialVersionUID = 7756652913910171472L;
 	private String nodeId;
 	private int numberOfAgents;
 

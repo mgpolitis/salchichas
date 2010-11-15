@@ -15,6 +15,8 @@ import java.io.Serializable;
  */
 public class AgentState implements Serializable {
 	private final String name;
+	
+	private static final long serialVersionUID = 8669616055376539453L;
 
 	public AgentState(Agent agent) {
 		super();
