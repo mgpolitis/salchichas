@@ -14,10 +14,6 @@ public interface DispatcherListener {
 
 	public boolean onDisconnect(Message message);
 
-	public boolean onResourceTransfer(Message message);
-
-	public boolean onResourceTransferCanceled(Message message);
-
 	public boolean onResourceRequest(Message message);
 
 }

@@ -10,6 +10,7 @@ import ar.edu.itba.pod.legajo49244.communication.ClusterAdministrationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ClusterCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
 import ar.edu.itba.pod.legajo49244.communication.SimulationCommunicationRemote;
+import ar.edu.itba.pod.legajo49244.communication.TransactionableRemote;
 import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
 import ar.edu.itba.pod.legajo49244.dispatcher.DispatcherListener;
 import ar.edu.itba.pod.legajo49244.message.Messages;
@@ -17,8 +18,10 @@ import ar.edu.itba.pod.simul.communication.AgentDescriptor;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.Message;
 import ar.edu.itba.pod.simul.communication.NodeAgentLoad;
+import ar.edu.itba.pod.simul.communication.Transactionable;
 import ar.edu.itba.pod.simul.communication.payload.DisconnectPayload;
 import ar.edu.itba.pod.simul.communication.payload.NodeAgentLoadPayload;
+import ar.edu.itba.pod.simul.communication.payload.ResourceRequestPayload;
 import ar.edu.itba.pod.simul.simulation.Agent;
 import ar.edu.itba.pod.simul.simulation.SimulationInspector;
 import ar.edu.itba.pod.simul.simulation.SimulationManager;
@@ -28,6 +31,7 @@ public class DistributedSimulationManager implements SimulationManager,
 		DispatcherListener {
 
 	private static final int MAX_ROUNDROBIN_TIMES = 100;
+	private static final long TRANSACTION_TIMEOUT = 1000;
 	private static DistributedSimulationManager INSTANCE = new DistributedSimulationManager();
 	private boolean isStarted = false;
 
@@ -47,7 +51,7 @@ public class DistributedSimulationManager implements SimulationManager,
 	@Override
 	public void start() {
 		simulation.start();
-		//SimulationCommunicationRemote.get().becomeCoordinator();
+		// SimulationCommunicationRemote.get().becomeCoordinator();
 		isStarted = true;
 	}
 
@@ -60,22 +64,26 @@ public class DistributedSimulationManager implements SimulationManager,
 			this.simulation().removeAgent(agent);
 		}
 		System.out.println("agents removed from local simulation");
-		
+
 		if (ClusterAdministrationRemote.get().getClusterNodes().size() == 0) {
-			System.out.println("I knew no other nodes in cluster, so I cant migrate agents.");
+			System.out
+					.println("I knew no other nodes in cluster, so I cant migrate agents.");
 			return;
 		}
 		int time = 0;
-		while(ads.size() != 0) {
+		while (ads.size() != 0) {
 			time++;
-			for (String node : ClusterAdministrationRemote.get().getClusterNodes()) {
+			for (String node : ClusterAdministrationRemote.get()
+					.getClusterNodes()) {
 				if (ads.isEmpty()) {
 					break;
 				}
 				AgentDescriptor ad = ads.pop();
 				try {
-					ConnectionManagerRemote.get().getConnectionManager(node).getSimulationCommunication().startAgent(ad);
-					System.out.println("Agent migrated, "+ads.size()+" remaining...");
+					ConnectionManagerRemote.get().getConnectionManager(node)
+							.getSimulationCommunication().startAgent(ad);
+					System.out.println("Agent migrated, " + ads.size()
+							+ " remaining...");
 				} catch (RemoteException e) {
 					ads.push(ad);
 				}
@@ -85,14 +93,15 @@ public class DistributedSimulationManager implements SimulationManager,
 				return;
 			}
 		}
-		
+
 		try {
-			ConnectionManagerRemote.get().getClusterAdmimnistration().disconnectFromGroup(Node.getNodeId());
+			ConnectionManagerRemote.get().getClusterAdmimnistration()
+					.disconnectFromGroup(Node.getNodeId());
 		} catch (RemoteException e) {
 			System.out.println("Cant tell others to disconnect");
 			e.printStackTrace();
 		}
-		
+
 		simulation().shutdown();
 		isStarted = false;
 	}
@@ -116,8 +125,9 @@ public class DistributedSimulationManager implements SimulationManager,
 					this.noCoordinatorKnownAddAgent(agent);
 				} else {
 					// coordinator is UP and informed of lower load node
-					System.out.println("I think  node " + nodeAgentLoad.getNodeId()
-							+ " has " + nodeAgentLoad.getNumberOfAgents()
+					System.out.println("I think  node "
+							+ nodeAgentLoad.getNodeId() + " has "
+							+ nodeAgentLoad.getNumberOfAgents()
 							+ " and is the node with lowest node load.");
 					String minNode = nodeAgentLoad.getNodeId();
 					AgentDescriptor descriptor = agent.getAgentDescriptor();
@@ -140,7 +150,6 @@ public class DistributedSimulationManager implements SimulationManager,
 
 	public void addAgentHere(Agent agent) {
 		simulation.addAgent(agent);
-		// TODO: ver si esto va aca, no va, o va antes!
 		if (isStarted) {
 			agent.start();
 		}
@@ -219,7 +228,7 @@ public class DistributedSimulationManager implements SimulationManager,
 		// sender node is coordinator, tell him your load
 		String coordId = message.getNodeId();
 		SimulationCommunicationRemote.get().leaveCoordination(coordId);
-		
+
 		int load = inspector().runningAgents();
 		try {
 			ClusterCommunicationRemote.get().send(
@@ -234,32 +243,69 @@ public class DistributedSimulationManager implements SimulationManager,
 
 	@Override
 	public boolean onNodeMarketData(Message message) {
-		// TODO averiguar q carajo es esto
+		// TODO para el informe
 		return false;
 	}
 
 	@Override
 	public boolean onNodeMarketDataRequest(Message message) {
-		// TODO averiguar q carajo es esto
+		// TODO para el informe
 		return false;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	@Override
 	public boolean onResourceRequest(Message message) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+		// Nodo A no tiene un recurso, manda broadcast
+		ResourceRequestPayload payload = (ResourceRequestPayload) message
+				.getPayload();
 
-	@Override
-	public boolean onResourceTransfer(Message message) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+		// Nodo B que recibe el mensaje y tiene el recurso,
+		boolean didPrepare = DistributedMarketManager.get().market()
+				.prepareToExportifYouHave(payload.getResource(),
+						payload.getAmountRequested());
 
-	@Override
-	public boolean onResourceTransferCanceled(Message message) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+		if (didPrepare) {
+			Transactionable otherTransactionable;
+			Transactionable myTransactionable;
+			try {
+				myTransactionable = TransactionableRemote.get();
+				otherTransactionable = ConnectionManagerRemote.get()
+						.getNodeCommunication();
 
+				try {
+					// invoca al beginTransaction con el nodo A como parámetro
+					myTransactionable.beginTransaction(message.getNodeId(),
+							TRANSACTION_TIMEOUT);
+					// Si no falla, el nodo B, invoca el exchange tanto en él
+					// mismo como en el nodo A.
+					otherTransactionable.exchange(payload.getResource(),
+							payload.getAmountRequested(), Node.getNodeId(),
+							message.getNodeId());
+					myTransactionable.exchange(payload.getResource(), payload
+							.getAmountRequested(), Node.getNodeId(), message
+							.getNodeId());
+					// Luego, el nodo B invoca el endTransaction.
+				} catch (IllegalStateException e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		return true;
+	}
 }

@@ -144,13 +144,15 @@ public class MessageDispatcher implements MessageListener {
 					listener.onResourceRequest(message);
 					break;
 				case RESOURCE_TRANSFER:
-					listener.onResourceTransfer(message);
+					// do nothing, deprecated message
+					//listener.onResourceTransfer(message);
 					break;
 				case RESOURCE_TRANSFER_CANCELED:
-					listener.onResourceTransferCanceled(message);
+					// do nothing, deprecated message
+					//listener.onResourceTransferCanceled(message);
 					break;
 				default:
-					throw new IllegalStateException("Unknown message type: "
+					System.out.println("Unknown message type: "
 							+ type);
 				}
 

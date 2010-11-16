@@ -14,7 +14,7 @@ import ar.edu.itba.pod.simul.communication.payload.ResourceTransferMessagePayloa
 public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 
 	public enum State {
-		IDLE, CAN_COMMIT_CALLED, PRE_COMMIT_CALLED
+		IDLE, CAN_COMMIT_CALLED, PRE_COMMIT_CALLED, DO_COMMIT_CALLED
 	}
 
 	private String coordId = null;
@@ -47,7 +47,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 * @param coordinatorId
 	 *            The coordinator identification
 	 */
-	public boolean canCommit(String coordinatorId, long timeout)
+	public synchronized boolean canCommit(String coordinatorId, long timeout)
 			throws RemoteException {
 		if (coordId != null) {
 			// interface doesnt say I should throw exception, :(, god help us
@@ -72,7 +72,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 * @param coordinatorId
 	 *            The coordinator identification
 	 */
-	public void preCommit(String coordinatorId) throws RemoteException {
+	public synchronized void preCommit(String coordinatorId) throws RemoteException {
 		if (!coordinatorId.equals(coordinatorId)) {
 			throw new IllegalArgumentException(
 					"Coordinator for this 3PC can only be " + coordinatorId);
@@ -96,7 +96,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 * @param coordinatorId
 	 *            The coordinator identification
 	 */
-	public void doCommit(String coordinatorId) throws RemoteException {
+	public synchronized void doCommit(String coordinatorId) throws RemoteException {
 		if (!coordinatorId.equals(coordinatorId)) {
 			throw new IllegalArgumentException(
 					"Coordinator for this 3PC can only be " + coordinatorId);
@@ -107,12 +107,10 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 
 		this.ultraDoCommit();
 
-		coordinatorId = null;
-		this.state = State.IDLE;
 		return;
 	}
 
-	private void ultraDoCommit() {
+	private synchronized void ultraDoCommit() {
 		ResourceTransferMessagePayload payload = null;
 		try {
 			payload = (ResourceTransferMessagePayload) TransactionableRemote
@@ -131,6 +129,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 			// add the resources to my market
 			market.importResources(payload.getResource(), payload.getAmount());
 		}
+		this.state = State.DO_COMMIT_CALLED;
 
 	}
 
@@ -141,9 +140,10 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 * 
 	 * @throws RemoteException
 	 */
-	public void abort() throws RemoteException {
+	public synchronized void abort() throws RemoteException {
 		Preconditions.checkState(this.state.equals(State.IDLE),
 				"canCommit must be called first!");
+
 
 		switch (this.state) {
 		case CAN_COMMIT_CALLED:
@@ -151,6 +151,10 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 			this.state = State.IDLE;
 			break;
 		case PRE_COMMIT_CALLED:
+			this.coordId = null;
+			this.state = State.IDLE;
+			break;
+		case DO_COMMIT_CALLED:
 			ResourceTransferMessagePayload payload = null;
 			try {
 				payload = (ResourceTransferMessagePayload) TransactionableRemote
@@ -184,7 +188,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 * 
 	 * @throws RemoteException
 	 */
-	public void onTimeout() throws RemoteException {
+	public synchronized void onTimeout() throws RemoteException {
 		Preconditions.checkState(this.state.equals(State.IDLE),
 				"canCommit must be called first!");
 
@@ -194,6 +198,11 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 
 		if (this.state.equals(State.PRE_COMMIT_CALLED)) {
 			this.ultraDoCommit();
+		}
+		
+		if (this.state.equals(State.DO_COMMIT_CALLED)) {
+			this.coordId = null;
+			this.state = State.IDLE;
 		}
 
 	}
