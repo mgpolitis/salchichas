@@ -52,6 +52,9 @@ public class TransactionableRemote implements Transactionable {
 	 */
 	public void beginTransaction(String remoteNodeId, long timeout)
 			throws RemoteException {
+		
+		System.out.println("*****Begin transaction called");
+		
 		//Hace sus validaciones correspondientes
 		Preconditions.checkNotNull(remoteNodeId);
 		if (transactionContextNode != null) {
@@ -94,6 +97,8 @@ public class TransactionableRemote implements Transactionable {
 	 * @throws RemoteException
 	 */
 	public void acceptTransaction(String remoteNodeId) throws RemoteException {
+		
+		System.out.println("*****Accept called");
 		
 		//Si no esta en una transacción, retorna
 		if (transactionContextNode == null) {
@@ -140,6 +145,9 @@ public class TransactionableRemote implements Transactionable {
 	 */
 	public void exchange(Resource resource, int amount, String sourceNode,
 			String destinationNode) throws RemoteException {
+		
+		System.out.println("*****exchange called");
+		
 		if (transactionContextNode == null) {
 			throw new IllegalStateException("cannot exchange without a transaction context");
 		}
