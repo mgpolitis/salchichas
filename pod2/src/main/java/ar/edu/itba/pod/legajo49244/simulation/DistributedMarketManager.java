@@ -16,6 +16,7 @@ public class DistributedMarketManager implements MarketManager {
 	
 	private DistributedMarketManager() {
 		market = new DistributedMarket();
+		market.start();
 	}
 
 	@Override

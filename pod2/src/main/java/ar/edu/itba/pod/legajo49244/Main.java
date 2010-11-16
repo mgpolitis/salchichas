@@ -51,7 +51,7 @@ public class Main {
 		MarketManager marketManager = factory.getMarketManager(conn);
 		marketManager = new FeedbackMarketManager(callback, marketManager);
 		final SimulationManager simul = new FeedbackSimulationManager(callback,
-				factory.getSimulationManager(conn, TimeMappers.oneSecondEach(24,
+				factory.getSimulationManager(conn, TimeMappers.oneSecondEach(6,
 						TimeUnit.HOURS)));
 		simul.register(Market.class, marketManager.market());
 		// ...
