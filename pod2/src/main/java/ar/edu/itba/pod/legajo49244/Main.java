@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
+import ar.edu.itba.pod.legajo49244.main.MegaEpicFactory;
 import ar.edu.itba.pod.legajo49244.message.TimeProvider;
 import ar.edu.itba.pod.legajo49244.parser.Delegate;
 import ar.edu.itba.pod.legajo49244.parser.InvalidCommandException;
@@ -50,7 +51,7 @@ public class Main {
 		MarketManager marketManager = factory.getMarketManager(conn);
 		marketManager = new FeedbackMarketManager(callback, marketManager);
 		final SimulationManager simul = new FeedbackSimulationManager(callback,
-				factory.getSimulationManager(conn, TimeMappers.oneSecondEach(6,
+				factory.getSimulationManager(conn, TimeMappers.oneSecondEach(24,
 						TimeUnit.HOURS)));
 		simul.register(Market.class, marketManager.market());
 		// ...

@@ -3,8 +3,8 @@ package ar.edu.itba.pod.legajo49244.communication;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.simul.communication.Transactionable;
 import ar.edu.itba.pod.simul.communication.payload.Payload;
 import ar.edu.itba.pod.simul.market.Resource;

@@ -1,6 +1,6 @@
 package ar.edu.itba.pod.legajo49244.message;
 
-import ar.edu.itba.pod.legajo49244.Node;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.simul.communication.Message;
 import ar.edu.itba.pod.simul.communication.MessageType;
 import ar.edu.itba.pod.simul.communication.payload.DisconnectPayload;

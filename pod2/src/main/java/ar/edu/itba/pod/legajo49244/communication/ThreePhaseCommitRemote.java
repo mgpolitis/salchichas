@@ -5,7 +5,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import com.google.common.base.Preconditions;
 
-import ar.edu.itba.pod.legajo49244.Node;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.legajo49244.simulation.DistributedMarket;
 import ar.edu.itba.pod.legajo49244.simulation.DistributedMarketManager;
 import ar.edu.itba.pod.simul.communication.ThreePhaseCommit;

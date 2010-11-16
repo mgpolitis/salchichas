@@ -7,8 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.legajo49244.message.Messages;
 import ar.edu.itba.pod.simul.communication.ClusterAdministration;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;

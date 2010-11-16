@@ -8,7 +8,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-import ar.edu.itba.pod.legajo49244.Node;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.simul.communication.ClusterAdministration;
 import ar.edu.itba.pod.simul.communication.ClusterCommunication;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;

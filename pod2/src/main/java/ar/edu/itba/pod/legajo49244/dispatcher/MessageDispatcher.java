@@ -10,9 +10,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.ClusterAdministrationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.simul.communication.Message;
 import ar.edu.itba.pod.simul.communication.MessageListener;
 import ar.edu.itba.pod.simul.communication.MessageType;

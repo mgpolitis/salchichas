@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.legajo49244;
+package ar.edu.itba.pod.legajo49244.main;
 
 import java.net.Inet4Address;
 import java.net.UnknownHostException;

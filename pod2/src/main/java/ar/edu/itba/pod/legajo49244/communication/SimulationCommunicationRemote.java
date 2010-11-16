@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.payload.NodeAgentLoadRequestPayloadWalter;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.legajo49244.message.Messages;
 import ar.edu.itba.pod.legajo49244.simulation.DistributedSimulationManager;
 import ar.edu.itba.pod.simul.communication.AgentDescriptor;

@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import ar.edu.itba.pod.legajo49244.Node;
 import ar.edu.itba.pod.legajo49244.communication.ClusterAdministrationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ClusterCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ConnectionManagerRemote;
@@ -13,6 +12,7 @@ import ar.edu.itba.pod.legajo49244.communication.SimulationCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.communication.TransactionableRemote;
 import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
 import ar.edu.itba.pod.legajo49244.dispatcher.DispatcherListener;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.legajo49244.message.Messages;
 import ar.edu.itba.pod.simul.communication.AgentDescriptor;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
