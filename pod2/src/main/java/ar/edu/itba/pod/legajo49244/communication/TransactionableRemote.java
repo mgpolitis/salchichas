@@ -236,7 +236,6 @@ public class TransactionableRemote implements Transactionable {
 		
 	}
 	
-	
 	/**
 	 * Reverts all the changes pending in the transaction context. If this
 	 * method is invoked outside a transaction context, an IllegalStateException

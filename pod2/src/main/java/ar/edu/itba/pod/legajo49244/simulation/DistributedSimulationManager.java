@@ -283,10 +283,10 @@ public class DistributedSimulationManager implements SimulationManager,
 						.getNodeCommunication();
 
 				try {
-					// invoca al beginTransaction con el nodo A como parámetro
+					// invoca al beginTransaction con el nodo A como parametro
 					myTransactionable.beginTransaction(message.getNodeId(),
 							TRANSACTION_TIMEOUT);
-					// Si no falla, el nodo B, invoca el exchange tanto en él
+					// Si no falla, el nodo B, invoca el exchange tanto en el
 					// mismo como en el nodo A.
 					otherTransactionable.exchange(payload.getResource(),
 							payload.getAmountRequested(), Node.getNodeId(),
@@ -295,6 +295,7 @@ public class DistributedSimulationManager implements SimulationManager,
 							.getAmountRequested(), Node.getNodeId(), message
 							.getNodeId());
 					// Luego, el nodo B invoca el endTransaction.
+					myTransactionable.endTransaction();
 				} catch (IllegalStateException e) {
 					// TODO: handle exception
 					e.printStackTrace();
