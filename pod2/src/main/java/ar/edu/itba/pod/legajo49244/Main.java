@@ -93,7 +93,7 @@ public class Main {
 		boolean rampage = false;
 		BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
 		while (true) {
-			if (rampage && TimeProvider.now() > start + 1000 * 5) {
+			if (rampage && TimeProvider.now() > start + 1000 * 0.5) {
 				// rampage fades in 5 seconds
 				System.out.println("rampage is fading...");
 				rampage = false;
@@ -109,7 +109,7 @@ public class Main {
 					return;
 				}
 				if (line.equals("1")) {
-					line = "new agent simple-producer name=Pig-Iron-Mine producing=2 of=Pig-Iron every=12h";
+					line = "new agent simple-producer name=Pig-Iron-Mine producing=999 of=Pig-Iron every=12h";
 				} else if (line.equalsIgnoreCase("rampage")) {
 					System.out.println("Entering rampage mode");
 					rampage = true;
