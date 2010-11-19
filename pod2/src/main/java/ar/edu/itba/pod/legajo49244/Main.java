@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
+import ar.edu.itba.pod.legajo49244.communication.SimulationCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.main.MegaEpicFactory;
 import ar.edu.itba.pod.legajo49244.message.TimeProvider;
 import ar.edu.itba.pod.legajo49244.parser.Delegate;
@@ -76,10 +77,10 @@ public class Main {
 			Agent steelFactory = SimpleConsumer.named("factory").consuming(10)
 					.of(steel).every(2, TimeUnit.DAYS).build();
 
-			simul.addAgent(mine1);
-			simul.addAgent(mine2);
-			simul.addAgent(refinery);
-			simul.addAgent(steelFactory);
+			// simul.addAgent(mine1);
+			// simul.addAgent(mine2);
+			// simul.addAgent(refinery);
+			// simul.addAgent(steelFactory);
 		}
 		// ...
 		simul.start();
@@ -110,6 +111,8 @@ public class Main {
 				}
 				if (line.equals("1")) {
 					line = "new agent simple-producer name=Pig-Iron-Mine producing=999 of=Pig-Iron every=12h";
+				} else if (line.equals("2")) {
+					line = "new agent simple-consumer name=Factory consuming=2 of=Pig-Iron every=12h";
 				} else if (line.equalsIgnoreCase("rampage")) {
 					System.out.println("Entering rampage mode");
 					rampage = true;
@@ -118,6 +121,10 @@ public class Main {
 					System.out.println("Commencing QUIT.");
 					simul.shutdown();
 					System.exit(0);
+				} else if (line.equals("loads") || line.equals("load")) {
+					((SimulationCommunicationRemote) conn
+							.getSimulationCommunication())
+							.forcedBecomeCoordinator();
 				}
 				System.out.println("Command read: " + line);
 				parser.parseCommand(line, new Delegate() {
@@ -134,10 +141,7 @@ public class Main {
 					}
 				});
 
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (InvalidCommandException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
 				// System.out
 				// .println("new (resource | agent) parameters\n"
 				// + "Creates a new resource or agent. \n"
@@ -179,7 +183,7 @@ public class Main {
 				// "\n\tValid Time units [Day=d, Hour=h, Minute=m, Seconds=s, MicroSeconds=ms, MicroSecconds=mms, NanoSeconds=ns]"
 				// +
 				// "\n\tDO NOT USE white spaces. Only to separete parameters.");
-			}
+			} 
 		}
 	}
 }

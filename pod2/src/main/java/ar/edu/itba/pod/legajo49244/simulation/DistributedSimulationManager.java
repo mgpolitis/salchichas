@@ -181,6 +181,10 @@ public class DistributedSimulationManager implements SimulationManager,
 	public DistributedSimulation simulation() {
 		return simulation;
 	}
+	
+	public void forceCoordinate() {
+		SimulationCommunicationRemote.get().becomeCoordinator();
+	}
 
 	/**
 	 * 

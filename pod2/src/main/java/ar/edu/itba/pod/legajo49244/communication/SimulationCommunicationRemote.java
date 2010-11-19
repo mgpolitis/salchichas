@@ -29,6 +29,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	private boolean isCoordinator = false;
 	private String coordinatorId = null;
+	private boolean isForced = false;
 
 	private SortedSet<NodeAgentLoad> sortedLoadPerNode;
 	private Map<String, NodeAgentLoad> mapLoadPerNode;
@@ -63,11 +64,12 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 		for (Agent a : DistributedSimulationManager.get().getAgents()) {
 			migrationBus.add(a.getAgentDescriptor());
-			
+
 			// shouldnt we get descriptor AFTER removing?
 			DistributedSimulationManager.get().simulation().removeAgent(a);
-			System.out.println("Agent "+a.getName()+" is beeing removed from simulation");
-			
+			System.out.println("Agent " + a.getName()
+					+ " is beeing removed from simulation");
+
 			numberOfAgents--;
 			if (numberOfAgents <= 0) {
 				break;
@@ -105,6 +107,14 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 			// made my best effort to inform, too bad
 		}
 
+	}
+
+	public void forcedBecomeCoordinator() {
+		// force coordination
+		isForced = true;
+		isCoordinator = false;
+
+		this.becomeCoordinator();
 	}
 
 	public synchronized void becomeCoordinator() {
@@ -235,52 +245,80 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		}
 	}
 
+	private void printNodeLoad(String informerNode, int load) {
+		System.out.println("\t<Node load info>: " + informerNode + ": " + load);
+	}
+
 	public void onWaitTimeForBalancingResponsesExpired() {
 		// TODO balance, is this OK?
-		System.out.println("Commencing load balancing, doc.");
-		float sum = 0;
-		for (NodeAgentLoad nal : this.sortedLoadPerNode) {
-			sum += nal.getNumberOfAgents();
-		}
-		//float mean = sum / this.sortedLoadPerNode.size();
-
-		NodeAgentLoad minLoad = this.sortedLoadPerNode.first();
-		NodeAgentLoad maxLoad = this.sortedLoadPerNode.last();
-
-		int delta = maxLoad.getNumberOfAgents() - minLoad.getNumberOfAgents();
-		if (delta >= 2) {
-			// commence migration process
-			String saturatedNode = maxLoad.getNodeId();
-			String freeNode = minLoad.getNodeId();
-			System.out.println("Migrating " + (delta / 2) + "agents from "
-					+ saturatedNode + " to " + freeNode);
-			int numberOfAgentsToMigrate = delta / 2;
-
-			try {
-				Collection<AgentDescriptor> migrationBus = ConnectionManagerRemote
-						.get().getConnectionManager(saturatedNode)
-						.getSimulationCommunication().migrateAgents(
-								numberOfAgentsToMigrate);
-				for (AgentDescriptor immigrant : migrationBus) {
-					ConnectionManagerRemote.get()
-							.getConnectionManager(freeNode)
-							.getSimulationCommunication().startAgent(immigrant);
-				}
-			} catch (RemoteException e) {
-				// TODO ask what to do in this case, error while migrating
-				e.printStackTrace();
-				System.out
-						.println("Error while migrating agents. HECATOMB !!!!!!!!!!");
+		if (isForced) {
+			for (NodeAgentLoad al : this.sortedLoadPerNode) {
+				this.printNodeLoad(al.getNodeId(), al.getNumberOfAgents());
 			}
-		} else {
-			System.out.println("Nothing to do, this is balanced, yeah!");
+		}
+		System.out.println("Commencing load balancing, doc.");
+		int delta = 1000;
+		// float mean = -1;
+		while (delta >= 2) {
+
+			float sum = 0;
+			for (NodeAgentLoad nal : this.sortedLoadPerNode) {
+				sum += nal.getNumberOfAgents();
+			}
+			// mean = sum / this.sortedLoadPerNode.size();
+
+			NodeAgentLoad minLoad = this.sortedLoadPerNode.first();
+			NodeAgentLoad maxLoad = this.sortedLoadPerNode.last();
+			System.out.println("MAX = " + maxLoad.getNumberOfAgents());
+			System.out.println("MIN = " + minLoad.getNumberOfAgents());
+
+			delta = maxLoad.getNumberOfAgents() - minLoad.getNumberOfAgents();
+			if (delta >= 2) {
+				// commence migration process
+				String saturatedNode = maxLoad.getNodeId();
+				String freeNode = minLoad.getNodeId();
+				System.out.println("Migrating " + (delta / 2) + " agents from "
+						+ saturatedNode + " to " + freeNode);
+				int numberOfAgentsToMigrate = delta / 2;
+
+				try {
+					Collection<AgentDescriptor> migrationBus = ConnectionManagerRemote
+							.get().getConnectionManager(saturatedNode)
+							.getSimulationCommunication().migrateAgents(
+									numberOfAgentsToMigrate);
+					for (AgentDescriptor immigrant : migrationBus) {
+						ConnectionManagerRemote.get().getConnectionManager(
+								freeNode).getSimulationCommunication()
+								.startAgent(immigrant);
+					}
+					this.updateRecordsFor(new NodeAgentLoad(saturatedNode,
+							maxLoad.getNumberOfAgents()
+									- numberOfAgentsToMigrate));
+					this.updateRecordsFor(new NodeAgentLoad(freeNode,
+							minLoad.getNumberOfAgents()
+									+ numberOfAgentsToMigrate));
+				} catch (RemoteException e) {
+					// TODO ask what to do in this case, error while migrating
+					e.printStackTrace();
+					System.out
+							.println("Error while migrating agents. HECATOMB !!!!!!!!!!");
+				}
+			} else {
+				System.out.println("Nothing to do, this is balanced, yeah!");
+			}
+		}
+		if (isForced) {
+			for (NodeAgentLoad al : this.sortedLoadPerNode) {
+				this.printNodeLoad(al.getNodeId(), al.getNumberOfAgents());
+			}
+			isForced = false;
 		}
 
 	}
 
 	private class WaiterRunnable implements Runnable {
 
-		private final static long WAIT_TIME = 10000;
+		private final static long WAIT_TIME = 3000;
 
 		@Override
 		public void run() {
