@@ -86,7 +86,7 @@ public class ConnectionManagerRemote implements ConnectionManager {
 
 	@Override
 	public int getClusterPort() throws RemoteException {
-		return Registry.REGISTRY_PORT+103;
+		return Registry.REGISTRY_PORT+193;
 	}
 
 	@Override

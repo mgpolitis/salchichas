@@ -117,20 +117,15 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		ret.addAll(this.clusterNodes);
 		ret.add(Node.getNodeId());
 		
-		this.clusterNodes.add(newNode);
-		
-		if (this.clusterNodes.size() > 0) {
-			List<String> nodes = Lists.newArrayList(this.clusterNodes);
-			Collections.shuffle(nodes);
-			String contactNode = nodes.get(0);
+		for (String neighbour : this.clusterNodes) {
 			try {
-				connectionManager.getConnectionManager(contactNode).getClusterAdmimnistration().addNewNode(newNode);
+				connectionManager.getConnectionManager(neighbour).getClusterAdmimnistration().addNewNode(newNode);
 			} catch (RemoteException e) {
-				// do nothing, cannot propagate further
+				// do nothing, could propagate to that node
 			}
 		}
 		
-
+		this.clusterNodes.add(newNode);
 		return ret;
 	}
 

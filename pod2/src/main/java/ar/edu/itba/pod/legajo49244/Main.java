@@ -54,7 +54,6 @@ public class Main {
 		final SimulationManager simul = new FeedbackSimulationManager(callback,
 				factory.getSimulationManager(conn, TimeMappers.oneSecondEach(6,
 						TimeUnit.HOURS)));
-		simul.register(Market.class, marketManager.market());
 		// ...
 
 		Market market = marketManager.market();
@@ -127,19 +126,25 @@ public class Main {
 							.forcedBecomeCoordinator();
 				}
 				System.out.println("Command read: " + line);
-				parser.parseCommand(line, new Delegate() {
+				try {
+					parser.parseCommand(line, new Delegate() {
 
-					@Override
-					public void handleNewResource(Resource resource) {
-						System.out.println("new resource");
-					}
+						@Override
+						public void handleNewResource(Resource resource) {
+							System.out.println("new resource");
+						}
 
-					@Override
-					public void handleNewAgent(Agent agent) {
-						System.out.println("new agent");
-						simul.addAgent(agent);
-					}
-				});
+						@Override
+						public void handleNewAgent(Agent agent) {
+							System.out.println("new agent");
+							simul.addAgent(agent);
+						}
+					});
+				} catch (Exception e) {
+					System.out
+							.println("Exception caught while reading command");
+					e.printStackTrace();
+				}
 
 			} catch (Exception e) {
 				// System.out
@@ -183,7 +188,7 @@ public class Main {
 				// "\n\tValid Time units [Day=d, Hour=h, Minute=m, Seconds=s, MicroSeconds=ms, MicroSecconds=mms, NanoSeconds=ns]"
 				// +
 				// "\n\tDO NOT USE white spaces. Only to separete parameters.");
-			} 
+			}
 		}
 	}
 }

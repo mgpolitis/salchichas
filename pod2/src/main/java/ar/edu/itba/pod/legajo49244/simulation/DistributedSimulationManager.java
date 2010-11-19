@@ -51,7 +51,7 @@ public class DistributedSimulationManager implements SimulationManager,
 	@Override
 	public void start() {
 		simulation.start();
-		// SimulationCommunicationRemote.get().becomeCoordinator();
+		SimulationCommunicationRemote.get().becomeCoordinator();
 		isStarted = true;
 	}
 

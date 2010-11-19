@@ -269,8 +269,8 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 			NodeAgentLoad minLoad = this.sortedLoadPerNode.first();
 			NodeAgentLoad maxLoad = this.sortedLoadPerNode.last();
-			System.out.println("MAX = " + maxLoad.getNumberOfAgents());
-			System.out.println("MIN = " + minLoad.getNumberOfAgents());
+			//System.out.println("MAX = " + maxLoad.getNumberOfAgents());
+			//System.out.println("MIN = " + minLoad.getNumberOfAgents());
 
 			delta = maxLoad.getNumberOfAgents() - minLoad.getNumberOfAgents();
 			if (delta >= 2) {
