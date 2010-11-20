@@ -1,7 +1,6 @@
 package ar.edu.itba.pod.legajo49244;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
@@ -9,8 +8,8 @@ import ar.edu.itba.pod.legajo49244.communication.SimulationCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.main.MegaEpicFactory;
 import ar.edu.itba.pod.legajo49244.message.TimeProvider;
 import ar.edu.itba.pod.legajo49244.parser.Delegate;
-import ar.edu.itba.pod.legajo49244.parser.InvalidCommandException;
 import ar.edu.itba.pod.legajo49244.parser.SimulationNewEntityCommandParser;
+import ar.edu.itba.pod.legajo49244.simulation.DistributedSimulationManager;
 import ar.edu.itba.pod.simul.ObjectFactory;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.market.Market;
@@ -124,6 +123,8 @@ public class Main {
 					((SimulationCommunicationRemote) conn
 							.getSimulationCommunication())
 							.forcedBecomeCoordinator();
+				} else if (line.equals("stats") || line.equals("stat")) {
+					DistributedSimulationManager.get().sendGetClusterMarketData();
 				}
 				System.out.println("Command read: " + line);
 				try {

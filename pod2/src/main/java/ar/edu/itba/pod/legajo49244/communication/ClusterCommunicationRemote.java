@@ -6,12 +6,14 @@ import java.util.Collections;
 import java.util.List;
 
 import ar.edu.itba.pod.legajo49244.dispatcher.MessageDispatcher;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.legajo49244.simulation.DistributedSimulationManager;
 import ar.edu.itba.pod.simul.communication.ClusterCommunication;
 import ar.edu.itba.pod.simul.communication.ConnectionManager;
 import ar.edu.itba.pod.simul.communication.Message;
 import ar.edu.itba.pod.simul.communication.MessageListener;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public class ClusterCommunicationRemote implements ClusterCommunication {
@@ -32,8 +34,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 		try {
 			UnicastRemoteObject.exportObject(this,0);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Node.exportError(getClass());
 		}
 	}
 
@@ -60,6 +61,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 			} catch (RemoteException e) {
 				// could not send message to that node
 				System.out.println("could not broadcast to node "+node+", he was down.");
+				e.printStackTrace();
 			}
 		}
 
@@ -67,6 +69,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 
 	@Override
 	public boolean send(Message message, String nodeId) throws RemoteException {
+		Preconditions.checkArgument(!message.equals(Node.getNodeId()), "Cannot send message to yourself!!!");
 		
 		ConnectionManager otherManager = ConnectionManagerRemote.get()
 				.getConnectionManager(nodeId);
@@ -77,4 +80,5 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 		System.out.println("[message sent]");
 		return ret;
 	}
+
 }

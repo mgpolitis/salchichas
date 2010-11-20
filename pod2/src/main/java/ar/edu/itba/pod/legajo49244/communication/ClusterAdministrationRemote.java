@@ -29,8 +29,7 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		try {
 			UnicastRemoteObject.exportObject(this, 0);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Node.exportError(getClass());
 		}
 	}
 
@@ -81,6 +80,10 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		Iterable<String> nodes = initialCM.getClusterAdmimnistration()
 				.addNewNode(Node.getNodeId());
 		for (String node : nodes) {
+			if (node.equals(Node.getNodeId())) {
+				continue;
+			}
+			System.out.println("\t-Adding neighbour <"+node+">");
 			clusterNodes.add(node);
 		}
 		clusterNodes.add(initialNode);
@@ -133,7 +136,6 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 
 	@Override
 	public void disconnectFromGroup(String nodeId) throws RemoteException {
-		// TODO: call this where necessary
 		if (!isConnected) {
 			throw new IllegalArgumentException("El nodo no estaba conectado.");
 		}

@@ -21,6 +21,7 @@ import ar.edu.itba.pod.simul.communication.NodeAgentLoad;
 import ar.edu.itba.pod.simul.communication.Transactionable;
 import ar.edu.itba.pod.simul.communication.payload.DisconnectPayload;
 import ar.edu.itba.pod.simul.communication.payload.NodeAgentLoadPayload;
+import ar.edu.itba.pod.simul.communication.payload.NodeMarketDataPayload;
 import ar.edu.itba.pod.simul.communication.payload.ResourceRequestPayload;
 import ar.edu.itba.pod.simul.simulation.Agent;
 import ar.edu.itba.pod.simul.simulation.SimulationInspector;
@@ -34,7 +35,7 @@ public class DistributedSimulationManager implements SimulationManager,
 	private static final long TRANSACTION_TIMEOUT = 1000;
 	private static DistributedSimulationManager INSTANCE = new DistributedSimulationManager();
 	private boolean isStarted = false;
-
+	
 	private DistributedSimulationManager() {
 	}
 
@@ -244,16 +245,42 @@ public class DistributedSimulationManager implements SimulationManager,
 		return true;
 	}
 
+	public void sendGetClusterMarketData() {
+		System.out.println("Requesting CLUSTER MARKET DATA");
+		try {
+			ClusterCommunicationRemote.get().broadcast(
+					Messages.newNodeMarketDataRequestMessage(Payloads
+							.newNodeMarketDataRequestPayload()));
+		} catch (RemoteException e) {
+			// could not broadcast
+			e.printStackTrace();
+		}
+		System.out.println("\t ~~~ "+Node.getNodeId()+": ");
+		System.out.println("\t t/sec = "+DistributedMarketManager.get().market().marketData().getHistory().getTransactionsPerSecond());
+	}
+
 	@Override
 	public boolean onNodeMarketData(Message message) {
-		// TODO para el informe
-		return false;
+		NodeMarketDataPayload payload = (NodeMarketDataPayload) message.getPayload();
+		System.out.println("\t ~~~ "+message.getNodeId()+": ");
+		System.out.println("\t t/sec = "+payload.getMarketData().getHistory().getTransactionsPerSecond());
+		return true;
 	}
 
 	@Override
 	public boolean onNodeMarketDataRequest(Message message) {
-		// TODO para el informe
-		return false;
+		NodeMarketDataPayload payload = Payloads
+				.newNodeMarketDataPayload(DistributedMarketManager.get()
+						.market().marketData());
+		try {
+			ClusterCommunicationRemote.get().send(
+					Messages.newNodeMarketDataResponseMessage(payload),
+					message.getNodeId());
+		} catch (Exception e) {
+			// could not send market data
+			e.printStackTrace();
+		}
+		return true;
 	}
 
 	@Override
@@ -292,16 +319,13 @@ public class DistributedSimulationManager implements SimulationManager,
 					myTransactionable.endTransaction();
 				} catch (IllegalStateException e) {
 					// some other node started transaction first
-					// ignore
-					// TODO: check revert?
+					//DistributedMarketManager.get().market().importResources(payload.getResource(), payload.getAmountRequested());
 				}
 
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// could not establish transaction
 			}
 		}
-
 		return true;
 	}
 }

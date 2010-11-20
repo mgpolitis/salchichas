@@ -45,21 +45,21 @@ public class MessageDispatcher implements MessageListener {
 		try {
 			UnicastRemoteObject.exportObject(this, 0);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Node.exportError(getClass());
 		}
 	}
 
 	@Override
 	public Iterable<Message> getNewMessages(String remoteNodeId)
 			throws RemoteException {
-		
+
 		// if I didn't know of nodes existance, add it
-		if (ClusterAdministrationRemote.get().getClusterNodes().contains(remoteNodeId)) {
-			ClusterAdministrationRemote.get().getClusterNodes().add(remoteNodeId);
+		if (ClusterAdministrationRemote.get().getClusterNodes().contains(
+				remoteNodeId)) {
+			ClusterAdministrationRemote.get().getClusterNodes().add(
+					remoteNodeId);
 		}
-		
-		
+
 		Long nodeLastContactTimestamp = lastContactedForPull.get(remoteNodeId);
 		if (nodeLastContactTimestamp == null) {
 			// first time this node is contacting me
@@ -135,6 +135,7 @@ public class MessageDispatcher implements MessageListener {
 					break;
 				case NODE_MARKET_DATA:
 					listener.onNodeMarketData(message);
+					break;
 				case NODE_MARKET_DATA_REQUEST:
 					listener.onNodeMarketDataRequest(message);
 					break;
@@ -143,15 +144,14 @@ public class MessageDispatcher implements MessageListener {
 					break;
 				case RESOURCE_TRANSFER:
 					// do nothing, deprecated message
-					//listener.onResourceTransfer(message);
+					// listener.onResourceTransfer(message);
 					break;
 				case RESOURCE_TRANSFER_CANCELED:
 					// do nothing, deprecated message
-					//listener.onResourceTransferCanceled(message);
+					// listener.onResourceTransferCanceled(message);
 					break;
 				default:
-					System.out.println("Unknown message type: "
-							+ type);
+					System.out.println("Unknown message type: " + type);
 				}
 
 				// broadcast if neccesary
@@ -186,8 +186,7 @@ public class MessageDispatcher implements MessageListener {
 				try {
 					Thread.sleep(SLEEP_AMMOUNT_MILLIS);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					continue;
 				}
 				long now = System.currentTimeMillis();
 				for (Message m : historyOfBroadcastables.keySet()) {

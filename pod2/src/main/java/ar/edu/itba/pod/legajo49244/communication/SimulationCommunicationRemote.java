@@ -40,8 +40,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 		try {
 			UnicastRemoteObject.exportObject(this, 0);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Node.exportError(getClass());
 		}
 	}
 
@@ -154,8 +153,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 							Messages
 									.newNodeAgentLoadRequestMessage(new NodeAgentLoadRequestPayloadWalter()));
 		} catch (RemoteException e) {
-			// TODO: formalize this syso or delete it
-			System.out.println("SHOULD NEVER REACH HERE");
+			// could not broadcast, will have to balance with parcial data
 		}
 		// deploy waiter thread to make callback after a while
 		new Thread(new WaiterRunnable()).start();
@@ -187,15 +185,13 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	}
 
 	public void onNodeDisconnected(String disconnectedNode) {
-		// TODO: ver los sysos estos, son informales
 		if (Node.getNodeId().equals(disconnectedNode)) {
 			try {
 				if (ClusterAdministrationRemote.get().isConnectedToGroup()) {
 					System.out
-							.println("Me dijeron que yo me desconecte y estoy conectado! WTF? ");
+							.println("Me dijeron que yo me desconecte y estoy conectado!");
 				}
 			} catch (RemoteException e) {
-				System.out.println("ESTO NO DEBERIA APARECER NUNCA");
 				// do nothing, will never fail
 			}
 		}
@@ -303,7 +299,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 							.getNumberOfAgents()
 							+ numberOfAgentsToMigrate));
 				} catch (RemoteException e) {
-					// TODO ask what to do in this case, error while migrating
+					// TODO stacktrace
 					e.printStackTrace();
 					System.out
 							.println("Error while migrating agents. HECATOMB !!!!!!!!!!");

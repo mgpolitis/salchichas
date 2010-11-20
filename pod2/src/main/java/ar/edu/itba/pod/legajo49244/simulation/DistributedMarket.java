@@ -50,8 +50,6 @@ public class DistributedMarket extends LocalMarket implements Market,
 									.newResourceRequestPayload(buying.count(buyer),
 											buyer.resource())));
 				} catch (RemoteException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 					System.out.println("Falla el broadcast de pedido de recurso");
 				}
 			}
@@ -144,5 +142,5 @@ public class DistributedMarket extends LocalMarket implements Market,
 		}
 		return false;
 	}
-
+	
 }

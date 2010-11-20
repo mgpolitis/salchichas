@@ -68,9 +68,8 @@ public class TransactionableRemote implements Transactionable {
 		} catch (Exception e) {
 			// Si lanza una exception, considera que no se pudo hacer la
 			// transacción
-			e.printStackTrace();
 			System.out.println("Could not create transaction, abort.");
-			return;
+			throw new IllegalStateException();
 		}
 
 		// Si retorna bien, considera la transacción creada

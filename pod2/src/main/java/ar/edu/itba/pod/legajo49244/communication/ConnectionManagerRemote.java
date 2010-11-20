@@ -33,7 +33,6 @@ public class ConnectionManagerRemote implements ConnectionManager {
 		System.out.println("Creating ConnectionManager");
 		try {
 			int port = getClusterPort();
-			// TODO: dejar esto o lo que anda SEGURO?
 			RMISocketFactory csf = new MySocketFactory(InetAddress.getByName(Node.getNodeId()));
 			Registry registry = LocateRegistry.createRegistry(port, csf, csf);
 			UnicastRemoteObject.exportObject(this, 0);
@@ -43,14 +42,14 @@ public class ConnectionManagerRemote implements ConnectionManager {
 			this.getGroupCommunication();
 			
 		} catch (AlreadyBoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Port,address combination already bound");
+			System.out.println(e.getMessage());
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Remote exception while creating RMI registry");
+			System.out.println(e.getMessage());
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Unknown host");
+			System.out.println(e.getMessage());
 		} 
 	}
 
@@ -66,13 +65,10 @@ public class ConnectionManagerRemote implements ConnectionManager {
 			ret = (ConnectionManager) registry
 					.lookup(ReferenceName.CONNECTION_MANAGER_NAME);
 		} catch (NotBoundException e) {
-			e.printStackTrace();
 			throw new RemoteException(
 					"Connection manager not bound in that node.");
 		} catch (AccessException e) {
-			// TODO Auto-generated catch block, analize case
-			e.printStackTrace();
-			throw new RemoteException("REASON UNKNOWN COMPLETE ME!!");
+			throw new RemoteException("Access Exception");
 		} catch (RemoteException e) {
 
 			String message = "Node "+nodeId+" was found to be down.";
@@ -95,14 +91,14 @@ public class ConnectionManagerRemote implements ConnectionManager {
 
 	@Override
 	public int getClusterPort() throws RemoteException {
-		return Registry.REGISTRY_PORT+193;
+		return Registry.REGISTRY_PORT+141;
 	}
 
 	@Override
 	public ClusterCommunication getGroupCommunication() throws RemoteException {
 		return ClusterCommunicationRemote.get();
 	}
-
+	
 	@Override
 	public Transactionable getNodeCommunication() throws RemoteException {
 		return TransactionableRemote.get();
