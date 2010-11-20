@@ -2,9 +2,7 @@ package ar.edu.itba.pod.legajo49244.communication;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
@@ -117,7 +115,12 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 		ret.addAll(this.clusterNodes);
 		ret.add(Node.getNodeId());
 		
+		this.clusterNodes.add(newNode);
+		
 		for (String neighbour : this.clusterNodes) {
+			if (neighbour.equals(newNode)) {
+				continue;
+			}
 			try {
 				connectionManager.getConnectionManager(neighbour).getClusterAdmimnistration().addNewNode(newNode);
 			} catch (RemoteException e) {
@@ -125,7 +128,6 @@ public class ClusterAdministrationRemote implements ClusterAdministration {
 			}
 		}
 		
-		this.clusterNodes.add(newNode);
 		return ret;
 	}
 

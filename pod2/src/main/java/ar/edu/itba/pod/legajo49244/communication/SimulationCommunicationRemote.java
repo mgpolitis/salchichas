@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import ar.edu.itba.pod.legajo49244.communication.payload.NodeAgentLoadRequestPayloadWalter;
 import ar.edu.itba.pod.legajo49244.main.Node;
@@ -27,7 +28,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	private static final SimulationCommunicationRemote INSTANCE = new SimulationCommunicationRemote();
 
-	private boolean isCoordinator = false;
+	private AtomicBoolean isCoordinator = new AtomicBoolean(false);
 	private String coordinatorId = null;
 	private boolean isForced = false;
 
@@ -50,7 +51,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	@Override
 	public NodeAgentLoad getMinimumNodeKnownLoad() throws RemoteException {
-		if (!isCoordinator) {
+		if (!isCoordinator.get()) {
 			return null;
 		}
 		NodeAgentLoad lowestLoad = sortedLoadPerNode.first();
@@ -81,7 +82,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	@Override
 	public void nodeLoadModified(NodeAgentLoad newLoad) throws RemoteException {
 		// esto es opcional, podria ignorarse
-		if (isCoordinator) {
+		if (isCoordinator.get()) {
 			this.updateRecordsFor(newLoad);
 		}
 	}
@@ -112,17 +113,17 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	public void forcedBecomeCoordinator() {
 		// force coordination
 		isForced = true;
-		isCoordinator = false;
+		isCoordinator.set(false);
 
 		this.becomeCoordinator();
 	}
 
 	public synchronized void becomeCoordinator() {
-		if (isCoordinator) {
+		if (isCoordinator.get()) {
 			throw new IllegalStateException("Node is coodinator already.");
 		}
 
-		isCoordinator = true;
+		isCoordinator.set(true);
 		coordinatorId = null;
 
 		mapLoadPerNode = Maps.newHashMap();
@@ -162,14 +163,14 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	}
 
 	public synchronized void leaveCoordination(String newCoordinator) {
-		isCoordinator = false;
+		isCoordinator.set(false);
 		mapLoadPerNode = null;
 		sortedLoadPerNode = null;
 		coordinatorId = newCoordinator;
 	}
 
 	public ConnectionManager getCoordinatorConnectionManager() {
-		if (isCoordinator) {
+		if (isCoordinator.get()) {
 			return ConnectionManagerRemote.get();
 		}
 		if (coordinatorId == null) {
@@ -198,13 +199,13 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 				// do nothing, will never fail
 			}
 		}
-		if (isCoordinator) {
+		if (isCoordinator.get()) {
 			this.removeRecordsFor(disconnectedNode);
 		}
 	}
 
 	private void removeRecordsFor(String nodeId) {
-		Preconditions.checkState(isCoordinator);
+		Preconditions.checkState(isCoordinator.get());
 		NodeAgentLoad disconnectedAgentLoad = mapLoadPerNode.get(nodeId);
 		if (disconnectedAgentLoad == null) {
 			System.out.println("I was ordered to delete records of a node,"
@@ -218,7 +219,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	}
 
 	private void updateRecordsFor(NodeAgentLoad newLoad) {
-		Preconditions.checkState(isCoordinator);
+		Preconditions.checkState(isCoordinator.get());
 		Preconditions
 				.checkState(mapLoadPerNode.keySet().size() == sortedLoadPerNode
 						.size());
@@ -236,7 +237,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	}
 
 	public void onNodeAgentsLoadInfoArrived(String informerNode, int load) {
-		if (isCoordinator) {
+		if (isCoordinator.get()) {
 			NodeAgentLoad newLoad = new NodeAgentLoad(informerNode, load);
 			this.updateRecordsFor(newLoad);
 		} else {
@@ -250,7 +251,11 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	}
 
 	public void onWaitTimeForBalancingResponsesExpired() {
-		// TODO balance, is this OK?
+		if (!isCoordinator.get()) {
+			System.out.println("I'm no longer coordinator, I wont balance");
+			return;
+		}
+
 		if (isForced) {
 			for (NodeAgentLoad al : this.sortedLoadPerNode) {
 				this.printNodeLoad(al.getNodeId(), al.getNumberOfAgents());
@@ -269,8 +274,8 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 			NodeAgentLoad minLoad = this.sortedLoadPerNode.first();
 			NodeAgentLoad maxLoad = this.sortedLoadPerNode.last();
-			//System.out.println("MAX = " + maxLoad.getNumberOfAgents());
-			//System.out.println("MIN = " + minLoad.getNumberOfAgents());
+			// System.out.println("MAX = " + maxLoad.getNumberOfAgents());
+			// System.out.println("MIN = " + minLoad.getNumberOfAgents());
 
 			delta = maxLoad.getNumberOfAgents() - minLoad.getNumberOfAgents();
 			if (delta >= 2) {
@@ -294,9 +299,9 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 					this.updateRecordsFor(new NodeAgentLoad(saturatedNode,
 							maxLoad.getNumberOfAgents()
 									- numberOfAgentsToMigrate));
-					this.updateRecordsFor(new NodeAgentLoad(freeNode,
-							minLoad.getNumberOfAgents()
-									+ numberOfAgentsToMigrate));
+					this.updateRecordsFor(new NodeAgentLoad(freeNode, minLoad
+							.getNumberOfAgents()
+							+ numberOfAgentsToMigrate));
 				} catch (RemoteException e) {
 					// TODO ask what to do in this case, error while migrating
 					e.printStackTrace();

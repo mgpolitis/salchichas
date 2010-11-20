@@ -239,8 +239,7 @@ public class DistributedSimulationManager implements SimulationManager,
 					Messages.newNodeAgentLoadResponseMessage(Payloads
 							.newNodeAgentLoadPayload(load)), coordId);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// too bad, could not inform my load...
 		}
 		return true;
 	}
@@ -301,8 +300,9 @@ public class DistributedSimulationManager implements SimulationManager,
 					// Luego, el nodo B invoca el endTransaction.
 					myTransactionable.endTransaction();
 				} catch (IllegalStateException e) {
-					// TODO: handle exception
-					e.printStackTrace();
+					// some other node started transaction first
+					// ignore
+					// TODO: check revert?
 				}
 
 			} catch (RemoteException e) {
