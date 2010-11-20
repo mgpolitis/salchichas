@@ -109,9 +109,9 @@ public class Main {
 					return;
 				}
 				if (line.equals("1")) {
-					line = "new agent simple-producer name=Pig-Iron-Mine producing=1 of=Pig-Iron every=12h";
+					line = "new agent simple-producer name=Pig-Iron-Mine producing=1 of=Pig-Iron every=1h";
 				} else if (line.equals("2")) {
-					line = "new agent simple-consumer name=Factory consuming=2 of=Pig-Iron every=12h";
+					line = "new agent simple-consumer name=Factory consuming=1 of=Pig-Iron every=1h";
 				} else if (line.equalsIgnoreCase("rampage")) {
 					System.out.println("Entering rampage mode");
 					rampage = true;

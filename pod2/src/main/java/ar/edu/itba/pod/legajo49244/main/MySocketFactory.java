@@ -2,6 +2,7 @@ package ar.edu.itba.pod.legajo49244.main;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.BindException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -22,6 +23,9 @@ public class MySocketFactory extends RMISocketFactory implements Serializable {
 		ServerSocket serverSocket = null;
 		try {
 			serverSocket = new ServerSocket(port, 50, ipInterface);
+		} catch (BindException e) {
+			System.out.println("FATAL: Could not bind to address "+ipInterface);
+			System.exit(1);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

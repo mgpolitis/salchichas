@@ -49,6 +49,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 */
 	public synchronized boolean canCommit(String coordinatorId, long timeout)
 			throws RemoteException {
+		System.out.println("****canCommit Called");
 		if (coordId != null) {
 			// interface doesnt say I should throw exception, :(, god help us
 			System.out.println("ALREADY HAD COORDINATOR, ALTO QUILOMBO!!!");
@@ -73,6 +74,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 *            The coordinator identification
 	 */
 	public synchronized void preCommit(String coordinatorId) throws RemoteException {
+		System.out.println("****preCommit Called");
 		if (!coordinatorId.equals(coordinatorId)) {
 			throw new IllegalArgumentException(
 					"Coordinator for this 3PC can only be " + coordinatorId);
@@ -97,6 +99,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 *            The coordinator identification
 	 */
 	public synchronized void doCommit(String coordinatorId) throws RemoteException {
+		System.out.println("****doCommit Called");
 		if (!coordinatorId.equals(coordinatorId)) {
 			throw new IllegalArgumentException(
 					"Coordinator for this 3PC can only be " + coordinatorId);
@@ -111,6 +114,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	}
 
 	private synchronized void ultraDoCommit() {
+		System.out.println("**** ultraDoCommit called");
 		ResourceTransferMessagePayload payload = null;
 		try {
 			payload = (ResourceTransferMessagePayload) TransactionableRemote
@@ -130,7 +134,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 			market.importResources(payload.getResource(), payload.getAmount());
 		}
 		this.state = State.DO_COMMIT_CALLED;
-
+		System.out.println(">>>>> seting state to "+this.state);
 	}
 
 	/**
@@ -141,7 +145,8 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 * @throws RemoteException
 	 */
 	public synchronized void abort() throws RemoteException {
-		Preconditions.checkState(this.state.equals(State.IDLE),
+		System.out.println("****abort Called");
+		Preconditions.checkState(!this.state.equals(State.IDLE),
 				"canCommit must be called first!");
 
 
@@ -189,7 +194,9 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 * @throws RemoteException
 	 */
 	public synchronized void onTimeout() throws RemoteException {
-		Preconditions.checkState(this.state.equals(State.IDLE),
+		System.out.println("****onTimeout Called");
+		System.out.println(">>>>>> my state is "+this.state);
+		Preconditions.checkState(!this.state.equals(State.IDLE),
 				"canCommit must be called first!");
 
 		if (this.state.equals(State.CAN_COMMIT_CALLED)) {

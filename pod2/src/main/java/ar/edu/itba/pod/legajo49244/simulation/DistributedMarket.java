@@ -30,25 +30,30 @@ public class DistributedMarket extends LocalMarket implements Market,
 
 	protected void matchBothEnds() {
 		for (ResourceStock buyer : buying) {
+			boolean resourcesObtained = false;
 			for (ResourceStock seller : selling) {
 				if (buyer.resource().equals(seller.resource())) {
 					transfer(buyer, seller);
+					resourcesObtained = true;
 				}
 			}
 			for (Resource dockResource : this.dockStock) {
 				if (buyer.resource().equals(dockResource)) {
 					smuggle(buyer, dockResource);
+					resourcesObtained = true;
 				}
 			}
-			try {
-				ClusterCommunicationRemote.get().broadcast(
-						Messages.newResourceRequestMessage(Payloads
-								.newResourceRequestPayload(buying.count(buyer),
-										buyer.resource())));
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.out.println("Falla el broadcast de pedido de recurso");
+			if (!resourcesObtained) {
+				try {
+					ClusterCommunicationRemote.get().broadcast(
+							Messages.newResourceRequestMessage(Payloads
+									.newResourceRequestPayload(buying.count(buyer),
+											buyer.resource())));
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					System.out.println("Falla el broadcast de pedido de recurso");
+				}
 			}
 		}
 	}

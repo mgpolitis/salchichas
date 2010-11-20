@@ -120,7 +120,6 @@ public class MessageDispatcher implements MessageListener {
 				}
 
 				MessageType type = message.getType();
-				System.out.println("Message read!!!");
 
 				// let delegate process message
 

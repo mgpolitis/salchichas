@@ -51,7 +51,7 @@ public class ConnectionManagerRemote implements ConnectionManager {
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} 
 	}
 
 	@Override

@@ -119,7 +119,7 @@ public class LocalMarket extends CleanableThread implements Market, MarketInspec
 		while(!shouldFinish()) {
 			try {
 				matchBothEnds();
-				Thread.sleep(1000 * 60);
+				Thread.sleep(1000 * 20);
 			} catch (InterruptedException e) {
 				// either shutdown, or new contacts offered
 			}

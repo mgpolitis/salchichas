@@ -181,7 +181,7 @@ public class DistributedSimulationManager implements SimulationManager,
 	public DistributedSimulation simulation() {
 		return simulation;
 	}
-	
+
 	public void forceCoordinate() {
 		SimulationCommunicationRemote.get().becomeCoordinator();
 	}
@@ -255,16 +255,6 @@ public class DistributedSimulationManager implements SimulationManager,
 		// TODO para el informe
 		return false;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 	@Override
 	public boolean onResourceRequest(Message message) {
@@ -283,6 +273,7 @@ public class DistributedSimulationManager implements SimulationManager,
 			try {
 				myTransactionable = TransactionableRemote.get();
 				otherTransactionable = ConnectionManagerRemote.get()
+						.getConnectionManager(message.getNodeId())
 						.getNodeCommunication();
 
 				try {
