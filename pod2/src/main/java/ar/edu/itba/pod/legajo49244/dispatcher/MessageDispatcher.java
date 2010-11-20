@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import ar.edu.itba.pod.legajo49244.communication.ClusterAdministrationRemote;
@@ -35,8 +36,8 @@ public class MessageDispatcher implements MessageListener {
 		System.out.println("Creating Message Listener and Dispatcher");
 		this.listener = listener;
 		this.ear = new LinkedBlockingQueue<Message>();
-		this.historyOfBroadcastables = new HashMap<Message, Long>();
-		this.lastContactedForPull = new HashMap<String, Long>();
+		this.historyOfBroadcastables = new ConcurrentHashMap<Message, Long>();
+		this.lastContactedForPull = new ConcurrentHashMap<String, Long>();
 
 		new Thread(new DispatcherRunnable()).start();
 		new Thread(new MessageForgetterRunnable()).start();
@@ -116,8 +117,7 @@ public class MessageDispatcher implements MessageListener {
 				try {
 					message = ear.take();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					continue;
 				}
 
 				MessageType type = message.getType();

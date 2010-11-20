@@ -109,7 +109,7 @@ public class Main {
 					return;
 				}
 				if (line.equals("1")) {
-					line = "new agent simple-producer name=Pig-Iron-Mine producing=999 of=Pig-Iron every=12h";
+					line = "new agent simple-producer name=Pig-Iron-Mine producing=1 of=Pig-Iron every=12h";
 				} else if (line.equals("2")) {
 					line = "new agent simple-consumer name=Factory consuming=2 of=Pig-Iron every=12h";
 				} else if (line.equalsIgnoreCase("rampage")) {
@@ -127,6 +127,9 @@ public class Main {
 				}
 				System.out.println("Command read: " + line);
 				try {
+					if (line.equals("")) {
+						continue;
+					}
 					parser.parseCommand(line, new Delegate() {
 
 						@Override
