@@ -1,18 +1,17 @@
 package ar.edu.itba.pod.legajo49244.communication;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.RMIClientSocketFactory;
-import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 
-import javax.rmi.ssl.SslRMIClientSocketFactory;
-import javax.rmi.ssl.SslRMIServerSocketFactory;
-
+import ar.edu.itba.pod.legajo49244.main.MySocketFactory;
 import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.simul.communication.ClusterAdministration;
 import ar.edu.itba.pod.simul.communication.ClusterCommunication;
@@ -33,8 +32,10 @@ public class ConnectionManagerRemote implements ConnectionManager {
 	private ConnectionManagerRemote() {
 		System.out.println("Creating ConnectionManager");
 		try {
-			Registry registry = LocateRegistry
-					.createRegistry(getClusterPort());
+			int port = getClusterPort();
+			// TODO: dejar esto o lo que anda SEGURO?
+			RMISocketFactory csf = new MySocketFactory(InetAddress.getByName(Node.getNodeId()));
+			Registry registry = LocateRegistry.createRegistry(port, csf, csf);
 			UnicastRemoteObject.exportObject(this, 0);
 			registry.bind(ReferenceName.CONNECTION_MANAGER_NAME, this);
 			
@@ -45,6 +46,9 @@ public class ConnectionManagerRemote implements ConnectionManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
