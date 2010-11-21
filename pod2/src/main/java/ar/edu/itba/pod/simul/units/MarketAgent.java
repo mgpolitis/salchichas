@@ -29,6 +29,7 @@ public abstract class MarketAgent extends Agent {
 	}
 
 	public final void waitForWork() throws InterruptedException {
+		System.out.println("S I M P L E    C O N S U M E R --- wait for work");
 		waitFor(workTime, workUnit);
 	}
 	
@@ -45,7 +46,7 @@ public abstract class MarketAgent extends Agent {
 	 * to carry the desired values
 	 */
 	static class MarketAgentBuilder implements Serializable {
-		private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 2827984953291690148L;
 		
 
 		private String name;

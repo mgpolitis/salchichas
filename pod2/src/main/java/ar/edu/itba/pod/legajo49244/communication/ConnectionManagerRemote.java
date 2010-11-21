@@ -33,8 +33,8 @@ public class ConnectionManagerRemote implements ConnectionManager {
 		System.out.println("Creating ConnectionManager");
 		try {
 			int port = getClusterPort();
-			RMISocketFactory csf = new MySocketFactory(InetAddress.getByName(Node.getNodeId()));
-			Registry registry = LocateRegistry.createRegistry(port, csf, csf);
+			//RMISocketFactory csf = new MySocketFactory(InetAddress.getByName(Node.getNodeId()));
+			Registry registry = LocateRegistry.createRegistry(port);//LocateRegistry.createRegistry(port, csf, csf);
 			UnicastRemoteObject.exportObject(this, 0);
 			registry.bind(ReferenceName.CONNECTION_MANAGER_NAME, this);
 			
@@ -47,10 +47,10 @@ public class ConnectionManagerRemote implements ConnectionManager {
 		} catch (RemoteException e) {
 			System.out.println("Remote exception while creating RMI registry");
 			System.out.println(e.getMessage());
-		} catch (UnknownHostException e) {
+		} /*catch (UnknownHostException e) {
 			System.out.println("Unknown host");
 			System.out.println(e.getMessage());
-		} 
+		} */
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class ConnectionManagerRemote implements ConnectionManager {
 
 	@Override
 	public int getClusterPort() throws RemoteException {
-		return Registry.REGISTRY_PORT+141;
+		return Registry.REGISTRY_PORT+3;
 	}
 
 	@Override

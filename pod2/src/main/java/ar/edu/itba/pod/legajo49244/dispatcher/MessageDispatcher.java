@@ -252,11 +252,10 @@ public class MessageDispatcher implements MessageListener {
 	private static Map<MessageType, Boolean> createIsForwardableHelper() {
 		Map<MessageType, Boolean> ret = Maps.newHashMap();
 		List<MessageType> forwardables = Lists.newArrayList(
-				MessageType.DISCONNECT, MessageType.RESOURCE_REQUEST);
+				MessageType.DISCONNECT, MessageType.RESOURCE_REQUEST,
+				MessageType.NODE_AGENTS_LOAD_REQUEST);
 		List<MessageType> nonForwardables = Lists.newArrayList(
-				MessageType.NODE_AGENTS_LOAD,
-				MessageType.NODE_AGENTS_LOAD_REQUEST,
-				MessageType.NODE_MARKET_DATA,
+				MessageType.NODE_AGENTS_LOAD, MessageType.NODE_MARKET_DATA,
 				MessageType.NODE_MARKET_DATA_REQUEST,
 				MessageType.RESOURCE_TRANSFER,
 				MessageType.RESOURCE_TRANSFER_CANCELED);

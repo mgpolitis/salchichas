@@ -7,6 +7,7 @@ import ar.edu.itba.pod.legajo49244.communication.payload.Payloads;
 import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.simul.communication.Transactionable;
 import ar.edu.itba.pod.simul.communication.payload.Payload;
+import ar.edu.itba.pod.simul.communication.payload.ResourceTransferMessagePayload;
 import ar.edu.itba.pod.simul.market.Resource;
 
 import com.google.common.base.Preconditions;
@@ -30,7 +31,7 @@ public class TransactionableRemote implements Transactionable {
 	}
 
 	private String transactionContextNode = null;
-	private Payload transactionPayload = null;
+	private ResourceTransferMessagePayload transactionPayload = null;
 	private Long transactionTimeout = null;
 
 	/**
@@ -197,6 +198,15 @@ public class TransactionableRemote implements Transactionable {
 		System.out.println("****endTransaction Called");
 		Preconditions.checkState(transactionContextNode != null,
 				"A transaction context must exist");
+		
+		if (transactionPayload.getDestination().equals(Node.getNodeId())) {
+			// if I am not coordinator, clean context and end
+			transactionTimeout = null;
+			transactionPayload = null;
+			transactionContextNode = null;
+			return;
+		}
+		
 		// Luego, el nodo B invoca el endTransaction.
 		// Este método, asume que el nodo B es el coordinador.
 

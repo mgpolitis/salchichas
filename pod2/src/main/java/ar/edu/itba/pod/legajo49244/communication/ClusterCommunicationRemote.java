@@ -60,7 +60,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 				}
 			} catch (RemoteException e) {
 				// could not send message to that node
-				System.out.println("could not broadcast to node "+node+", he was down.");
+				System.out.println("could not broadcast to node "+node+".");
 				e.printStackTrace();
 			}
 		}
