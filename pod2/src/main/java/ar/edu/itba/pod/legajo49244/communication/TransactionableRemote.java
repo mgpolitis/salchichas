@@ -14,7 +14,7 @@ import com.google.common.base.Preconditions;
 
 public class TransactionableRemote implements Transactionable {
 
-	private static final Transactionable INSTANCE = new TransactionableRemote();
+	private static final TransactionableRemote INSTANCE = new TransactionableRemote();
 	private static final long ACCEPT_SLEEP_TIME = 1000;
 
 	private TransactionableRemote() {
@@ -26,7 +26,7 @@ public class TransactionableRemote implements Transactionable {
 		}
 	}
 
-	public static Transactionable get() {
+	public static TransactionableRemote get() {
 		return INSTANCE;
 	}
 
@@ -64,8 +64,8 @@ public class TransactionableRemote implements Transactionable {
 
 		// Invoca el acceptTransaction del nodo B
 		try {
-			ConnectionManagerRemote.get().getConnectionManager(remoteNodeId).getNodeCommunication()
-					.acceptTransaction(Node.getNodeId());
+			ConnectionManagerRemote.get().getConnectionManager(remoteNodeId)
+					.getNodeCommunication().acceptTransaction(Node.getNodeId());
 		} catch (Exception e) {
 			// Si lanza una exception, considera que no se pudo hacer la
 			// transacción
@@ -198,15 +198,13 @@ public class TransactionableRemote implements Transactionable {
 		System.out.println("****endTransaction Called");
 		Preconditions.checkState(transactionContextNode != null,
 				"A transaction context must exist");
-		
+
 		if (transactionPayload.getDestination().equals(Node.getNodeId())) {
 			// if I am not coordinator, clean context and end
-			transactionTimeout = null;
-			transactionPayload = null;
-			transactionContextNode = null;
+			cleanContext();
 			return;
 		}
-		
+
 		// Luego, el nodo B invoca el endTransaction.
 		// Este método, asume que el nodo B es el coordinador.
 
@@ -253,13 +251,6 @@ public class TransactionableRemote implements Transactionable {
 		}
 		ThreePhaseCommitRemote.get().doCommit((Node.getNodeId()));
 
-		// Antes de terminar el endTransaction, no te olvides de limpiar los
-		// datos del exchange.
-
-		transactionTimeout = null;
-		transactionPayload = null;
-		transactionContextNode = null;
-
 	}
 
 	/**
@@ -272,10 +263,14 @@ public class TransactionableRemote implements Transactionable {
 		System.out.println("****rollback Called");
 		Preconditions.checkState(transactionContextNode != null,
 				"A transaction context must exist");
+		cleanContext();
+
+	}
+
+	public void cleanContext() {
 		transactionTimeout = null;
 		transactionPayload = null;
 		transactionContextNode = null;
-
 	}
 
 }

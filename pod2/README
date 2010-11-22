@@ -1,0 +1,37 @@
+
+
+TPE POD Manuel Araoz - 49244
+
+Simulacion Distribuida de un Mercado
+------------------------------------
+
+
+Para instalar y correr el Main provisto:
+
++ correr "mvn clean package" desde el directorio raiz del proyecto.
+
++ crear un repositorio de clases para RMI usando el tpepod-49244-0.1.jar. 
+ (tener en cuenta que es diferente del usado para ejecutar). Recomendacion:
+ levantar un servidor HTTP en un nodo que sirva el archivo. Por ejemplo, si 
+ cuenta con una instalacion de Python, se puede hacer facilmente con el comando
+	$ python -m"SimpleHTTPServer" 8888
+ donde 8888 puede ser reemplazado por cualquier otro puerto donde se quiera 
+ servir el archivo. Esto levanta un servidor HTTP que sirve los contenidos
+ de la carpeta actual. 
+
++ editar el archivo run.sh y settear adecuadamente la propiedad java.rmi.server.
+  codebase para que apunte al repositorio de clases levantado en el paso
+  anterior.
+
++ distribuir los archivos target/tpepod-49244-0.1.one-jar.jar, file.policy y 
+  run.sh (editado correctamente) en los nodos que se quieran usar para el 
+  cluster.
+
++ Ejecutar run.sh pasandole como argumentos el hostname del nodo y 
+  (opcionalmente) el hostname del entry point al cluster. Si no se provee
+  el entrypoint el nodo creara un grupo nuevo.
+
++ Ante cualquier duda mandar un mail a manuelaraoz@gmail.com y lo ayudaremos 
+  con mucho gusto!!  :D
+
+

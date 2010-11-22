@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import ar.edu.itba.pod.legajo49244.communication.SimulationCommunicationRemote;
 import ar.edu.itba.pod.legajo49244.main.MegaEpicFactory;
+import ar.edu.itba.pod.legajo49244.main.Node;
 import ar.edu.itba.pod.legajo49244.message.TimeProvider;
 import ar.edu.itba.pod.legajo49244.parser.Delegate;
 import ar.edu.itba.pod.legajo49244.parser.SimulationNewEntityCommandParser;
@@ -34,8 +35,6 @@ public class Main {
 			System.setSecurityManager(new SecurityManager());
 		}
 
-		FeedbackCallback callback = new ConsoleFeedbackCallback();
-
 		ObjectFactory factory = new MegaEpicFactory();
 		ConnectionManager conn = null;
 		if (args.length > 1) {
@@ -49,10 +48,8 @@ public class Main {
 		}
 
 		MarketManager marketManager = factory.getMarketManager(conn);
-		marketManager = new FeedbackMarketManager(callback, marketManager);
-		final SimulationManager simul = new FeedbackSimulationManager(callback,
-				factory.getSimulationManager(conn, TimeMappers.oneSecondEach(6,
-						TimeUnit.HOURS)));
+		final SimulationManager simul = factory.getSimulationManager(conn,
+				TimeMappers.oneSecondEach(6, TimeUnit.HOURS));
 		// ...
 
 		Market market = marketManager.market();
@@ -62,6 +59,7 @@ public class Main {
 		Resource pigIron = new Resource("Mineral", "Pig-Iron");
 		Resource copper = new Resource("Mineral", "Copper");
 		Resource steel = new Resource("Alloy", "Steel");
+		Resource toy = new Resource("Product", "Toy");
 
 		if (args.length == 1) {
 
@@ -74,11 +72,14 @@ public class Main {
 					.build();
 			Agent steelFactory = SimpleConsumer.named("factory").consuming(10)
 					.of(steel).every(2, TimeUnit.DAYS).build();
+			Agent toyFactory = Factory.named("toy factory").using(3, steel)
+					.producing(1, toy).every(12, TimeUnit.HOURS).build();
 
-			// simul.addAgent(mine1);
-			// simul.addAgent(mine2);
-			// simul.addAgent(refinery);
-			// simul.addAgent(steelFactory);
+			simul.addAgent(mine1);
+			simul.addAgent(mine2);
+			simul.addAgent(refinery);
+			simul.addAgent(steelFactory);
+			simul.addAgent(toyFactory);
 		}
 		// ...
 		simul.start();
@@ -87,6 +88,34 @@ public class Main {
 		parser.addResource(pigIron);
 		parser.addResource(copper);
 		parser.addResource(steel);
+		parser.addResource(toy);
+
+		boolean con = true;
+		while (con && args.length < 2) {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			Agent mine1 = SimpleProducer.named("pig iron mine").producing(2)
+					.of(pigIron).every(12, TimeUnit.HOURS).build();
+			simul.addAgent(mine1);
+			Agent mine2 = SimpleProducer.named("copper mine").producing(4).of(
+					copper).every(1, TimeUnit.DAYS).build();
+			simul.addAgent(mine2);
+			Agent refinery = Factory.named("steel refinery").using(5, pigIron)
+					.and(2, copper).producing(6, steel).every(1, TimeUnit.DAYS)
+					.build();
+			simul.addAgent(refinery);
+			Agent steelFactory = SimpleConsumer.named("factory").consuming(10)
+					.of(steel).every(2, TimeUnit.DAYS).build();
+			simul.addAgent(steelFactory);
+			Agent toyFactory = Factory.named("toy factory").using(3, steel)
+					.producing(1, toy).every(12, TimeUnit.HOURS).build();
+			simul.addAgent(toyFactory);
+
+			DistributedSimulationManager.get().sendGetClusterMarketData();
+		}
 
 		long start = TimeProvider.now();
 		boolean rampage = false;
@@ -124,8 +153,12 @@ public class Main {
 							.getSimulationCommunication())
 							.forcedBecomeCoordinator();
 				} else if (line.equals("stats") || line.equals("stat")) {
-					DistributedSimulationManager.get().sendGetClusterMarketData();
+					DistributedSimulationManager.get()
+							.sendGetClusterMarketData();
+				} else if (line.equals("-v") || line.equals("verbosity")) {
+					Node.setVerbose(!Node.isVerbose());
 				}
+
 				System.out.println("Command read: " + line);
 				try {
 					if (line.equals("")) {

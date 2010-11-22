@@ -32,6 +32,10 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 	private String coordinatorId = null;
 	private boolean isForced = false;
 
+	public boolean getIsCoordinator() {
+		return isCoordinator.get();
+	}
+
 	private SortedSet<NodeAgentLoad> sortedLoadPerNode;
 	private Map<String, NodeAgentLoad> mapLoadPerNode;
 
@@ -299,10 +303,6 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 							.getNumberOfAgents()
 							+ numberOfAgentsToMigrate));
 				} catch (RemoteException e) {
-					// TODO stacktrace
-					e.printStackTrace();
-					System.out
-							.println("Error while migrating agents. HECATOMB !!!!!!!!!!");
 				}
 			} else {
 				System.out.println("Nothing to do, this is balanced, yeah!");
@@ -319,7 +319,7 @@ public class SimulationCommunicationRemote implements SimulationCommunication {
 
 	private class WaiterRunnable implements Runnable {
 
-		private final static long WAIT_TIME = 3000;
+		private final static long WAIT_TIME = 1200;
 
 		@Override
 		public void run() {

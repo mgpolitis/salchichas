@@ -83,8 +83,7 @@ public class MessageDispatcher implements MessageListener {
 	public boolean onMessageArrive(Message message) throws RemoteException {
 		Preconditions.checkNotNull(message);
 
-		System.out.println("[Message arrived:]");
-		System.out.println("\t- " + message);
+	
 
 		if (message.getNodeId() != null
 				&& message.getNodeId().equals(Node.getNodeId())) {
@@ -93,6 +92,11 @@ public class MessageDispatcher implements MessageListener {
 
 		if (historyOfBroadcastables.containsKey(message)) {
 			return false;
+		}
+		
+		if (Node.isVerbose()) {
+			System.out.println("[New message arrived:]");
+			System.out.println("\t- " + message);
 		}
 
 		this.ear.add(message);
@@ -156,8 +160,10 @@ public class MessageDispatcher implements MessageListener {
 
 				// broadcast if neccesary
 				if (MessageDispatcher.isForwardable(message)) {
-					System.out.println("[Forwarding message: ]");
-					System.out.println("\t- " + message);
+					if (Node.isVerbose()) {
+						System.out.println("[Forwarding message: ]");
+						System.out.println("\t- " + message);
+					}
 					try {
 						ConnectionManagerRemote.get().getGroupCommunication()
 								.broadcast(message);
@@ -232,17 +238,16 @@ public class MessageDispatcher implements MessageListener {
 						// messages from
 						continue;
 					}
-					System.out.println("Requesting new messages from "
-							+ randomNode);
+					/*System.out.println("Requesting new messages from "
+							+ randomNode);*/
 				} else {
-					System.out.println("No peers to request messages from.");
+					//System.out.println("No peers to request messages from.");
 				}
 
 				try {
 					Thread.sleep(SLEEP_AMMOUNT_MILLIS);
 				} catch (InterruptedException e) {
-					System.out.println("thread interrupted while sleeping?");
-					e.printStackTrace();
+					//"thread interrupted while sleeping?
 				}
 
 			}
@@ -277,7 +282,7 @@ public class MessageDispatcher implements MessageListener {
 		MessageType type = message.getType();
 		Boolean ret = IS_FORWARDABLE_HELPER.get(type);
 		if (ret == null) {
-			throw new IllegalArgumentException("I don't message type " + type);
+			return false;
 		}
 		return ret;
 	}

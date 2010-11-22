@@ -1,0 +1,1 @@
+new agent simple-producer name=Pig-Iron-Mine producing=1 of=Pig-Iron every=1h

@@ -134,7 +134,6 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 			market.importResources(payload.getResource(), payload.getAmount());
 		}
 		this.state = State.DO_COMMIT_CALLED;
-		System.out.println(">>>>> seting state to "+this.state);
 	}
 
 	/**
@@ -195,7 +194,6 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 	 */
 	public synchronized void onTimeout() throws RemoteException {
 		System.out.println("****onTimeout Called");
-		System.out.println(">>>>>> my state is "+this.state);
 		Preconditions.checkState(!this.state.equals(State.IDLE),
 				"canCommit must be called first!");
 
@@ -211,6 +209,8 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 			this.coordId = null;
 			this.state = State.IDLE;
 		}
+		
+		TransactionableRemote.get().cleanContext();
 
 	}
 
@@ -233,10 +233,7 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 
 			try {
 				ThreePhaseCommitRemote.this.onTimeout();
-			} catch (RemoteException e) {
-				System.out
-						.println("remote exception on waiter runnable of 3PC");
-				e.printStackTrace();
+			} catch (Exception e) {
 				// will never fail
 			}
 		}

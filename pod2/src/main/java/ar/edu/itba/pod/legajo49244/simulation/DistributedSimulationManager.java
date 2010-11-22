@@ -1,9 +1,14 @@
 package ar.edu.itba.pod.legajo49244.simulation;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import ar.edu.itba.pod.legajo49244.communication.ClusterAdministrationRemote;
 import ar.edu.itba.pod.legajo49244.communication.ClusterCommunicationRemote;
@@ -32,10 +37,10 @@ public class DistributedSimulationManager implements SimulationManager,
 		DispatcherListener {
 
 	private static final int MAX_ROUNDROBIN_TIMES = 100;
-	private static final long TRANSACTION_TIMEOUT = 1000;
+	private static final long TRANSACTION_TIMEOUT = 200;
 	private static DistributedSimulationManager INSTANCE = new DistributedSimulationManager();
 	private boolean isStarted = false;
-	
+
 	private DistributedSimulationManager() {
 	}
 
@@ -45,6 +50,8 @@ public class DistributedSimulationManager implements SimulationManager,
 
 	private DistributedSimulation simulation;
 
+	private Map<String, Double> tps = new ConcurrentHashMap<String, Double>();
+
 	public void setTimeMapper(TimeMapper timeMapper) {
 		simulation = new DistributedSimulation(timeMapper);
 	}
@@ -52,7 +59,9 @@ public class DistributedSimulationManager implements SimulationManager,
 	@Override
 	public void start() {
 		simulation.start();
-		SimulationCommunicationRemote.get().becomeCoordinator();
+		if (!SimulationCommunicationRemote.get().getIsCoordinator()) {
+			SimulationCommunicationRemote.get().becomeCoordinator();
+		}
 		isStarted = true;
 	}
 
@@ -253,17 +262,39 @@ public class DistributedSimulationManager implements SimulationManager,
 							.newNodeMarketDataRequestPayload()));
 		} catch (RemoteException e) {
 			// could not broadcast
+		}
+		System.out.println("\t ~~~ " + Node.getNodeId() + ": ");
+		System.out.println("\t t/sec = "
+				+ DistributedMarketManager.get().market().marketData()
+						.getHistory().getTransactionsPerSecond());
+
+		tps.put(Node.getNodeId(), DistributedMarketManager.get().market().marketData()
+						.getHistory().getTransactionsPerSecond());
+		double promedio = 0;
+		for (Double d : tps.values()) {
+			promedio += d;
+		}
+		promedio /= tps.size();
+
+		try {
+			PrintStream fout = new PrintStream(new FileOutputStream(
+					"statistics.txt", true));
+			fout.append("" + promedio + " " + tps.size() + "\n");
+			fout.close();
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		System.out.println("\t ~~~ "+Node.getNodeId()+": ");
-		System.out.println("\t t/sec = "+DistributedMarketManager.get().market().marketData().getHistory().getTransactionsPerSecond());
+
 	}
 
 	@Override
 	public boolean onNodeMarketData(Message message) {
-		NodeMarketDataPayload payload = (NodeMarketDataPayload) message.getPayload();
-		System.out.println("\t ~~~ "+message.getNodeId()+": ");
-		System.out.println("\t t/sec = "+payload.getMarketData().getHistory().getTransactionsPerSecond());
+		NodeMarketDataPayload payload = (NodeMarketDataPayload) message
+				.getPayload();
+
+		tps.put(message.getNodeId(), payload.getMarketData().getHistory()
+				.getTransactionsPerSecond());
+
 		return true;
 	}
 
@@ -319,7 +350,9 @@ public class DistributedSimulationManager implements SimulationManager,
 					myTransactionable.endTransaction();
 				} catch (IllegalStateException e) {
 					// some other node started transaction first
-					//DistributedMarketManager.get().market().importResources(payload.getResource(), payload.getAmountRequested());
+					DistributedMarketManager.get().market()
+							.importResources(payload.getResource(),
+									payload.getAmountRequested());
 				}
 
 			} catch (RemoteException e) {

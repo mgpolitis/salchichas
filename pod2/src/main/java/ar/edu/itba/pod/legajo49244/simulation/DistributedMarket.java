@@ -95,8 +95,8 @@ public class DistributedMarket extends LocalMarket implements Market,
 			int transfer) {
 		transactionCount++;
 		// TODO: erase
-		System.out.printf("SMUGGLE: from %s to %s --> %d of %s\n", "Dock",
-				buyer.name(), transfer, dockResource.name());
+		/*System.out.printf("SMUGGLE: from %s to %s --> %d of %s\n", "Dock",
+				buyer.name(), transfer, dockResource.name());*/
 
 	}
 

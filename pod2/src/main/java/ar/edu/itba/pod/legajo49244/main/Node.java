@@ -7,6 +7,7 @@ public class Node {
 
 	private static String USER_NODE_ID = null;
 	private static String USER_ENTRY_POINT = null;
+	private static boolean verbose = false;
 
 	public static void setUserNodeId(String nodeId) {
 		USER_NODE_ID = nodeId;
@@ -16,6 +17,14 @@ public class Node {
 		USER_ENTRY_POINT = nodeId;
 	}
 
+	public static void setVerbose(boolean verbosity) {
+		verbose = verbosity;
+	}
+	
+	public static boolean isVerbose() {
+		return verbose;
+	}
+	
 	public final static String NODE_ID = getNodeId();
 
 	public static String getNodeId() {

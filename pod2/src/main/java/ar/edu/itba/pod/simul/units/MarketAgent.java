@@ -29,7 +29,6 @@ public abstract class MarketAgent extends Agent {
 	}
 
 	public final void waitForWork() throws InterruptedException {
-		System.out.println("S I M P L E    C O N S U M E R --- wait for work");
 		waitFor(workTime, workUnit);
 	}
 	

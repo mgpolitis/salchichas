@@ -61,7 +61,6 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 			} catch (RemoteException e) {
 				// could not send message to that node
 				System.out.println("could not broadcast to node "+node+".");
-				e.printStackTrace();
 			}
 		}
 
@@ -73,11 +72,13 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 		
 		ConnectionManager otherManager = ConnectionManagerRemote.get()
 				.getConnectionManager(nodeId);
-		System.out.println("[Sending message to "+nodeId+":]");
-		System.out.println("\t- "+message);
+		if (Node.isVerbose()) {
+			System.out.println("[Sending message to "+nodeId+":]");
+			System.out.println("\t- "+message);
+		}
 		boolean ret = otherManager.getGroupCommunication().getListener()
 		.onMessageArrive(message);
-		System.out.println("[message sent]");
+		//System.out.println("[message sent]");
 		return ret;
 	}
 
