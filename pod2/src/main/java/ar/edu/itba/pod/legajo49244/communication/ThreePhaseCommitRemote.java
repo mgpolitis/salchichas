@@ -121,9 +121,6 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 					.get().getPayload();
 		} catch (RemoteException e) {
 			// will never fail, local call
-			e.printStackTrace();
-			System.out
-					.println("this should never appear, local call transactionableRemote");
 		}
 		DistributedMarket market = DistributedMarketManager.get().market();
 		if (payload.getSource().equals(Node.getNodeId())) {
@@ -165,9 +162,6 @@ public class ThreePhaseCommitRemote implements ThreePhaseCommit {
 						.get().getPayload();
 			} catch (RemoteException e) {
 				// will never fail, local call
-				e.printStackTrace();
-				System.out
-						.println("this should never appear 2, local call transactionableRemote");
 			}
 			DistributedMarket market = DistributedMarketManager.get().market();
 			if (payload.getDestination().equals(Node.getNodeId())) {

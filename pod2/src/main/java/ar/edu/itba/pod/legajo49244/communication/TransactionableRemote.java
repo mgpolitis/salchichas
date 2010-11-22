@@ -54,7 +54,9 @@ public class TransactionableRemote implements Transactionable {
 	public void beginTransaction(String remoteNodeId, long timeout)
 			throws RemoteException {
 
-		System.out.println("*****Begin transaction called");
+		if (Node.isVerbose()) {
+			System.out.println("*****Begin transaction called");
+		}
 
 		// Hace sus validaciones correspondientes
 		Preconditions.checkNotNull(remoteNodeId);
@@ -69,7 +71,6 @@ public class TransactionableRemote implements Transactionable {
 		} catch (Exception e) {
 			// Si lanza una exception, considera que no se pudo hacer la
 			// transacción
-			System.out.println("Could not create transaction, abort.");
 			throw new IllegalStateException();
 		}
 
@@ -99,7 +100,9 @@ public class TransactionableRemote implements Transactionable {
 	 */
 	public void acceptTransaction(String remoteNodeId) throws RemoteException {
 
-		System.out.println("*****Accept called");
+		if (Node.isVerbose()) {
+			System.out.println("*****Accept called");
+		}
 
 		// Si no esta en una transacción, retorna
 		if (transactionContextNode == null) {
@@ -148,7 +151,9 @@ public class TransactionableRemote implements Transactionable {
 	public void exchange(Resource resource, int amount, String sourceNode,
 			String destinationNode) throws RemoteException {
 
-		System.out.println("*****exchange called");
+		if (Node.isVerbose()) {
+			System.out.println("*****exchange called");
+		}
 
 		if (transactionContextNode == null) {
 			throw new IllegalStateException(
@@ -195,7 +200,9 @@ public class TransactionableRemote implements Transactionable {
 	 * 
 	 */
 	public void endTransaction() throws RemoteException {
-		System.out.println("****endTransaction Called");
+		if (Node.isVerbose()) {
+			System.out.println("****endTransaction Called");
+		}
 		Preconditions.checkState(transactionContextNode != null,
 				"A transaction context must exist");
 
@@ -247,7 +254,6 @@ public class TransactionableRemote implements Transactionable {
 					Node.getNodeId());
 		} catch (RemoteException e) {
 			// no importa, la transaccion se realizo
-			System.out.println("!!!!! remote exception en doCommit!!!!!!!!");
 		}
 		ThreePhaseCommitRemote.get().doCommit((Node.getNodeId()));
 
@@ -260,7 +266,9 @@ public class TransactionableRemote implements Transactionable {
 	 * thrown. Otherwise, it is guaranteed that the changes are reverted.
 	 */
 	public void rollback() throws RemoteException {
-		System.out.println("****rollback Called");
+		if (Node.isVerbose()) {
+			System.out.println("****rollback Called");
+		}
 		Preconditions.checkState(transactionContextNode != null,
 				"A transaction context must exist");
 		cleanContext();
