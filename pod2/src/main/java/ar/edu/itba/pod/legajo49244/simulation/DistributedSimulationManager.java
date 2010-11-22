@@ -255,7 +255,6 @@ public class DistributedSimulationManager implements SimulationManager,
 	}
 
 	public void sendGetClusterMarketData() {
-		System.out.println("Requesting CLUSTER MARKET DATA");
 		try {
 			ClusterCommunicationRemote.get().broadcast(
 					Messages.newNodeMarketDataRequestMessage(Payloads
@@ -263,10 +262,6 @@ public class DistributedSimulationManager implements SimulationManager,
 		} catch (RemoteException e) {
 			// could not broadcast
 		}
-		System.out.println("\t ~~~ " + Node.getNodeId() + ": ");
-		System.out.println("\t t/sec = "
-				+ DistributedMarketManager.get().market().marketData()
-						.getHistory().getTransactionsPerSecond());
 
 		tps.put(Node.getNodeId(), DistributedMarketManager.get().market().marketData()
 						.getHistory().getTransactionsPerSecond());
@@ -288,7 +283,7 @@ public class DistributedSimulationManager implements SimulationManager,
 	}
 
 	@Override
-	public boolean onNodeMarketData(Message message) {
+	public synchronized boolean onNodeMarketData(Message message) {
 		NodeMarketDataPayload payload = (NodeMarketDataPayload) message
 				.getPayload();
 
@@ -299,7 +294,7 @@ public class DistributedSimulationManager implements SimulationManager,
 	}
 
 	@Override
-	public boolean onNodeMarketDataRequest(Message message) {
+	public synchronized boolean onNodeMarketDataRequest(Message message) {
 		NodeMarketDataPayload payload = Payloads
 				.newNodeMarketDataPayload(DistributedMarketManager.get()
 						.market().marketData());

@@ -90,32 +90,31 @@ public class Main {
 		parser.addResource(steel);
 		parser.addResource(toy);
 
-		boolean con = true;
-		while (con && args.length < 2) {
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			Agent mine1 = SimpleProducer.named("pig iron mine").producing(2)
-					.of(pigIron).every(12, TimeUnit.HOURS).build();
-			simul.addAgent(mine1);
-			Agent mine2 = SimpleProducer.named("copper mine").producing(4).of(
-					copper).every(1, TimeUnit.DAYS).build();
-			simul.addAgent(mine2);
-			Agent refinery = Factory.named("steel refinery").using(5, pigIron)
-					.and(2, copper).producing(6, steel).every(1, TimeUnit.DAYS)
-					.build();
-			simul.addAgent(refinery);
-			Agent steelFactory = SimpleConsumer.named("factory").consuming(10)
-					.of(steel).every(2, TimeUnit.DAYS).build();
-			simul.addAgent(steelFactory);
-			Agent toyFactory = Factory.named("toy factory").using(3, steel)
-					.producing(1, toy).every(12, TimeUnit.HOURS).build();
-			simul.addAgent(toyFactory);
-
-			DistributedSimulationManager.get().sendGetClusterMarketData();
-		}
+//		boolean con = true;
+//		while (con && args.length < 2) {
+//			try {
+//				Thread.sleep(2000);
+//			} catch (InterruptedException e) {
+//			}
+//			Agent mine1 = SimpleProducer.named("pig iron mine").producing(2)
+//					.of(pigIron).every(12, TimeUnit.HOURS).build();
+//			simul.addAgent(mine1);
+//			Agent mine2 = SimpleProducer.named("copper mine").producing(4).of(
+//					copper).every(1, TimeUnit.DAYS).build();
+//			simul.addAgent(mine2);
+//			Agent refinery = Factory.named("steel refinery").using(5, pigIron)
+//					.and(2, copper).producing(6, steel).every(1, TimeUnit.DAYS)
+//					.build();
+//			simul.addAgent(refinery);
+//			Agent steelFactory = SimpleConsumer.named("factory").consuming(10)
+//					.of(steel).every(2, TimeUnit.DAYS).build();
+//			simul.addAgent(steelFactory);
+//			Agent toyFactory = Factory.named("toy factory").using(3, steel)
+//					.producing(1, toy).every(12, TimeUnit.HOURS).build();
+//			simul.addAgent(toyFactory);
+//
+//			DistributedSimulationManager.get().sendGetClusterMarketData();
+//		}
 
 		long start = TimeProvider.now();
 		boolean rampage = false;

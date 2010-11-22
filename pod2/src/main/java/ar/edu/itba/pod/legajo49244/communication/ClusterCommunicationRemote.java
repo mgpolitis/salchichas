@@ -22,17 +22,19 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 
 	private static final ClusterCommunicationRemote INSTANCE = new ClusterCommunicationRemote();
 	private MessageListener messageListener;
-	
+
 	public static ClusterCommunicationRemote get() {
 		return INSTANCE;
 	}
 
 	private ClusterCommunicationRemote() {
 		System.out.println("Creating ClusterCommunication");
-		DistributedSimulationManager distributedSimulationManager = DistributedSimulationManager.get();
-		this.messageListener = new MessageDispatcher(distributedSimulationManager);
+		DistributedSimulationManager distributedSimulationManager = DistributedSimulationManager
+				.get();
+		this.messageListener = new MessageDispatcher(
+				distributedSimulationManager);
 		try {
-			UnicastRemoteObject.exportObject(this,0);
+			UnicastRemoteObject.exportObject(this, 0);
 		} catch (RemoteException e) {
 			Node.exportError(getClass());
 		}
@@ -60,7 +62,7 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 				}
 			} catch (RemoteException e) {
 				// could not send message to that node
-				System.out.println("could not broadcast to node "+node+".");
+				System.out.println("could not broadcast to node " + node + ".");
 			}
 		}
 
@@ -68,17 +70,18 @@ public class ClusterCommunicationRemote implements ClusterCommunication {
 
 	@Override
 	public boolean send(Message message, String nodeId) throws RemoteException {
-		Preconditions.checkArgument(!message.equals(Node.getNodeId()), "Cannot send message to yourself!!!");
-		
+		Preconditions.checkArgument(!message.equals(Node.getNodeId()),
+				"Cannot send message to yourself!!!");
+
 		ConnectionManager otherManager = ConnectionManagerRemote.get()
 				.getConnectionManager(nodeId);
 		if (Node.isVerbose()) {
-			System.out.println("[Sending message to "+nodeId+":]");
-			System.out.println("\t- "+message);
+			System.out.println("[Sending message to " + nodeId + ":]");
+			System.out.println("\t- " + message);
 		}
 		boolean ret = otherManager.getGroupCommunication().getListener()
-		.onMessageArrive(message);
-		//System.out.println("[message sent]");
+				.onMessageArrive(message);
+		// System.out.println("[message sent]");
 		return ret;
 	}
 

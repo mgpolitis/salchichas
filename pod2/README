@@ -33,5 +33,8 @@ Para instalar y correr el Main provisto:
 
 + Ante cualquier duda mandar un mail a manuelaraoz@gmail.com y lo ayudaremos 
   con mucho gusto!!  :D
+  
+  
+tip: para correr en modo verbose, ejecutar el método estático Node.setVerbose(true);
 
 
