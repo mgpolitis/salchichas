@@ -28,8 +28,9 @@ public class SimpleConsumer extends MarketAgent implements ResourceStock {
 				}
 				waitForResources();
 				waitForWork();
+				amount.set(amount.get() - rate());
 			} catch (InterruptedException e) {
-				// this should happen when finishing or when new sotck arrives
+				// this should happen when finishing or when new stock arrives
 			}
 		}
 	}
