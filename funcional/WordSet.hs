@@ -13,15 +13,16 @@ where
     esVacio (GNode False []) = True
     esVacio _ = False
 
---pertenece :: WordSet -> String -> Bool
+    --pertenece :: WordSet -> String -> Bool
 
---agregarPalabra :: WordSet -> String -> WordSet
+    --agregarPalabra :: WordSet -> String -> WordSet
+    --agregarPalabra = foldWordSet ...
 
---borrarPalabra :: WordSet -> String -> WordSet
+    --borrarPalabra :: WordSet -> String -> WordSet
 
---cantidadQueEmpiezanCon :: WordSet -> String -> Integer
+    --cantidadQueEmpiezanCon :: WordSet -> String -> Integer
 
---sonIguales :: WordSet -> WordSet -> Bool
+    --sonIguales :: WordSet -> WordSet -> Bool
 
-
+wordSet2list :: WordSet -> [String]
 
