@@ -45,3 +45,5 @@ pertenece "hola" (borrarPalabra "" (aPalabras ["hola", "pepe", "a", "b", "c"] so
 -- True
 pertenece "hola" (borrarPalabra "hola" (aPalabras ["hola", "pepe", "a", "b", "c"] soloLambda))
 -- False
+w2l (bPalabras ["hola","pepe","a","b","c"] (aPalabras ["hola", "pepe", "a", "b", "c"] soloLambda))
+-- [""]

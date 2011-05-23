@@ -1,6 +1,6 @@
 module WordSet
     (WordSet, vacio, esVacio,
-    pertenece, agregarPalabra, borrarPalabra, aPalabras,
+    pertenece, agregarPalabra, borrarPalabra, aPalabras, bPalabras,
     cantidadQueEmpiezanCon, tamanio,
     wordSet2list, w2l,
     sonIguales)
@@ -31,7 +31,7 @@ where
     zipWithChar as = map (\(i,e) -> (int2char i, e)) (zipWithIndex as)
 
     setElement :: [a] -> a -> Int -> [a]
-    setElement [] x n = error "No se puede settear ese indice"
+    setElement [] x n = error "El conjunto de palabras solo soporta letras minusculas"
     setElement (y:ys) x 0 = x:ys
     setElement (y:ys) x n = y:(setElement ys x (n-1))
 
@@ -104,6 +104,11 @@ where
     borrarPalabra (c : cs) ws@(GNode b ts) = case (subTreeForChar c ws) of
                                     Nothing -> ws
                                     Just branch -> replaceBranch ws c (borrarPalabra cs branch)
+
+    -- borra todas las palabras de una lista a un conjunto
+    bPalabras :: [String] -> WordSet -> WordSet
+    bPalabras [] ws = ws
+    bPalabras (str : strs) ws = bPalabras strs (borrarPalabra str ws)
 
     -- devuelve la cantidad de palabras del conjunto que empiezan con el prefijo dado
     cantidadQueEmpiezanCon :: String -> WordSet -> Int
