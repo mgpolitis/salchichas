@@ -44,8 +44,6 @@ where
 
     newBranchWithChar :: Char -> [WordSet]
     newBranchWithChar c = setElement newBranch soloLambda (char2int c)
---     newBranchWithChar [] = []
---     newBranchWithChar (c:cs) = setElement (newBranchWithChar cs) soloLambda (char2int c)
 
     replaceBranch :: WordSet -> Char -> WordSet -> WordSet
     replaceBranch (GNode b ts) c branch = (GNode b (setElement ts branch (char2int c)))
@@ -66,22 +64,31 @@ where
 
     pertenece :: String -> WordSet -> Bool
     pertenece [] =  sonIguales (GNode True [])
-    pertenece (c : cs) = \ws -> let maybeBranch = (subTreeForChar c ws) in 
-                                case maybeBranch of
+    pertenece (c : cs) = \ws -> case (subTreeForChar c ws) of
                                     Nothing -> False
                                     Just branch -> pertenece cs branch
 
     agregarPalabra :: String -> WordSet -> WordSet
     agregarPalabra [] (GNode b ts) = GNode True ts
-    agregarPalabra (c : cs) ws@(GNode b ts) = let maybeBranch = (subTreeForChar c ws) in
-                                    case maybeBranch of
-                                        Nothing -> GNode b (newBranchWithChar c)
-                                        Just branch -> replaceBranch ws c (agregarPalabra cs branch)
+    agregarPalabra (c : cs) ws@(GNode b ts) = case (subTreeForChar c ws) of
+                                    Nothing -> replaceBranch (GNode b newBranch) c (agregarPalabra cs vacio)
+                                    Just branch -> replaceBranch ws c (agregarPalabra cs branch)
 
+    aPalabras :: [String] -> WordSet -> WordSet
+    aPalabras [] ws = ws
+    aPalabras (str : strs) ws = aPalabras strs (agregarPalabra str ws)
 
-    --borrarPalabra :: WordSet -> String -> WordSet
+    borrarPalabra ::  String -> WordSet -> WordSet
+    borrarPalabra [] (GNode b ts) = GNode False ts
+--     borrarPalabra (c : cs) ws = case (subTreeForChar c ws) of
+--                                 Nothing -> ws
+--                                 Just branch -> borrarPalabra cs branch
 
-    --cantidadQueEmpiezanCon :: WordSet -> String -> Int
+    cantidadQueEmpiezanCon :: String -> WordSet -> Int
+    cantidadQueEmpiezanCon [] ws        = tamanio ws
+    cantidadQueEmpiezanCon (c : cs) ws  = case (subTreeForChar c ws) of
+                                        Nothing -> 0
+                                        Just branch -> cantidadQueEmpiezanCon cs branch
 
     sonIguales :: WordSet -> WordSet -> Bool
     sonIguales = (==)
@@ -91,6 +98,7 @@ where
                                     init = if b then [""] else []
                                 in init ++ (concat (map (\(c, l) -> map (c:) l) (zipped)))
 
+    w2l :: WordSet -> [String]
     w2l = wordSet2list
 
 
