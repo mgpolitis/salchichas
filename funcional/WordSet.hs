@@ -14,6 +14,12 @@ where
 
 
     suma1 = (+1)
+
+    -- idea tomada de http://www.haskell.org/haskellwiki/If-then-else
+    if' :: a -> a -> Bool -> a
+    if' x _ True = x
+    if' _ y False = y
+
     char2int :: Char -> Int
     char2int = ((ord 'a') `subtract`) . (ord)
 
@@ -131,10 +137,12 @@ where
     sonIguales = (==)
 
     -- convierte el conjunto de palabras a una lista de palabras
-    wordSet2list :: WordSet -> [String]
-    wordSet2list (GNode b ts) = let zipped = (zipWithChar (map wordSet2list ts))
-                                    init = if b then [""] else []
-                                in init ++ (concat (map (\(c, l) -> map (c:) l) (zipped)))
+    --wordSet2list :: WordSet -> [String]
+    --wordSet2list (GNode b ts) = let zipped = (zipWithChar (map wordSet2list ts))
+    --                                init = if b then [""] else []
+    --                            in init ++ (concat (map (\(c, l) -> map (c:) l) (zipped)))
+    wordSet2list = foldWordSet ((++).(if' [""] []))
+                                (concat . (map (\(c, l) -> map (c:) l)) . zipWithChar)
 
     -- igual que wordSet2list, pero mas comodo
     w2l :: WordSet -> [String]
