@@ -120,10 +120,11 @@ where
 
     -- devuelve la cantidad de palabras del conjunto que empiezan con el prefijo dado
     cantidadQueEmpiezanCon :: String -> WordSet -> Int
-    cantidadQueEmpiezanCon [] ws        = tamanio ws
-    cantidadQueEmpiezanCon (c : cs) ws  = case (subTreeForChar c ws) of
-                                        Nothing -> 0
-                                        Just branch -> cantidadQueEmpiezanCon cs branch
+    --cantidadQueEmpiezanCon [] ws        = tamanio ws
+    --cantidadQueEmpiezanCon (c : cs) ws  = case (subTreeForChar c ws) of
+    --                                    Nothing -> 0
+    --                                    Just branch -> cantidadQueEmpiezanCon cs branch
+    cantidadQueEmpiezanCon = foldSWS (const . (const 0)) (const id) (tamanio)
 
     -- dice si ambos conjuntos contienen las mismas palabras
     sonIguales :: WordSet -> WordSet -> Bool
