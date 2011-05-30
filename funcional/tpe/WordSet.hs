@@ -121,7 +121,7 @@ where
     foldSWS :: (Char -> WordSet -> t) -> (Char -> t -> t) -> (WordSet->t) -> String -> WordSet -> t
     foldSWS nf bf zf [] ws = zf ws
     foldSWS nf bf zf (c : cs) ws = case (subTreeForChar c ws) of
-                            Nothing -> (nf c ws)
+                            Nothing -> (nf c cs ws)
                             Just branch -> (bf c (foldSWS nf bf zf cs branch))
 
     -- devuelve la cantidad de palabras del conjunto que empiezan con el prefijo dado
@@ -130,7 +130,7 @@ where
     --cantidadQueEmpiezanCon (c : cs) ws  = case (subTreeForChar c ws) of
     --                                    Nothing -> 0
     --                                    Just branch -> cantidadQueEmpiezanCon cs branch
-    cantidadQueEmpiezanCon = foldSWS (const . (const 0)) (const id) (tamanio)
+    cantidadQueEmpiezanCon = foldSWS (\_ _ _-> 0) (\_ n -> n) (tamanio)
 
     -- dice si ambos conjuntos contienen las mismas palabras
     sonIguales :: WordSet -> WordSet -> Bool
