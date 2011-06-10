@@ -81,6 +81,8 @@ where
     --  funciones exportadas
     -- **********************
 
+    -- NOTA: se dejaron comentadas las primeras implementaciones de cada funcion (sin esquemas tipo fold)
+
     -- dice si el conjunto es vacio o no
     esVacio :: WordSet -> Bool
     --esVacio (GNode False []) = True
@@ -105,12 +107,12 @@ where
 
     -- dice si la palabra pertenece al conjunto
     pertenece :: String -> WordSet -> Bool
-    pertenece [] =  sonIguales (GNode True [])
-    pertenece (c : cs) = \ws -> case (subTreeForChar c ws) of
+    pertenece [] ws=  sonIguales (GNode True []) ws
+    pertenece (c : cs) ws = case (subTreeForChar c ws) of
                                     Nothing -> False
                                     Just branch -> pertenece cs branch
 
-    -- agrega una palabra al conjunto
+    -- agrega una palabra al conjunto. si ya está, devuelve el conjunto original
     agregarPalabra :: String -> WordSet -> WordSet
     --agregarPalabra [] (GNode b ts) = GNode True ts
     --agregarPalabra (c : cs) ws@(GNode b ts) = case (subTreeForChar c ws) of
@@ -150,10 +152,11 @@ where
     cantidadQueEmpiezanCon = foldSWS (\_ _ _-> 0) (\_ _ n -> n) (tamanio)
 
     -- dice si ambos conjuntos contienen las mismas palabras
+    -- se puede usar esta implementacion ya que se hace borrado con poda
     sonIguales :: WordSet -> WordSet -> Bool
     sonIguales = (==)
 
-    -- convierte el conjunto de palabras a una lista de palabras
+    -- convierte el conjunto de palabras a una lista de palabras, ordenadas alfabeticamente
     --wordSet2list :: WordSet -> [String]
     --wordSet2list (GNode b ts) = let zipped = (zipWithChar (map wordSet2list ts))
     --                                init = if b then [""] else []
