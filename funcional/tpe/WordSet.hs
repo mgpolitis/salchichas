@@ -57,12 +57,25 @@ where
     newBranch :: [WordSet]
     newBranch = replicate 26 vacio
 
+    replacePrune :: WordSet -> Char -> WordSet -> WordSet
+    replacePrune ws@(GNode b ts) c branch = if (branch == vacio) && (tamanio ws) == 1
+                                            then GNode b []
+                                            else replaceBranch ws c branch
+
     replaceBranch :: WordSet -> Char -> WordSet -> WordSet
-    replaceBranch (GNode b ts) c branch = (GNode b (setElement ts branch (char2int c)))
+    replaceBranch (GNode b ts) c branch = GNode b (setElement ts branch (char2int c))
 
     newFullBranch :: [WordSet]
     newFullBranch = replicate 26 soloLambda
 
+    turn :: Bool -> WordSet -> WordSet
+    turn b (GNode o ts) = GNode b ts
+
+    turnOff :: WordSet -> WordSet
+    turnOff = turn False
+
+    turnOn :: WordSet -> WordSet
+    turnOn = turn True
 
     -- **********************
     --  funciones exportadas
@@ -70,12 +83,20 @@ where
 
     -- dice si el conjunto es vacio o no
     esVacio :: WordSet -> Bool
-    esVacio (GNode False []) = True
-    esVacio _ = False
+    --esVacio (GNode False []) = True
+    --esVacio _ = False
+    esVacio = (==vacio)
 
     -- esquema recursivo para conjuntos de palabras
     foldWordSet :: (Bool->c->b) -> ([b] -> c) -> WordSet -> b
     foldWordSet g h (GNode b ts) = g b (h (map (foldWordSet g h) ts ))
+
+    -- esquema para funciones que recorren strings y el arbol simultaneamente
+    foldSWS :: (Char -> String -> WordSet -> t) -> (WordSet -> Char -> t -> t) -> (WordSet->t) -> String -> WordSet -> t
+    foldSWS nf bf zf [] ws = zf ws
+    foldSWS nf bf zf (c : cs) ws = case (subTreeForChar c ws) of
+                            Nothing -> (nf c cs ws)
+                            Just branch -> (bf ws c (foldSWS nf bf zf cs branch))
 
     -- devuelve la cantidad de palabras en el conjunto
     tamanio :: WordSet -> Int
@@ -91,10 +112,12 @@ where
 
     -- agrega una palabra al conjunto
     agregarPalabra :: String -> WordSet -> WordSet
-    agregarPalabra [] (GNode b ts) = GNode True ts
-    agregarPalabra (c : cs) ws@(GNode b ts) = case (subTreeForChar c ws) of
-                                    Nothing -> replaceBranch (GNode b newBranch) c (agregarPalabra cs vacio)
-                                    Just branch -> replaceBranch ws c (agregarPalabra cs branch)
+    --agregarPalabra [] (GNode b ts) = GNode True ts
+    --agregarPalabra (c : cs) ws@(GNode b ts) = case (subTreeForChar c ws) of
+    --                                Nothing -> replaceBranch (GNode b newBranch) c (agregarPalabra cs vacio)
+    --                                Just branch -> replaceBranch ws c (agregarPalabra cs branch)
+    agregarPalabra = foldSWS (\c cs (GNode b _) -> replaceBranch (GNode b newBranch) c (agregarPalabra cs vacio))
+                            (replaceBranch) (turnOn)
 
     -- agrega todas las palabras de una lista a un conjunto
     aPalabras :: [String] -> WordSet -> WordSet
@@ -105,10 +128,11 @@ where
 
     -- borra una palabra del conjunto. si no esta, devuelve el conjunto original
     borrarPalabra ::  String -> WordSet -> WordSet
-    borrarPalabra [] (GNode b ts) = GNode False ts
-    borrarPalabra (c : cs) ws@(GNode b ts) = case (subTreeForChar c ws) of
-                                    Nothing -> ws
-                                    Just branch -> replaceBranch ws c (borrarPalabra cs branch)
+    --borrarPalabra [] (GNode b ts) = GNode False ts
+    --borrarPalabra (c : cs) ws@(GNode b ts) = case (subTreeForChar c ws) of
+    --                                Nothing -> ws
+    --                                Just branch -> replaceBranch ws c (borrarPalabra cs branch)
+    borrarPalabra = foldSWS (\_ _ ws -> ws) (replacePrune) (turnOff)
 
     -- borra todas las palabras de una lista a un conjunto
     bPalabras :: [String] -> WordSet -> WordSet
@@ -117,20 +141,13 @@ where
     bPalabras = foldr (\str f -> f . (borrarPalabra str)) (id)
 
 
-    -- esquema para funciones que recorren strings y el arbol simultaneamente
-    foldSWS :: (Char -> WordSet -> t) -> (Char -> t -> t) -> (WordSet->t) -> String -> WordSet -> t
-    foldSWS nf bf zf [] ws = zf ws
-    foldSWS nf bf zf (c : cs) ws = case (subTreeForChar c ws) of
-                            Nothing -> (nf c cs ws)
-                            Just branch -> (bf c (foldSWS nf bf zf cs branch))
-
     -- devuelve la cantidad de palabras del conjunto que empiezan con el prefijo dado
     cantidadQueEmpiezanCon :: String -> WordSet -> Int
     --cantidadQueEmpiezanCon [] ws        = tamanio ws
     --cantidadQueEmpiezanCon (c : cs) ws  = case (subTreeForChar c ws) of
     --                                    Nothing -> 0
     --                                    Just branch -> cantidadQueEmpiezanCon cs branch
-    cantidadQueEmpiezanCon = foldSWS (\_ _ _-> 0) (\_ n -> n) (tamanio)
+    cantidadQueEmpiezanCon = foldSWS (\_ _ _-> 0) (\_ _ n -> n) (tamanio)
 
     -- dice si ambos conjuntos contienen las mismas palabras
     sonIguales :: WordSet -> WordSet -> Bool
