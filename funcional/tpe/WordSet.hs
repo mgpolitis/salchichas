@@ -107,10 +107,11 @@ where
 
     -- dice si la palabra pertenece al conjunto
     pertenece :: String -> WordSet -> Bool
-    pertenece [] ws=  sonIguales (GNode True []) ws
-    pertenece (c : cs) ws = case (subTreeForChar c ws) of
-                                    Nothing -> False
-                                    Just branch -> pertenece cs branch
+    --pertenece [] ws=  sonIguales (GNode True []) ws
+    --pertenece (c : cs) ws = case (subTreeForChar c ws) of
+    --                                Nothing -> False
+    --                                Just branch -> pertenece cs branch
+    pertenece = foldSWS (\_ _ _ -> False) (\_ _ b -> b) (==soloLambda)
 
     -- agrega una palabra al conjunto. si ya está, devuelve el conjunto original
     agregarPalabra :: String -> WordSet -> WordSet
